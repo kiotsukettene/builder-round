@@ -47,7 +47,8 @@ model User {
 model Patient {
   id             String    @id @default(cuid())
   userId         String    @unique
-  fullName       String
+  firstName      String
+  lastName       String
   birthday       DateTime?
   weight         Float?
   height         Float?
@@ -62,7 +63,8 @@ model Patient {
 model Doctor {
   id             String  @id @default(cuid())
   userId         String  @unique
-  fullName       String
+  firstName      String
+  lastName       String
   specialization String
   bio            String?
   fee            Float?
