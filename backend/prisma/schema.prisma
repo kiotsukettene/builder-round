@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ── Enums ──
+
+enum Role {
+  PATIENT
+  DOCTOR
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum NotificationType {
+  APPOINTMENT_BOOKED
+  APPOINTMENT_CANCELLED
+  APPOINTMENT_REMINDER
+  SCHEDULE_UPDATED
+}
+
+// ── Auth ──
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+
+  patient       Patient?
+  doctor        Doctor?
+  notifications Notification[]
+}
+
+// ── Profiles ──
+
+model Patient {
+  id             String    @id @default(cuid())
+  userId         String    @unique
+  fullName       String
+  birthday       DateTime?
+  weight         Float?
+  height         Float?
+  phone          String?
+  history        String?
+  profilePicture String?
+
+  user         User          @relation(fields: [userId], references: [id])
+  appointments Appointment[]
+}
+
+model Doctor {
+  id             String  @id @default(cuid())
+  userId         String  @unique
+  fullName       String
+  specialization String
+  bio            String?
+  fee            Float?
+  profilePicture String?
+
+  user           User                @relation(fields: [userId], references: [id])
+  appointments   Appointment[]
+  availabilities DoctorAvailability[]
+}
+
+// ── Scheduling ──
+
+model DoctorAvailability {
+  id        String @id @default(cuid())
+  doctorId  String
+  dayOfWeek Int
+  startTime String
+  endTime   String
+
+  doctor Doctor @relation(fields: [doctorId], references: [id])
+
+  @@unique([doctorId, dayOfWeek, startTime])
+}
+
+model Appointment {
+  id          String            @id @default(cuid())
+  patientId   String
+  doctorId    String
+  scheduledAt DateTime
+  status      AppointmentStatus @default(PENDING)
+  meetingUrl  String?
+  notes       String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  patient          Patient           @relation(fields: [patientId], references: [id])
+  doctor           Doctor            @relation(fields: [doctorId], references: [id])
+  consultationNote ConsultationNote?
+  prescriptions    Prescription[]
+}
+
+// ── Post-Consultation ──
+
+model ConsultationNote {
+  id              String   @id @default(cuid())
+  appointmentId   String   @unique
+  diagnosis       String?
+  notes           String?
+  recommendations String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+}
+
+model Prescription {
+  id            String   @id @default(cuid())
+  appointmentId String
+  medication    String
+  dosage        String?
+  frequency     String?
+  duration      String?
+  instructions  String?
+  createdAt     DateTime @default(now())
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+}
+
+// ── Notifications ──
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  isRead    Boolean          @default(false)
+  relatedId String?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
