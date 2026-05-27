@@ -1,0 +1,21 @@
+$kind: http-request
+name: Set Availability
+method: PUT
+url: "{{baseUrl}}/api/v1/schedules/availability"
+order: 2000
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"
+body:
+  type: json
+  content: |-
+    {
+      "consultationDuration": 30,
+      "slots": [
+        { "dayOfWeek": 1, "startTime": "09:00", "endTime": "12:00" },
+        { "dayOfWeek": 1, "startTime": "14:00", "endTime": "17:00" },
+        { "dayOfWeek": 3, "startTime": "10:00", "endTime": "15:00" },
+        { "dayOfWeek": 5, "startTime": "08:00", "endTime": "13:00" }
+      ]
+    }
