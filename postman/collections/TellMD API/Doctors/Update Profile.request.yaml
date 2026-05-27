@@ -12,6 +12,9 @@ body:
   type: json
   content: |-
     {
-      "specialization": "Cardiology",
-      "fee": 75
+      "firstName":"",
+      "lastName":"",
+      "specialization":"",
+      "bio":"",
+      "fee":0
     }
