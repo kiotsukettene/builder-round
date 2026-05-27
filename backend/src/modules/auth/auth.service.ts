@@ -11,6 +11,7 @@ import {
 import { hashToken } from "../../utils/token-hash.js";
 import * as authRepository from "./auth.repository.js";
 import { RESEND_VERIFICATION_COOLDOWN_MS } from "./auth.constants.js";
+import { formatUserWithPatientDto } from "../patients/patient.utils.js";
 import type {
   RegisterInput,
   LoginInput,
@@ -155,9 +156,14 @@ export async function login(data: LoginInput) {
   });
   const refreshToken = generateRefreshToken({ userId: user.id });
 
-  const { password: _, ...userWithoutPassword } = user;
+  const fullUser = await authRepository.findUserById(user.id);
+  if (!fullUser) {
+    throw new AppError("User not found", 404);
+  }
 
-  return { user: userWithoutPassword, accessToken, refreshToken };
+  const userResponse = formatUserWithPatientDto(fullUser);
+
+  return { user: userResponse, accessToken, refreshToken };
 }
 
 export async function refresh(token: string) {
@@ -216,5 +222,5 @@ export async function getProfile(userId: string) {
     throw new AppError("User not found", 404);
   }
 
-  return user;
+  return formatUserWithPatientDto(user);
 }

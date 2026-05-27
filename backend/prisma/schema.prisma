@@ -64,8 +64,9 @@ model Patient {
   weight         Float?
   height         Float?
   phone          String?
-  history        String?
-  profilePicture String?
+  history            String?
+  profilePicture     String?
+  profileCompletedAt DateTime?
 
   user         User          @relation(fields: [userId], references: [id])
   appointments Appointment[]

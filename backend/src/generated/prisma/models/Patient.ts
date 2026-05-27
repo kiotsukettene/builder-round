@@ -47,6 +47,7 @@ export type PatientMinAggregateOutputType = {
   phone: string | null
   history: string | null
   profilePicture: string | null
+  profileCompletedAt: Date | null
 }
 
 export type PatientMaxAggregateOutputType = {
@@ -60,6 +61,7 @@ export type PatientMaxAggregateOutputType = {
   phone: string | null
   history: string | null
   profilePicture: string | null
+  profileCompletedAt: Date | null
 }
 
 export type PatientCountAggregateOutputType = {
@@ -73,6 +75,7 @@ export type PatientCountAggregateOutputType = {
   phone: number
   history: number
   profilePicture: number
+  profileCompletedAt: number
   _all: number
 }
 
@@ -98,6 +101,7 @@ export type PatientMinAggregateInputType = {
   phone?: true
   history?: true
   profilePicture?: true
+  profileCompletedAt?: true
 }
 
 export type PatientMaxAggregateInputType = {
@@ -111,6 +115,7 @@ export type PatientMaxAggregateInputType = {
   phone?: true
   history?: true
   profilePicture?: true
+  profileCompletedAt?: true
 }
 
 export type PatientCountAggregateInputType = {
@@ -124,6 +129,7 @@ export type PatientCountAggregateInputType = {
   phone?: true
   history?: true
   profilePicture?: true
+  profileCompletedAt?: true
   _all?: true
 }
 
@@ -224,6 +230,7 @@ export type PatientGroupByOutputType = {
   phone: string | null
   history: string | null
   profilePicture: string | null
+  profileCompletedAt: Date | null
   _count: PatientCountAggregateOutputType | null
   _avg: PatientAvgAggregateOutputType | null
   _sum: PatientSumAggregateOutputType | null
@@ -260,6 +267,7 @@ export type PatientWhereInput = {
   phone?: Prisma.StringNullableFilter<"Patient"> | string | null
   history?: Prisma.StringNullableFilter<"Patient"> | string | null
   profilePicture?: Prisma.StringNullableFilter<"Patient"> | string | null
+  profileCompletedAt?: Prisma.DateTimeNullableFilter<"Patient"> | Date | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   appointments?: Prisma.AppointmentListRelationFilter
 }
@@ -275,6 +283,7 @@ export type PatientOrderByWithRelationInput = {
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   history?: Prisma.SortOrderInput | Prisma.SortOrder
   profilePicture?: Prisma.SortOrderInput | Prisma.SortOrder
+  profileCompletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   appointments?: Prisma.AppointmentOrderByRelationAggregateInput
 }
@@ -293,6 +302,7 @@ export type PatientWhereUniqueInput = Prisma.AtLeast<{
   phone?: Prisma.StringNullableFilter<"Patient"> | string | null
   history?: Prisma.StringNullableFilter<"Patient"> | string | null
   profilePicture?: Prisma.StringNullableFilter<"Patient"> | string | null
+  profileCompletedAt?: Prisma.DateTimeNullableFilter<"Patient"> | Date | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   appointments?: Prisma.AppointmentListRelationFilter
 }, "id" | "userId">
@@ -308,6 +318,7 @@ export type PatientOrderByWithAggregationInput = {
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   history?: Prisma.SortOrderInput | Prisma.SortOrder
   profilePicture?: Prisma.SortOrderInput | Prisma.SortOrder
+  profileCompletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.PatientCountOrderByAggregateInput
   _avg?: Prisma.PatientAvgOrderByAggregateInput
   _max?: Prisma.PatientMaxOrderByAggregateInput
@@ -329,6 +340,7 @@ export type PatientScalarWhereWithAggregatesInput = {
   phone?: Prisma.StringNullableWithAggregatesFilter<"Patient"> | string | null
   history?: Prisma.StringNullableWithAggregatesFilter<"Patient"> | string | null
   profilePicture?: Prisma.StringNullableWithAggregatesFilter<"Patient"> | string | null
+  profileCompletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Patient"> | Date | string | null
 }
 
 export type PatientCreateInput = {
@@ -341,6 +353,7 @@ export type PatientCreateInput = {
   phone?: string | null
   history?: string | null
   profilePicture?: string | null
+  profileCompletedAt?: Date | string | null
   user: Prisma.UserCreateNestedOneWithoutPatientInput
   appointments?: Prisma.AppointmentCreateNestedManyWithoutPatientInput
 }
@@ -356,6 +369,7 @@ export type PatientUncheckedCreateInput = {
   phone?: string | null
   history?: string | null
   profilePicture?: string | null
+  profileCompletedAt?: Date | string | null
   appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutPatientInput
 }
 
@@ -369,6 +383,7 @@ export type PatientUpdateInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   history?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutPatientNestedInput
   appointments?: Prisma.AppointmentUpdateManyWithoutPatientNestedInput
 }
@@ -384,6 +399,7 @@ export type PatientUncheckedUpdateInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   history?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutPatientNestedInput
 }
 
@@ -398,6 +414,7 @@ export type PatientCreateManyInput = {
   phone?: string | null
   history?: string | null
   profilePicture?: string | null
+  profileCompletedAt?: Date | string | null
 }
 
 export type PatientUpdateManyMutationInput = {
@@ -410,6 +427,7 @@ export type PatientUpdateManyMutationInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   history?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type PatientUncheckedUpdateManyInput = {
@@ -423,6 +441,7 @@ export type PatientUncheckedUpdateManyInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   history?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type PatientNullableScalarRelationFilter = {
@@ -441,6 +460,7 @@ export type PatientCountOrderByAggregateInput = {
   phone?: Prisma.SortOrder
   history?: Prisma.SortOrder
   profilePicture?: Prisma.SortOrder
+  profileCompletedAt?: Prisma.SortOrder
 }
 
 export type PatientAvgOrderByAggregateInput = {
@@ -459,6 +479,7 @@ export type PatientMaxOrderByAggregateInput = {
   phone?: Prisma.SortOrder
   history?: Prisma.SortOrder
   profilePicture?: Prisma.SortOrder
+  profileCompletedAt?: Prisma.SortOrder
 }
 
 export type PatientMinOrderByAggregateInput = {
@@ -472,6 +493,7 @@ export type PatientMinOrderByAggregateInput = {
   phone?: Prisma.SortOrder
   history?: Prisma.SortOrder
   profilePicture?: Prisma.SortOrder
+  profileCompletedAt?: Prisma.SortOrder
 }
 
 export type PatientSumOrderByAggregateInput = {
@@ -548,6 +570,7 @@ export type PatientCreateWithoutUserInput = {
   phone?: string | null
   history?: string | null
   profilePicture?: string | null
+  profileCompletedAt?: Date | string | null
   appointments?: Prisma.AppointmentCreateNestedManyWithoutPatientInput
 }
 
@@ -561,6 +584,7 @@ export type PatientUncheckedCreateWithoutUserInput = {
   phone?: string | null
   history?: string | null
   profilePicture?: string | null
+  profileCompletedAt?: Date | string | null
   appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutPatientInput
 }
 
@@ -590,6 +614,7 @@ export type PatientUpdateWithoutUserInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   history?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   appointments?: Prisma.AppointmentUpdateManyWithoutPatientNestedInput
 }
 
@@ -603,6 +628,7 @@ export type PatientUncheckedUpdateWithoutUserInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   history?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutPatientNestedInput
 }
 
@@ -616,6 +642,7 @@ export type PatientCreateWithoutAppointmentsInput = {
   phone?: string | null
   history?: string | null
   profilePicture?: string | null
+  profileCompletedAt?: Date | string | null
   user: Prisma.UserCreateNestedOneWithoutPatientInput
 }
 
@@ -630,6 +657,7 @@ export type PatientUncheckedCreateWithoutAppointmentsInput = {
   phone?: string | null
   history?: string | null
   profilePicture?: string | null
+  profileCompletedAt?: Date | string | null
 }
 
 export type PatientCreateOrConnectWithoutAppointmentsInput = {
@@ -658,6 +686,7 @@ export type PatientUpdateWithoutAppointmentsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   history?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutPatientNestedInput
 }
 
@@ -672,6 +701,7 @@ export type PatientUncheckedUpdateWithoutAppointmentsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   history?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -716,6 +746,7 @@ export type PatientSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   phone?: boolean
   history?: boolean
   profilePicture?: boolean
+  profileCompletedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   appointments?: boolean | Prisma.Patient$appointmentsArgs<ExtArgs>
   _count?: boolean | Prisma.PatientCountOutputTypeDefaultArgs<ExtArgs>
@@ -732,6 +763,7 @@ export type PatientSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   phone?: boolean
   history?: boolean
   profilePicture?: boolean
+  profileCompletedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["patient"]>
 
@@ -746,6 +778,7 @@ export type PatientSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   phone?: boolean
   history?: boolean
   profilePicture?: boolean
+  profileCompletedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["patient"]>
 
@@ -760,9 +793,10 @@ export type PatientSelectScalar = {
   phone?: boolean
   history?: boolean
   profilePicture?: boolean
+  profileCompletedAt?: boolean
 }
 
-export type PatientOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "firstName" | "lastName" | "birthday" | "weight" | "height" | "phone" | "history" | "profilePicture", ExtArgs["result"]["patient"]>
+export type PatientOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "firstName" | "lastName" | "birthday" | "weight" | "height" | "phone" | "history" | "profilePicture" | "profileCompletedAt", ExtArgs["result"]["patient"]>
 export type PatientInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   appointments?: boolean | Prisma.Patient$appointmentsArgs<ExtArgs>
@@ -792,6 +826,7 @@ export type $PatientPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     phone: string | null
     history: string | null
     profilePicture: string | null
+    profileCompletedAt: Date | null
   }, ExtArgs["result"]["patient"]>
   composites: {}
 }
@@ -1227,6 +1262,7 @@ export interface PatientFieldRefs {
   readonly phone: Prisma.FieldRef<"Patient", 'String'>
   readonly history: Prisma.FieldRef<"Patient", 'String'>
   readonly profilePicture: Prisma.FieldRef<"Patient", 'String'>
+  readonly profileCompletedAt: Prisma.FieldRef<"Patient", 'DateTime'>
 }
     
 

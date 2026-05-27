@@ -2,6 +2,8 @@ import type { Request, Response, NextFunction } from "express";
 import { verifyAccessToken } from "../utils/jwt.js";
 import { AppError } from "../errors/app-error.js";
 import * as authRepository from "../modules/auth/auth.repository.js";
+import * as patientRepository from "../modules/patients/patient.repository.js";
+import { isPatientProfileComplete } from "../modules/patients/patient.utils.js";
 
 export function authenticate(
   req: Request,
@@ -61,6 +63,27 @@ export async function requireVerifiedEmail(
       "Please verify your email to access this resource",
       403,
     );
+  }
+
+  next();
+}
+
+export async function requireCompleteProfile(
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+): Promise<void> {
+  if (!req.user?.userId) {
+    throw new AppError("Authentication required", 401);
+  }
+
+  const patient = await patientRepository.findPatientByUserId(req.user.userId);
+  if (!patient) {
+    throw new AppError("Patient profile not found", 404);
+  }
+
+  if (!isPatientProfileComplete(patient)) {
+    throw new AppError("Please complete your profile to access this feature", 403);
   }
 
   next();
