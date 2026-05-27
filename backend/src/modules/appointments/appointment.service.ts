@@ -13,18 +13,31 @@ import type {
 const CANCELLABLE_STATUSES = ["PENDING", "CONFIRMED"] as const;
 const RESCHEDULABLE_STATUSES = ["PENDING", "CONFIRMED"] as const;
 
-function isTimeWithinAvailability(
+function requireFutureDate(scheduledAt: Date): void {
+  if (scheduledAt <= new Date()) {
+    throw new AppError("Appointment must be scheduled for a future date and time", 400);
+  }
+}
+
+function isSlotWithinAvailability(
   scheduledAt: Date,
+  durationMinutes: number,
   availabilities: { dayOfWeek: number; startTime: string; endTime: string }[],
 ): boolean {
   const dayOfWeek = scheduledAt.getUTCDay();
-  const hours = scheduledAt.getUTCHours().toString().padStart(2, "0");
-  const minutes = scheduledAt.getUTCMinutes().toString().padStart(2, "00");
-  const timeStr = `${hours}:${minutes}`;
+  const startH = scheduledAt.getUTCHours().toString().padStart(2, "0");
+  const startM = scheduledAt.getUTCMinutes().toString().padStart(2, "0");
+  const startStr = `${startH}:${startM}`;
 
-  return availabilities.some((slot) => {
-    if (slot.dayOfWeek !== dayOfWeek) return false;
-    return timeStr >= slot.startTime && timeStr < slot.endTime;
+  const slotEndMs = scheduledAt.getTime() + durationMinutes * 60 * 1000;
+  const slotEnd = new Date(slotEndMs);
+  const endH = slotEnd.getUTCHours().toString().padStart(2, "0");
+  const endM = slotEnd.getUTCMinutes().toString().padStart(2, "0");
+  const endStr = `${endH}:${endM}`;
+
+  return availabilities.some((window) => {
+    if (window.dayOfWeek !== dayOfWeek) return false;
+    return startStr >= window.startTime && endStr <= window.endTime;
   });
 }
 
@@ -64,29 +77,38 @@ export async function bookAppointment(
 
   const scheduledAt = new Date(input.scheduledAt);
 
-  if (!isTimeWithinAvailability(scheduledAt, doctor.availabilities)) {
+  requireFutureDate(scheduledAt);
+
+  if (!isSlotWithinAvailability(scheduledAt, doctor.consultationDuration, doctor.availabilities)) {
     throw new AppError(
       "The requested time slot is outside the doctor's availability",
       400,
     );
   }
 
-  const conflict = await appointmentRepository.findConflictingAppointment(
+  const isBlocked = await appointmentRepository.isDateBlockedForDoctor(
     doctor.id,
     scheduledAt,
   );
-  if (conflict) {
+  if (isBlocked) {
+    throw new AppError("The doctor is not available on this date", 400);
+  }
+
+  const result = await appointmentRepository.createAppointmentSafe({
+    patientId: patient.id,
+    doctorId: doctor.id,
+    scheduledAt,
+    durationMinutes: doctor.consultationDuration,
+  });
+
+  if (result.conflict) {
     throw new AppError(
       "This time slot is already booked. Please choose another time.",
       409,
     );
   }
 
-  const appointment = await appointmentRepository.createAppointment({
-    patientId: patient.id,
-    doctorId: doctor.id,
-    scheduledAt,
-  });
+  const { appointment } = result;
 
   await sendNotification({
     userId: appointment.doctor.user.id,
@@ -176,30 +198,38 @@ export async function rescheduleAppointment(
   const scheduledAt = new Date(input.scheduledAt);
   const doctor = await getDoctorWithAvailabilityOrThrow(appointment.doctor.id);
 
-  if (!isTimeWithinAvailability(scheduledAt, doctor.availabilities)) {
+  requireFutureDate(scheduledAt);
+
+  if (!isSlotWithinAvailability(scheduledAt, doctor.consultationDuration, doctor.availabilities)) {
     throw new AppError(
       "The requested time slot is outside the doctor's availability",
       400,
     );
   }
 
-  const conflict = await appointmentRepository.findConflictingAppointment(
+  const isBlocked = await appointmentRepository.isDateBlockedForDoctor(
+    doctor.id,
+    scheduledAt,
+  );
+  if (isBlocked) {
+    throw new AppError("The doctor is not available on this date", 400);
+  }
+
+  const result = await appointmentRepository.updateAppointmentScheduleSafe(
+    appointmentId,
     appointment.doctor.id,
     scheduledAt,
-    appointmentId,
+    doctor.consultationDuration,
   );
 
-  if (conflict) {
+  if (result.conflict) {
     throw new AppError(
       "This time slot is already booked. Please choose another time.",
       409,
     );
   }
 
-  const updated = await appointmentRepository.updateAppointmentSchedule(
-    appointmentId,
-    scheduledAt,
-  );
+  const { appointment: updated } = result;
 
   await sendNotification({
     userId: appointment.doctor.user.id,

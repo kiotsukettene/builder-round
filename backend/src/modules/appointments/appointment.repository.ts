@@ -2,6 +2,25 @@ import prisma from "../../lib/prisma.js";
 import type { AppointmentStatus } from "../../generated/prisma/client.js";
 import type { ListAppointmentsQueryInput } from "./appointment.validation.js";
 
+export async function isDateBlockedForDoctor(
+  doctorId: string,
+  date: Date,
+): Promise<boolean> {
+  const dayStart = new Date(date);
+  dayStart.setUTCHours(0, 0, 0, 0);
+  const dayEnd = new Date(date);
+  dayEnd.setUTCHours(23, 59, 59, 999);
+
+  const blocked = await prisma.blockedDate.findFirst({
+    where: {
+      doctorId,
+      date: { gte: dayStart, lte: dayEnd },
+    },
+  });
+
+  return blocked !== null;
+}
+
 const appointmentWithRelations = {
   patient: {
     include: {
@@ -115,11 +134,12 @@ export async function updateAppointmentSchedule(
 export async function findConflictingAppointment(
   doctorId: string,
   scheduledAt: Date,
+  durationMinutes: number,
   excludeId?: string,
 ) {
-  const windowMs = 30 * 60 * 1000;
-  const from = new Date(scheduledAt.getTime() - windowMs);
-  const to = new Date(scheduledAt.getTime() + windowMs);
+  const windowMs = durationMinutes * 60 * 1000;
+  const from = new Date(scheduledAt.getTime() - windowMs + 1);
+  const to = new Date(scheduledAt.getTime() + windowMs - 1);
 
   return prisma.appointment.findFirst({
     where: {
@@ -129,4 +149,81 @@ export async function findConflictingAppointment(
       ...(excludeId && { NOT: { id: excludeId } }),
     },
   });
+}
+
+export async function createAppointmentSafe(data: {
+  patientId: string;
+  doctorId: string;
+  scheduledAt: Date;
+  durationMinutes: number;
+}) {
+  return prisma.$transaction(
+    async (tx) => {
+      const windowMs = data.durationMinutes * 60 * 1000;
+      const from = new Date(data.scheduledAt.getTime() - windowMs + 1);
+      const to = new Date(data.scheduledAt.getTime() + windowMs - 1);
+
+      const conflict = await tx.appointment.findFirst({
+        where: {
+          doctorId: data.doctorId,
+          status: { in: ["PENDING", "CONFIRMED"] },
+          scheduledAt: { gte: from, lte: to },
+        },
+      });
+
+      if (conflict) {
+        return { conflict: true as const };
+      }
+
+      const appointment = await tx.appointment.create({
+        data: {
+          patientId: data.patientId,
+          doctorId: data.doctorId,
+          scheduledAt: data.scheduledAt,
+          status: "PENDING",
+        },
+        include: appointmentWithRelations,
+      });
+
+      return { conflict: false as const, appointment };
+    },
+    { isolationLevel: "Serializable" },
+  );
+}
+
+export async function updateAppointmentScheduleSafe(
+  id: string,
+  doctorId: string,
+  scheduledAt: Date,
+  durationMinutes: number,
+) {
+  return prisma.$transaction(
+    async (tx) => {
+      const windowMs = durationMinutes * 60 * 1000;
+      const from = new Date(scheduledAt.getTime() - windowMs + 1);
+      const to = new Date(scheduledAt.getTime() + windowMs - 1);
+
+      const conflict = await tx.appointment.findFirst({
+        where: {
+          doctorId,
+          status: { in: ["PENDING", "CONFIRMED"] },
+          scheduledAt: { gte: from, lte: to },
+          NOT: { id },
+        },
+      });
+
+      if (conflict) {
+        return { conflict: true as const };
+      }
+
+      const appointment = await tx.appointment.update({
+        where: { id },
+        data: { scheduledAt, status: "PENDING" },
+        include: appointmentWithRelations,
+      });
+
+      return { conflict: false as const, appointment };
+    },
+    { isolationLevel: "Serializable" },
+  );
 }
