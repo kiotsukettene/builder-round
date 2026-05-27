@@ -1,0 +1,15 @@
+$kind: http-request
+name: Reschedule Appointment
+method: PATCH
+url: "{{baseUrl}}/api/v1/appointments/APPOINTMENT_ID_HERE/reschedule"
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"
+body:
+  type: json
+  content: |-
+    {
+      "scheduledAt": "2026-06-12T10:00:00.000Z"
+    }
+order: 5000

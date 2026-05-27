@@ -1,0 +1,9 @@
+$kind: http-request
+name: Cancel Appointment
+method: PATCH
+url: "{{baseUrl}}/api/v1/appointments/APPOINTMENT_ID_HERE/cancel"
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"
+order: 4000
