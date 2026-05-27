@@ -7,6 +7,8 @@ import authRoutes from "./modules/auth/auth.routes.js";
 import patientRoutes from "./modules/patients/patient.routes.js";
 import doctorRoutes from "./modules/doctors/doctor.routes.js";
 import recommendationRoutes from "./modules/recommendations/recommendation.routes.js";
+import appointmentRoutes from "./modules/appointments/appointment.routes.js";
+import notificationRoutes from "./modules/notifications/notification.routes.js";
 import { globalLimiter } from "./middleware/rate-limiter.js";
 import { errorHandler } from "./middleware/error-handler.js";
 
@@ -32,6 +34,8 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/patients", patientRoutes);
 app.use("/api/v1/doctors", doctorRoutes);
 app.use("/api/v1/recommendations", recommendationRoutes);
+app.use("/api/v1/appointments", appointmentRoutes);
+app.use("/api/v1/notifications", notificationRoutes);
 
 app.use(errorHandler);
 
