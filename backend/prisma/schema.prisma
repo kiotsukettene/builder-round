@@ -73,19 +73,21 @@ model Patient {
 }
 
 model Doctor {
-  id                 String    @id @default(cuid())
-  userId             String    @unique
-  firstName          String
-  lastName           String
-  specialization     String
-  bio                String?
-  fee                Float?
-  profilePicture     String?
-  profileCompletedAt DateTime?
+  id                   String    @id @default(cuid())
+  userId               String    @unique
+  firstName            String
+  lastName             String
+  specialization       String
+  bio                  String?
+  fee                  Float?
+  consultationDuration Int       @default(30)
+  profilePicture       String?
+  profileCompletedAt   DateTime?
 
   user           User                @relation(fields: [userId], references: [id])
   appointments   Appointment[]
   availabilities DoctorAvailability[]
+  blockedDates   BlockedDate[]
 }
 
 // ── Scheduling ──
@@ -100,6 +102,18 @@ model DoctorAvailability {
   doctor Doctor @relation(fields: [doctorId], references: [id])
 
   @@unique([doctorId, dayOfWeek, startTime])
+}
+
+model BlockedDate {
+  id        String   @id @default(cuid())
+  doctorId  String
+  date      DateTime @db.Date
+  reason    String?
+  createdAt DateTime @default(now())
+
+  doctor Doctor @relation(fields: [doctorId], references: [id])
+
+  @@unique([doctorId, date])
 }
 
 model Appointment {

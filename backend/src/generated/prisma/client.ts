@@ -67,6 +67,11 @@ export type Doctor = Prisma.DoctorModel
  */
 export type DoctorAvailability = Prisma.DoctorAvailabilityModel
 /**
+ * Model BlockedDate
+ * 
+ */
+export type BlockedDate = Prisma.BlockedDateModel
+/**
  * Model Appointment
  * 
  */
