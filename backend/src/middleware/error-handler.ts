@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import multer from "multer";
 import { AppError } from "../errors/app-error.js";
 import { z } from "zod";
 
@@ -20,6 +21,18 @@ export function errorHandler(
     const message = err.issues
       .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
       .join(", ");
+    res.status(400).json({
+      success: false,
+      message,
+    });
+    return;
+  }
+
+  if (err instanceof multer.MulterError) {
+    const message =
+      err.code === "LIMIT_FILE_SIZE"
+        ? "File too large. Maximum size is 5MB"
+        : err.message;
     res.status(400).json({
       success: false,
       message,

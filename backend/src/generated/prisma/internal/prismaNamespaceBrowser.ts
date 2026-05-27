@@ -113,7 +113,8 @@ export const PatientScalarFieldEnum = {
   height: 'height',
   phone: 'phone',
   history: 'history',
-  profilePicture: 'profilePicture'
+  profilePicture: 'profilePicture',
+  profileCompletedAt: 'profileCompletedAt'
 } as const
 
 export type PatientScalarFieldEnum = (typeof PatientScalarFieldEnum)[keyof typeof PatientScalarFieldEnum]

@@ -1,4 +1,4 @@
-import { rateLimit } from "express-rate-limit";
+import { ipKeyGenerator, rateLimit } from "express-rate-limit";
 import { RESEND_VERIFICATION_COOLDOWN_MS } from "../modules/auth/auth.constants.js";
 
 export const globalLimiter = rateLimit({
@@ -31,7 +31,7 @@ export const resendVerificationLimiter = rateLimit({
     if (typeof email === "string" && email.trim()) {
       return `resend:${email.trim().toLowerCase()}`;
     }
-    return req.ip ?? "unknown";
+    return req.ip ? ipKeyGenerator(req.ip) : "unknown";
   },
   message: {
     success: false,

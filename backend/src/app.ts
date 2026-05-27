@@ -4,6 +4,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import authRoutes from "./modules/auth/auth.routes.js";
+import patientRoutes from "./modules/patients/patient.routes.js";
 import { globalLimiter } from "./middleware/rate-limiter.js";
 import { errorHandler } from "./middleware/error-handler.js";
 
@@ -26,6 +27,7 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/patients", patientRoutes);
 
 app.use(errorHandler);
 

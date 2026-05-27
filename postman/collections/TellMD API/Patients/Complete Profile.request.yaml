@@ -1,0 +1,22 @@
+$kind: http-request
+name: Complete Profile
+method: PUT
+url: '{{baseUrl}}/api/v1/patients/me'
+order: 2000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{accessToken}}'
+body:
+  type: json
+  content: |-
+    {
+      "firstName": "Jane",
+      "lastName": "Doe",
+      "birthday": "1990-05-15",
+      "weight": 65,
+      "height": 170,
+      "phone": "+1234567890",
+      "history": "No known allergies. Occasional seasonal allergies."
+    }

@@ -1,0 +1,17 @@
+$kind: http-request
+name: Update Profile
+method: PATCH
+url: '{{baseUrl}}/api/v1/patients/me'
+order: 3000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{accessToken}}'
+body:
+  type: json
+  content: |-
+    {
+      "phone": "+1987654321",
+      "weight": 66
+    }
