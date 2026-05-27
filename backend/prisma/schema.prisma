@@ -73,14 +73,15 @@ model Patient {
 }
 
 model Doctor {
-  id             String  @id @default(cuid())
-  userId         String  @unique
-  firstName      String
-  lastName       String
-  specialization String
-  bio            String?
-  fee            Float?
-  profilePicture String?
+  id                 String    @id @default(cuid())
+  userId             String    @unique
+  firstName          String
+  lastName           String
+  specialization     String
+  bio                String?
+  fee                Float?
+  profilePicture     String?
+  profileCompletedAt DateTime?
 
   user           User                @relation(fields: [userId], references: [id])
   appointments   Appointment[]

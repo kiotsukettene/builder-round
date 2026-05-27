@@ -1,13 +1,6 @@
 $kind: http-request
-name: Complete Profile
+url: "{{baseUrl}}/api/v1/patients/me"
 method: PUT
-url: '{{baseUrl}}/api/v1/patients/me'
-order: 2000
-auth:
-  type: bearer
-  credentials:
-    - key: token
-      value: '{{accessToken}}'
 body:
   type: json
   content: |-
@@ -20,3 +13,8 @@ body:
       "phone": "+1234567890",
       "history": "No known allergies. Occasional seasonal allergies."
     }
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"
+order: 2000

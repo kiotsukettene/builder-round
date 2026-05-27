@@ -1,8 +1,6 @@
 $kind: http-request
-name: Refresh Token
+url: "{{baseUrl}}/api/v1/auth/refresh"
 method: POST
-url: '{{baseUrl}}/api/v1/auth/refresh'
-order: 4000
 body:
   type: json
   content: |-
@@ -11,7 +9,8 @@ body:
     }
 scripts:
   - type: afterResponse
-    language: text/javascript
     code: |-
       const res = pm.response.json();
       if (res.data?.accessToken) pm.collectionVariables.set("accessToken", res.data.accessToken);
+    language: text/javascript
+order: 6000

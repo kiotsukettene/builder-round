@@ -1,8 +1,6 @@
 $kind: http-request
-name: Register Patient
-method: POST
 url: "{{baseUrl}}/api/v1/auth/register"
-order: 1000
+method: POST
 body:
   type: json
   content: |-
@@ -13,3 +11,4 @@ body:
       "lastName": "Revillame",
       "role": "PATIENT"
     }
+order: 1000

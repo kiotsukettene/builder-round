@@ -1,16 +1,14 @@
 $kind: http-request
-name: Upload Profile Picture
+url: "{{baseUrl}}/api/v1/patients/me/profile-picture"
 method: POST
-url: '{{baseUrl}}/api/v1/patients/me/profile-picture'
-order: 1000
-auth:
-  type: bearer
-  credentials:
-    - key: token
-      value: '{{accessToken}}'
 body:
   type: formdata
   content:
-    - key: profilePicture
-      type: file
-      src: ''
+    - type: file
+      key: profilePicture
+      src: ""
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"
+order: 1000

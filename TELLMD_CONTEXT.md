@@ -110,6 +110,11 @@ This project is developed as a Minimum Viable Product (MVP) using the PERN stack
 ### Details
 - Register account
 - Login account
+
+## Doctor Profile
+### Description
+- Allows doctors to manage their account
+### Details
 - Manage profile
 - Add specialization
 - Add biography
