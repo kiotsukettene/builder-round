@@ -42,4 +42,20 @@ router.post(
   doctorController.uploadProfilePicture,
 );
 
+router.get(
+  "/",
+  authenticate,
+  authorize("PATIENT"),
+  requireVerifiedEmail,
+  doctorController.listDoctors,
+);
+
+router.get(
+  "/:id",
+  authenticate,
+  authorize("PATIENT"),
+  requireVerifiedEmail,
+  doctorController.getDoctorById,
+);
+
 export default router;

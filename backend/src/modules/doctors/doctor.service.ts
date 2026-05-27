@@ -5,9 +5,15 @@ import {
   uploadImage,
 } from "../../lib/cloudinary.js";
 import * as doctorRepository from "./doctor.repository.js";
-import { isDoctorProfileComplete, toDoctorDto } from "./doctor.utils.js";
+import {
+  isDoctorProfileComplete,
+  toDoctorDto,
+  toPublicDoctorDto,
+  toPublicDoctorWithAvailabilityDto,
+} from "./doctor.utils.js";
 import type {
   CompleteProfileInput,
+  ListDoctorsQueryInput,
   UpdateProfileInput,
 } from "./doctor.validation.js";
 
@@ -96,4 +102,28 @@ export async function uploadProfilePicture(
   );
 
   return { profilePicture: updatedDoctor.profilePicture };
+}
+
+export async function listDoctors(query: ListDoctorsQueryInput) {
+  const { page, limit } = query;
+  const { doctors, total } = await doctorRepository.findDoctors(query);
+
+  return {
+    data: doctors.map(toPublicDoctorDto),
+    meta: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+}
+
+export async function getDoctorById(id: string) {
+  const doctor = await doctorRepository.findDoctorById(id);
+  if (!doctor) {
+    throw new AppError("Doctor not found", 404);
+  }
+
+  return toPublicDoctorWithAvailabilityDto(doctor);
 }

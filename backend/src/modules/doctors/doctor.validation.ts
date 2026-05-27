@@ -18,5 +18,13 @@ export const completeProfileSchema = profileFieldsSchema.pick({
 
 export const updateProfileSchema = profileFieldsSchema.partial();
 
+export const listDoctorsQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+  search: z.string().optional(),
+  specialization: z.string().optional(),
+});
+
 export type CompleteProfileInput = z.infer<typeof completeProfileSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+export type ListDoctorsQueryInput = z.infer<typeof listDoctorsQuerySchema>;
