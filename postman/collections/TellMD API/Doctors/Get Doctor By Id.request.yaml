@@ -1,0 +1,9 @@
+$kind: http-request
+name: Get Doctor By Id
+method: GET
+url: "{{baseUrl}}/api/v1/doctors/cmpny9tz900033kglbrnl6ssl"
+order: 6000
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"
