@@ -1,0 +1,15 @@
+$kind: http-request
+name: Custom Recommendation (from symptoms)
+method: POST
+url: "{{baseUrl}}/api/v1/recommendations"
+body:
+  type: json
+  content: |-
+    {
+      "symptoms": "I have been experiencing asthma and shortness of breath"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"
+order: 2000
