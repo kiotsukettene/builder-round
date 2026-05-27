@@ -1,6 +1,7 @@
 import prisma from "../../lib/prisma.js";
 import type {
   CompleteProfileInput,
+  ListDoctorsQueryInput,
   UpdateProfileInput,
 } from "./doctor.validation.js";
 
@@ -64,5 +65,49 @@ export async function updateProfilePicture(
   return prisma.doctor.update({
     where: { userId },
     data: { profilePicture: profilePictureUrl },
+  });
+}
+
+export async function findDoctors(filters: ListDoctorsQueryInput) {
+  const { page, limit, search, specialization } = filters;
+  const skip = (page - 1) * limit;
+
+  const where = {
+    profileCompletedAt: { not: null },
+    ...(specialization && {
+      specialization: { contains: specialization, mode: "insensitive" as const },
+    }),
+    ...(search && {
+      OR: [
+        { firstName: { contains: search, mode: "insensitive" as const } },
+        { lastName: { contains: search, mode: "insensitive" as const } },
+      ],
+    }),
+  };
+
+  const [doctors, total] = await prisma.$transaction([
+    prisma.doctor.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+    }),
+    prisma.doctor.count({ where }),
+  ]);
+
+  return { doctors, total };
+}
+
+export async function findDoctorById(id: string) {
+  return prisma.doctor.findFirst({
+    where: {
+      id,
+      profileCompletedAt: { not: null },
+    },
+    include: {
+      availabilities: {
+        orderBy: [{ dayOfWeek: "asc" }, { startTime: "asc" }],
+      },
+    },
   });
 }

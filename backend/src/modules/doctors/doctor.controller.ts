@@ -4,6 +4,7 @@ import { asyncHandler } from "../../utils/async-handler.js";
 import * as doctorService from "./doctor.service.js";
 import {
   completeProfileSchema,
+  listDoctorsQuerySchema,
   updateProfileSchema,
 } from "./doctor.validation.js";
 
@@ -14,6 +15,15 @@ function getUserId(req: Request): string {
   }
 
   return userId;
+}
+
+function getDoctorId(req: Request): string {
+  const id = req.params.id;
+  if (!id || Array.isArray(id)) {
+    throw new AppError("Doctor ID is required", 400);
+  }
+
+  return id;
 }
 
 export const getProfile = asyncHandler(
@@ -65,6 +75,32 @@ export const uploadProfilePicture = asyncHandler(
       success: true,
       message: "Profile picture uploaded successfully",
       data: result,
+    });
+  },
+);
+
+export const listDoctors = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const query = listDoctorsQuerySchema.parse(req.query);
+    const result = await doctorService.listDoctors(query);
+
+    res.status(200).json({
+      success: true,
+      message: "Doctors retrieved successfully",
+      data: result.data,
+      meta: result.meta,
+    });
+  },
+);
+
+export const getDoctorById = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const doctor = await doctorService.getDoctorById(getDoctorId(req));
+
+    res.status(200).json({
+      success: true,
+      message: "Doctor retrieved successfully",
+      data: doctor,
     });
   },
 );
