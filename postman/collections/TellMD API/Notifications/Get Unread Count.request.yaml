@@ -1,0 +1,9 @@
+$kind: http-request
+name: Get Unread Count
+method: GET
+url: "{{baseUrl}}/api/v1/notifications/unread-count"
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"
+order: 2000
