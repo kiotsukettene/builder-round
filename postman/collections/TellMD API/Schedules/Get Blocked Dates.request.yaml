@@ -1,0 +1,9 @@
+$kind: http-request
+name: Get Blocked Dates
+method: GET
+url: "{{baseUrl}}/api/v1/schedules/blocked-dates"
+order: 3000
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"

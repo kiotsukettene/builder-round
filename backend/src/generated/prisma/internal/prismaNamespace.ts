@@ -389,6 +389,7 @@ export const ModelName = {
   Patient: 'Patient',
   Doctor: 'Doctor',
   DoctorAvailability: 'DoctorAvailability',
+  BlockedDate: 'BlockedDate',
   Appointment: 'Appointment',
   ConsultationNote: 'ConsultationNote',
   Prescription: 'Prescription',
@@ -408,7 +409,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "revokedRefreshToken" | "patient" | "doctor" | "doctorAvailability" | "appointment" | "consultationNote" | "prescription" | "notification"
+    modelProps: "user" | "revokedRefreshToken" | "patient" | "doctor" | "doctorAvailability" | "blockedDate" | "appointment" | "consultationNote" | "prescription" | "notification"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -779,6 +780,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.DoctorAvailabilityCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.DoctorAvailabilityCountAggregateOutputType> | number
+        }
+      }
+    }
+    BlockedDate: {
+      payload: Prisma.$BlockedDatePayload<ExtArgs>
+      fields: Prisma.BlockedDateFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BlockedDateFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlockedDatePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BlockedDateFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlockedDatePayload>
+        }
+        findFirst: {
+          args: Prisma.BlockedDateFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlockedDatePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BlockedDateFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlockedDatePayload>
+        }
+        findMany: {
+          args: Prisma.BlockedDateFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlockedDatePayload>[]
+        }
+        create: {
+          args: Prisma.BlockedDateCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlockedDatePayload>
+        }
+        createMany: {
+          args: Prisma.BlockedDateCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BlockedDateCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlockedDatePayload>[]
+        }
+        delete: {
+          args: Prisma.BlockedDateDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlockedDatePayload>
+        }
+        update: {
+          args: Prisma.BlockedDateUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlockedDatePayload>
+        }
+        deleteMany: {
+          args: Prisma.BlockedDateDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BlockedDateUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BlockedDateUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlockedDatePayload>[]
+        }
+        upsert: {
+          args: Prisma.BlockedDateUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlockedDatePayload>
+        }
+        aggregate: {
+          args: Prisma.BlockedDateAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBlockedDate>
+        }
+        groupBy: {
+          args: Prisma.BlockedDateGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BlockedDateGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BlockedDateCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BlockedDateCountAggregateOutputType> | number
         }
       }
     }
@@ -1167,6 +1242,7 @@ export const DoctorScalarFieldEnum = {
   specialization: 'specialization',
   bio: 'bio',
   fee: 'fee',
+  consultationDuration: 'consultationDuration',
   profilePicture: 'profilePicture',
   profileCompletedAt: 'profileCompletedAt'
 } as const
@@ -1183,6 +1259,17 @@ export const DoctorAvailabilityScalarFieldEnum = {
 } as const
 
 export type DoctorAvailabilityScalarFieldEnum = (typeof DoctorAvailabilityScalarFieldEnum)[keyof typeof DoctorAvailabilityScalarFieldEnum]
+
+
+export const BlockedDateScalarFieldEnum = {
+  id: 'id',
+  doctorId: 'doctorId',
+  date: 'date',
+  reason: 'reason',
+  createdAt: 'createdAt'
+} as const
+
+export type BlockedDateScalarFieldEnum = (typeof BlockedDateScalarFieldEnum)[keyof typeof BlockedDateScalarFieldEnum]
 
 
 export const AppointmentScalarFieldEnum = {
@@ -1490,6 +1577,7 @@ export type GlobalOmitConfig = {
   patient?: Prisma.PatientOmit
   doctor?: Prisma.DoctorOmit
   doctorAvailability?: Prisma.DoctorAvailabilityOmit
+  blockedDate?: Prisma.BlockedDateOmit
   appointment?: Prisma.AppointmentOmit
   consultationNote?: Prisma.ConsultationNoteOmit
   prescription?: Prisma.PrescriptionOmit

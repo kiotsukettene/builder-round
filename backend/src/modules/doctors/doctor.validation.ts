@@ -9,12 +9,18 @@ const profileFieldsSchema = z.object({
     .min(1, "Biography is required")
     .max(2000, "Biography is too long"),
   fee: z.number().positive("Consultation fee must be a positive number"),
+  consultationDuration: z
+    .number()
+    .int()
+    .min(10, "Consultation duration must be at least 10 minutes")
+    .max(240, "Consultation duration cannot exceed 240 minutes"),
 });
 
 export const completeProfileSchema = profileFieldsSchema.pick({
   bio: true,
   fee: true,
-});
+  consultationDuration: true,
+}).partial({ consultationDuration: true });
 
 export const updateProfileSchema = profileFieldsSchema.partial();
 
