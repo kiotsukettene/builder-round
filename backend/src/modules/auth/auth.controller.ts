@@ -5,6 +5,9 @@ import {
   registerSchema,
   loginSchema,
   refreshSchema,
+  logoutSchema,
+  verifyEmailSchema,
+  resendVerificationSchema,
 } from "./auth.validation.js";
 
 export const register = asyncHandler(
@@ -14,7 +17,8 @@ export const register = asyncHandler(
 
     res.status(201).json({
       success: true,
-      message: "User registered successfully",
+      message:
+        "Registration successful. Please check your email to verify your account.",
       data: result,
     });
   },
@@ -33,6 +37,30 @@ export const login = asyncHandler(
   },
 );
 
+export const verifyEmail = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const { token } = verifyEmailSchema.parse(req.body);
+    await authService.verifyEmail(token);
+
+    res.status(200).json({
+      success: true,
+      message: "Email verified successfully",
+    });
+  },
+);
+
+export const resendVerification = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const data = resendVerificationSchema.parse(req.body);
+    await authService.resendVerification(data);
+
+    res.status(200).json({
+      success: true,
+      message: "If an account exists, a verification email has been sent",
+    });
+  },
+);
+
 export const refresh = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { refreshToken } = refreshSchema.parse(req.body);
@@ -42,6 +70,27 @@ export const refresh = asyncHandler(
       success: true,
       message: "Token refreshed successfully",
       data: result,
+    });
+  },
+);
+
+export const logout = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const userId = req.user?.userId;
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+      return;
+    }
+
+    const { refreshToken } = logoutSchema.parse(req.body);
+    await authService.logout(userId, refreshToken);
+
+    res.status(200).json({
+      success: true,
+      message: "Logout successful",
     });
   },
 );

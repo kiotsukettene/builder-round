@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { verifyAccessToken } from "../utils/jwt.js";
 import { AppError } from "../errors/app-error.js";
+import * as authRepository from "../modules/auth/auth.repository.js";
 
 export function authenticate(
   req: Request,
@@ -39,4 +40,28 @@ export function authorize(...roles: string[]) {
 
     next();
   };
+}
+
+export async function requireVerifiedEmail(
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+): Promise<void> {
+  if (!req.user?.userId) {
+    throw new AppError("Authentication required", 401);
+  }
+
+  const user = await authRepository.findUserById(req.user.userId);
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  if (!user.emailVerified) {
+    throw new AppError(
+      "Please verify your email to access this resource",
+      403,
+    );
+  }
+
+  next();
 }
