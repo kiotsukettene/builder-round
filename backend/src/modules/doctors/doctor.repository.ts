@@ -15,12 +15,24 @@ export async function completeDoctorProfile(
   userId: string,
   data: CompleteProfileInput,
 ) {
+  const updateData: {
+    bio: string;
+    fee: number;
+    consultationDuration?: number;
+    profileCompletedAt: Date;
+  } = {
+    bio: data.bio,
+    fee: data.fee,
+    profileCompletedAt: new Date(),
+  };
+
+  if (data.consultationDuration !== undefined) {
+    updateData.consultationDuration = data.consultationDuration;
+  }
+
   return prisma.doctor.update({
     where: { userId },
-    data: {
-      ...data,
-      profileCompletedAt: new Date(),
-    },
+    data: updateData,
   });
 }
 
@@ -34,23 +46,15 @@ export async function updateDoctorByUserId(
     specialization?: string;
     bio?: string;
     fee?: number;
+    consultationDuration?: number;
   } = {};
 
-  if (data.firstName !== undefined) {
-    updateData.firstName = data.firstName;
-  }
-  if (data.lastName !== undefined) {
-    updateData.lastName = data.lastName;
-  }
-  if (data.specialization !== undefined) {
-    updateData.specialization = data.specialization;
-  }
-  if (data.bio !== undefined) {
-    updateData.bio = data.bio;
-  }
-  if (data.fee !== undefined) {
-    updateData.fee = data.fee;
-  }
+  if (data.firstName !== undefined) updateData.firstName = data.firstName;
+  if (data.lastName !== undefined) updateData.lastName = data.lastName;
+  if (data.specialization !== undefined) updateData.specialization = data.specialization;
+  if (data.bio !== undefined) updateData.bio = data.bio;
+  if (data.fee !== undefined) updateData.fee = data.fee;
+  if (data.consultationDuration !== undefined) updateData.consultationDuration = data.consultationDuration;
 
   return prisma.doctor.update({
     where: { userId },
@@ -109,6 +113,37 @@ export async function findDoctorById(id: string) {
         orderBy: [{ dayOfWeek: "asc" }, { startTime: "asc" }],
       },
     },
+  });
+}
+
+export async function findDoctorForSlots(id: string) {
+  return prisma.doctor.findFirst({
+    where: { id, profileCompletedAt: { not: null } },
+    select: {
+      id: true,
+      consultationDuration: true,
+      fee: true,
+      availabilities: {
+        orderBy: [{ dayOfWeek: "asc" }, { startTime: "asc" }],
+      },
+      blockedDates: true,
+    },
+  });
+}
+
+export async function findAppointmentsOnDate(doctorId: string, date: Date) {
+  const start = new Date(date);
+  start.setUTCHours(0, 0, 0, 0);
+  const end = new Date(date);
+  end.setUTCHours(23, 59, 59, 999);
+
+  return prisma.appointment.findMany({
+    where: {
+      doctorId,
+      status: { in: ["PENDING", "CONFIRMED"] },
+      scheduledAt: { gte: start, lte: end },
+    },
+    select: { scheduledAt: true },
   });
 }
 

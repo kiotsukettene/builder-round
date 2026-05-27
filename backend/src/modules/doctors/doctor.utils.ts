@@ -8,6 +8,7 @@ type PublicDoctorFields = Pick<
   | "specialization"
   | "bio"
   | "fee"
+  | "consultationDuration"
   | "profilePicture"
 >;
 
@@ -49,6 +50,7 @@ export function toPublicDoctorDto(doctor: PublicDoctorFields) {
     specialization: doctor.specialization,
     bio: doctor.bio,
     fee: doctor.fee,
+    consultationDuration: doctor.consultationDuration,
     profilePicture: doctor.profilePicture,
   };
 }

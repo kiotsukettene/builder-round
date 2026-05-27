@@ -7,6 +7,11 @@ import {
   listDoctorsQuerySchema,
   updateProfileSchema,
 } from "./doctor.validation.js";
+import { z } from "zod";
+
+const slotsQuerySchema = z.object({
+  date: z.string().min(1, "date query parameter is required"),
+});
 
 function getUserId(req: Request): string {
   const userId = req.user?.userId;
@@ -101,6 +106,19 @@ export const getDoctorById = asyncHandler(
       success: true,
       message: "Doctor retrieved successfully",
       data: doctor,
+    });
+  },
+);
+
+export const getAvailableSlots = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const { date } = slotsQuerySchema.parse(req.query);
+    const result = await doctorService.getAvailableSlots(getDoctorId(req), date);
+
+    res.status(200).json({
+      success: true,
+      message: "Available slots retrieved successfully",
+      data: result,
     });
   },
 );

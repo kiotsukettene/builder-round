@@ -51,6 +51,14 @@ router.get(
 );
 
 router.get(
+  "/:id/slots",
+  authenticate,
+  authorize("PATIENT"),
+  requireVerifiedEmail,
+  doctorController.getAvailableSlots,
+);
+
+router.get(
   "/:id",
   authenticate,
   authorize("PATIENT"),
