@@ -1,0 +1,22 @@
+$kind: http-request
+name: Logout
+method: POST
+url: '{{baseUrl}}/api/v1/auth/logout'
+order: 4500
+headers:
+  - key: Authorization
+    value: 'Bearer {{accessToken}}'
+body:
+  type: json
+  content: |-
+    {
+      "refreshToken": "{{refreshToken}}"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      if (pm.response.code === 200) {
+        pm.collectionVariables.unset("accessToken");
+        pm.collectionVariables.unset("refreshToken");
+      }
