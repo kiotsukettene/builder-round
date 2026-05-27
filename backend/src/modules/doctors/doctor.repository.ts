@@ -111,3 +111,25 @@ export async function findDoctorById(id: string) {
     },
   });
 }
+
+export async function getAllSpecializations(): Promise<string[]> {
+  const rows = await prisma.doctor.findMany({
+    where: { profileCompletedAt: { not: null } },
+    select: { specialization: true },
+    distinct: ["specialization"],
+    orderBy: { specialization: "asc" },
+  });
+
+  return rows.map((r) => r.specialization);
+}
+
+export async function findDoctorsBySpecialization(specialization: string) {
+  return prisma.doctor.findMany({
+    where: {
+      profileCompletedAt: { not: null },
+      specialization: { contains: specialization, mode: "insensitive" },
+    },
+    take: 10,
+    orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+  });
+}
