@@ -1,0 +1,17 @@
+$kind: http-request
+name: Complete Profile
+method: PUT
+url: '{{baseUrl}}/api/v1/doctors/me'
+order: 2000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{accessToken}}'
+body:
+  type: json
+  content: |-
+    {
+      "bio": "Board-certified general practitioner with over 10 years of experience in primary care and preventive medicine.",
+      "fee": 50
+    }

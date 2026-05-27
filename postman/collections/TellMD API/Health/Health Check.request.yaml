@@ -1,5 +1,4 @@
 $kind: http-request
-name: Health Check
+url: "{{baseUrl}}/health"
 method: GET
-url: '{{baseUrl}}/health'
 order: 1000

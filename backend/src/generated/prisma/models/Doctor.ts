@@ -43,6 +43,7 @@ export type DoctorMinAggregateOutputType = {
   bio: string | null
   fee: number | null
   profilePicture: string | null
+  profileCompletedAt: Date | null
 }
 
 export type DoctorMaxAggregateOutputType = {
@@ -54,6 +55,7 @@ export type DoctorMaxAggregateOutputType = {
   bio: string | null
   fee: number | null
   profilePicture: string | null
+  profileCompletedAt: Date | null
 }
 
 export type DoctorCountAggregateOutputType = {
@@ -65,6 +67,7 @@ export type DoctorCountAggregateOutputType = {
   bio: number
   fee: number
   profilePicture: number
+  profileCompletedAt: number
   _all: number
 }
 
@@ -86,6 +89,7 @@ export type DoctorMinAggregateInputType = {
   bio?: true
   fee?: true
   profilePicture?: true
+  profileCompletedAt?: true
 }
 
 export type DoctorMaxAggregateInputType = {
@@ -97,6 +101,7 @@ export type DoctorMaxAggregateInputType = {
   bio?: true
   fee?: true
   profilePicture?: true
+  profileCompletedAt?: true
 }
 
 export type DoctorCountAggregateInputType = {
@@ -108,6 +113,7 @@ export type DoctorCountAggregateInputType = {
   bio?: true
   fee?: true
   profilePicture?: true
+  profileCompletedAt?: true
   _all?: true
 }
 
@@ -206,6 +212,7 @@ export type DoctorGroupByOutputType = {
   bio: string | null
   fee: number | null
   profilePicture: string | null
+  profileCompletedAt: Date | null
   _count: DoctorCountAggregateOutputType | null
   _avg: DoctorAvgAggregateOutputType | null
   _sum: DoctorSumAggregateOutputType | null
@@ -240,6 +247,7 @@ export type DoctorWhereInput = {
   bio?: Prisma.StringNullableFilter<"Doctor"> | string | null
   fee?: Prisma.FloatNullableFilter<"Doctor"> | number | null
   profilePicture?: Prisma.StringNullableFilter<"Doctor"> | string | null
+  profileCompletedAt?: Prisma.DateTimeNullableFilter<"Doctor"> | Date | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   appointments?: Prisma.AppointmentListRelationFilter
   availabilities?: Prisma.DoctorAvailabilityListRelationFilter
@@ -254,6 +262,7 @@ export type DoctorOrderByWithRelationInput = {
   bio?: Prisma.SortOrderInput | Prisma.SortOrder
   fee?: Prisma.SortOrderInput | Prisma.SortOrder
   profilePicture?: Prisma.SortOrderInput | Prisma.SortOrder
+  profileCompletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   appointments?: Prisma.AppointmentOrderByRelationAggregateInput
   availabilities?: Prisma.DoctorAvailabilityOrderByRelationAggregateInput
@@ -271,6 +280,7 @@ export type DoctorWhereUniqueInput = Prisma.AtLeast<{
   bio?: Prisma.StringNullableFilter<"Doctor"> | string | null
   fee?: Prisma.FloatNullableFilter<"Doctor"> | number | null
   profilePicture?: Prisma.StringNullableFilter<"Doctor"> | string | null
+  profileCompletedAt?: Prisma.DateTimeNullableFilter<"Doctor"> | Date | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   appointments?: Prisma.AppointmentListRelationFilter
   availabilities?: Prisma.DoctorAvailabilityListRelationFilter
@@ -285,6 +295,7 @@ export type DoctorOrderByWithAggregationInput = {
   bio?: Prisma.SortOrderInput | Prisma.SortOrder
   fee?: Prisma.SortOrderInput | Prisma.SortOrder
   profilePicture?: Prisma.SortOrderInput | Prisma.SortOrder
+  profileCompletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.DoctorCountOrderByAggregateInput
   _avg?: Prisma.DoctorAvgOrderByAggregateInput
   _max?: Prisma.DoctorMaxOrderByAggregateInput
@@ -304,6 +315,7 @@ export type DoctorScalarWhereWithAggregatesInput = {
   bio?: Prisma.StringNullableWithAggregatesFilter<"Doctor"> | string | null
   fee?: Prisma.FloatNullableWithAggregatesFilter<"Doctor"> | number | null
   profilePicture?: Prisma.StringNullableWithAggregatesFilter<"Doctor"> | string | null
+  profileCompletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Doctor"> | Date | string | null
 }
 
 export type DoctorCreateInput = {
@@ -314,6 +326,7 @@ export type DoctorCreateInput = {
   bio?: string | null
   fee?: number | null
   profilePicture?: string | null
+  profileCompletedAt?: Date | string | null
   user: Prisma.UserCreateNestedOneWithoutDoctorInput
   appointments?: Prisma.AppointmentCreateNestedManyWithoutDoctorInput
   availabilities?: Prisma.DoctorAvailabilityCreateNestedManyWithoutDoctorInput
@@ -328,6 +341,7 @@ export type DoctorUncheckedCreateInput = {
   bio?: string | null
   fee?: number | null
   profilePicture?: string | null
+  profileCompletedAt?: Date | string | null
   appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutDoctorInput
   availabilities?: Prisma.DoctorAvailabilityUncheckedCreateNestedManyWithoutDoctorInput
 }
@@ -340,6 +354,7 @@ export type DoctorUpdateInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fee?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutDoctorNestedInput
   appointments?: Prisma.AppointmentUpdateManyWithoutDoctorNestedInput
   availabilities?: Prisma.DoctorAvailabilityUpdateManyWithoutDoctorNestedInput
@@ -354,6 +369,7 @@ export type DoctorUncheckedUpdateInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fee?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutDoctorNestedInput
   availabilities?: Prisma.DoctorAvailabilityUncheckedUpdateManyWithoutDoctorNestedInput
 }
@@ -367,6 +383,7 @@ export type DoctorCreateManyInput = {
   bio?: string | null
   fee?: number | null
   profilePicture?: string | null
+  profileCompletedAt?: Date | string | null
 }
 
 export type DoctorUpdateManyMutationInput = {
@@ -377,6 +394,7 @@ export type DoctorUpdateManyMutationInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fee?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type DoctorUncheckedUpdateManyInput = {
@@ -388,6 +406,7 @@ export type DoctorUncheckedUpdateManyInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fee?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type DoctorNullableScalarRelationFilter = {
@@ -404,6 +423,7 @@ export type DoctorCountOrderByAggregateInput = {
   bio?: Prisma.SortOrder
   fee?: Prisma.SortOrder
   profilePicture?: Prisma.SortOrder
+  profileCompletedAt?: Prisma.SortOrder
 }
 
 export type DoctorAvgOrderByAggregateInput = {
@@ -419,6 +439,7 @@ export type DoctorMaxOrderByAggregateInput = {
   bio?: Prisma.SortOrder
   fee?: Prisma.SortOrder
   profilePicture?: Prisma.SortOrder
+  profileCompletedAt?: Prisma.SortOrder
 }
 
 export type DoctorMinOrderByAggregateInput = {
@@ -430,6 +451,7 @@ export type DoctorMinOrderByAggregateInput = {
   bio?: Prisma.SortOrder
   fee?: Prisma.SortOrder
   profilePicture?: Prisma.SortOrder
+  profileCompletedAt?: Prisma.SortOrder
 }
 
 export type DoctorSumOrderByAggregateInput = {
@@ -509,6 +531,7 @@ export type DoctorCreateWithoutUserInput = {
   bio?: string | null
   fee?: number | null
   profilePicture?: string | null
+  profileCompletedAt?: Date | string | null
   appointments?: Prisma.AppointmentCreateNestedManyWithoutDoctorInput
   availabilities?: Prisma.DoctorAvailabilityCreateNestedManyWithoutDoctorInput
 }
@@ -521,6 +544,7 @@ export type DoctorUncheckedCreateWithoutUserInput = {
   bio?: string | null
   fee?: number | null
   profilePicture?: string | null
+  profileCompletedAt?: Date | string | null
   appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutDoctorInput
   availabilities?: Prisma.DoctorAvailabilityUncheckedCreateNestedManyWithoutDoctorInput
 }
@@ -549,6 +573,7 @@ export type DoctorUpdateWithoutUserInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fee?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   appointments?: Prisma.AppointmentUpdateManyWithoutDoctorNestedInput
   availabilities?: Prisma.DoctorAvailabilityUpdateManyWithoutDoctorNestedInput
 }
@@ -561,6 +586,7 @@ export type DoctorUncheckedUpdateWithoutUserInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fee?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutDoctorNestedInput
   availabilities?: Prisma.DoctorAvailabilityUncheckedUpdateManyWithoutDoctorNestedInput
 }
@@ -573,6 +599,7 @@ export type DoctorCreateWithoutAvailabilitiesInput = {
   bio?: string | null
   fee?: number | null
   profilePicture?: string | null
+  profileCompletedAt?: Date | string | null
   user: Prisma.UserCreateNestedOneWithoutDoctorInput
   appointments?: Prisma.AppointmentCreateNestedManyWithoutDoctorInput
 }
@@ -586,6 +613,7 @@ export type DoctorUncheckedCreateWithoutAvailabilitiesInput = {
   bio?: string | null
   fee?: number | null
   profilePicture?: string | null
+  profileCompletedAt?: Date | string | null
   appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutDoctorInput
 }
 
@@ -613,6 +641,7 @@ export type DoctorUpdateWithoutAvailabilitiesInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fee?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutDoctorNestedInput
   appointments?: Prisma.AppointmentUpdateManyWithoutDoctorNestedInput
 }
@@ -626,6 +655,7 @@ export type DoctorUncheckedUpdateWithoutAvailabilitiesInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fee?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutDoctorNestedInput
 }
 
@@ -637,6 +667,7 @@ export type DoctorCreateWithoutAppointmentsInput = {
   bio?: string | null
   fee?: number | null
   profilePicture?: string | null
+  profileCompletedAt?: Date | string | null
   user: Prisma.UserCreateNestedOneWithoutDoctorInput
   availabilities?: Prisma.DoctorAvailabilityCreateNestedManyWithoutDoctorInput
 }
@@ -650,6 +681,7 @@ export type DoctorUncheckedCreateWithoutAppointmentsInput = {
   bio?: string | null
   fee?: number | null
   profilePicture?: string | null
+  profileCompletedAt?: Date | string | null
   availabilities?: Prisma.DoctorAvailabilityUncheckedCreateNestedManyWithoutDoctorInput
 }
 
@@ -677,6 +709,7 @@ export type DoctorUpdateWithoutAppointmentsInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fee?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutDoctorNestedInput
   availabilities?: Prisma.DoctorAvailabilityUpdateManyWithoutDoctorNestedInput
 }
@@ -690,6 +723,7 @@ export type DoctorUncheckedUpdateWithoutAppointmentsInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fee?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   availabilities?: Prisma.DoctorAvailabilityUncheckedUpdateManyWithoutDoctorNestedInput
 }
 
@@ -742,6 +776,7 @@ export type DoctorSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   bio?: boolean
   fee?: boolean
   profilePicture?: boolean
+  profileCompletedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   appointments?: boolean | Prisma.Doctor$appointmentsArgs<ExtArgs>
   availabilities?: boolean | Prisma.Doctor$availabilitiesArgs<ExtArgs>
@@ -757,6 +792,7 @@ export type DoctorSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   bio?: boolean
   fee?: boolean
   profilePicture?: boolean
+  profileCompletedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["doctor"]>
 
@@ -769,6 +805,7 @@ export type DoctorSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   bio?: boolean
   fee?: boolean
   profilePicture?: boolean
+  profileCompletedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["doctor"]>
 
@@ -781,9 +818,10 @@ export type DoctorSelectScalar = {
   bio?: boolean
   fee?: boolean
   profilePicture?: boolean
+  profileCompletedAt?: boolean
 }
 
-export type DoctorOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "firstName" | "lastName" | "specialization" | "bio" | "fee" | "profilePicture", ExtArgs["result"]["doctor"]>
+export type DoctorOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "firstName" | "lastName" | "specialization" | "bio" | "fee" | "profilePicture" | "profileCompletedAt", ExtArgs["result"]["doctor"]>
 export type DoctorInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   appointments?: boolean | Prisma.Doctor$appointmentsArgs<ExtArgs>
@@ -813,6 +851,7 @@ export type $DoctorPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     bio: string | null
     fee: number | null
     profilePicture: string | null
+    profileCompletedAt: Date | null
   }, ExtArgs["result"]["doctor"]>
   composites: {}
 }
@@ -1247,6 +1286,7 @@ export interface DoctorFieldRefs {
   readonly bio: Prisma.FieldRef<"Doctor", 'String'>
   readonly fee: Prisma.FieldRef<"Doctor", 'Float'>
   readonly profilePicture: Prisma.FieldRef<"Doctor", 'String'>
+  readonly profileCompletedAt: Prisma.FieldRef<"Doctor", 'DateTime'>
 }
     
 

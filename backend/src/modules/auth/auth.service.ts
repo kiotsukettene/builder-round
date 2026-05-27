@@ -12,6 +12,8 @@ import { hashToken } from "../../utils/token-hash.js";
 import * as authRepository from "./auth.repository.js";
 import { RESEND_VERIFICATION_COOLDOWN_MS } from "./auth.constants.js";
 import { formatUserWithPatientDto } from "../patients/patient.utils.js";
+import { formatUserWithDoctorDto } from "../doctors/doctor.utils.js";
+import type { Doctor, Patient } from "../../generated/prisma/client.js";
 import type {
   RegisterInput,
   LoginInput,
@@ -31,6 +33,12 @@ function generateVerificationToken(): {
   const expiresAt = new Date(Date.now() + VERIFICATION_TOKEN_TTL_MS);
 
   return { rawToken, hashedToken, expiresAt };
+}
+
+function formatUserProfileDto<T extends { patient?: Patient | null; doctor?: Doctor | null }>(
+  user: T,
+) {
+  return formatUserWithDoctorDto(formatUserWithPatientDto(user));
 }
 
 function getFirstName(user: {
@@ -161,7 +169,7 @@ export async function login(data: LoginInput) {
     throw new AppError("User not found", 404);
   }
 
-  const userResponse = formatUserWithPatientDto(fullUser);
+  const userResponse = formatUserProfileDto(fullUser);
 
   return { user: userResponse, accessToken, refreshToken };
 }
@@ -222,5 +230,5 @@ export async function getProfile(userId: string) {
     throw new AppError("User not found", 404);
   }
 
-  return formatUserWithPatientDto(user);
+  return formatUserProfileDto(user);
 }

@@ -1167,7 +1167,8 @@ export const DoctorScalarFieldEnum = {
   specialization: 'specialization',
   bio: 'bio',
   fee: 'fee',
-  profilePicture: 'profilePicture'
+  profilePicture: 'profilePicture',
+  profileCompletedAt: 'profileCompletedAt'
 } as const
 
 export type DoctorScalarFieldEnum = (typeof DoctorScalarFieldEnum)[keyof typeof DoctorScalarFieldEnum]
