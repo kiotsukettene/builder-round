@@ -1,0 +1,15 @@
+$kind: http-request
+name: Register Patient
+method: POST
+url: "{{baseUrl}}/api/v1/auth/register"
+order: 1000
+body:
+  type: json
+  content: |-
+    {
+      "email": "kiotsuketteneloreto@gmail.com",
+      "password": "Password@123",
+      "firstName": "Oreo",
+      "lastName": "Revillame",
+      "role": "PATIENT"
+    }

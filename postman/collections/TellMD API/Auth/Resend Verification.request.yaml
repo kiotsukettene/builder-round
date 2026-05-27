@@ -1,0 +1,11 @@
+$kind: http-request
+name: Resend Verification
+method: POST
+url: "{{baseUrl}}/api/v1/auth/resend-verification"
+order: 2600
+body:
+  type: json
+  content: |-
+    {
+      "email": "kiotsuketteneloreto@gmail.com"
+    }

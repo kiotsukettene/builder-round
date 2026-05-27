@@ -1,0 +1,11 @@
+$kind: http-request
+name: Verify Email
+method: POST
+url: "{{baseUrl}}/api/v1/auth/verify-email"
+order: 2500
+body:
+  type: json
+  content: |-
+    {
+      "token": "eb1a0705bd6a0896fdd0470da05b355a52e076f4cc4db7deadf703e66818d4f9"
+    }
