@@ -1,0 +1,9 @@
+$kind: http-request
+name: End Consultation
+method: PATCH
+url: "{{baseUrl}}/api/v1/consultations/cmpo76h010009dkglo0g8mw7d/end"
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"
+order: 2000

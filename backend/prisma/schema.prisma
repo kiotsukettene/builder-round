@@ -23,23 +23,40 @@ enum AppointmentStatus {
 
 enum NotificationType {
   APPOINTMENT_BOOKED
+  APPOINTMENT_CONFIRMED
   APPOINTMENT_CANCELLED
   APPOINTMENT_REMINDER
   SCHEDULE_UPDATED
 }
 
+enum RecommendationSource {
+  HISTORY
+  SYMPTOMS
+}
+
 // ── Auth ──
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  role      Role
-  createdAt DateTime @default(now())
+  id                       String    @id @default(cuid())
+  email                    String    @unique
+  password                 String
+  role                     Role
+  emailVerified            Boolean   @default(false)
+  emailVerificationToken   String?   @unique
+  emailVerificationExpires DateTime?
+  lastVerificationEmailSentAt DateTime?
+  createdAt                DateTime  @default(now())
 
   patient       Patient?
   doctor        Doctor?
   notifications Notification[]
+}
+
+model RevokedRefreshToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
 
 // ── Profiles ──
@@ -53,26 +70,33 @@ model Patient {
   weight         Float?
   height         Float?
   phone          String?
-  history        String?
-  profilePicture String?
+  history            String?
+  profilePicture     String?
+  profileCompletedAt DateTime?
 
-  user         User          @relation(fields: [userId], references: [id])
-  appointments Appointment[]
+  user            User             @relation(fields: [userId], references: [id])
+  appointments    Appointment[]
+  recommendations Recommendation[]
+  reviews         DoctorReview[]
 }
 
 model Doctor {
-  id             String  @id @default(cuid())
-  userId         String  @unique
-  firstName      String
-  lastName       String
-  specialization String
-  bio            String?
-  fee            Float?
-  profilePicture String?
+  id                   String    @id @default(cuid())
+  userId               String    @unique
+  firstName            String
+  lastName             String
+  specialization       String
+  bio                  String?
+  fee                  Float?
+  consultationDuration Int       @default(30)
+  profilePicture       String?
+  profileCompletedAt   DateTime?
 
   user           User                @relation(fields: [userId], references: [id])
   appointments   Appointment[]
   availabilities DoctorAvailability[]
+  blockedDates   BlockedDate[]
+  reviews        DoctorReview[]
 }
 
 // ── Scheduling ──
@@ -89,21 +113,37 @@ model DoctorAvailability {
   @@unique([doctorId, dayOfWeek, startTime])
 }
 
+model BlockedDate {
+  id        String   @id @default(cuid())
+  doctorId  String
+  date      DateTime @db.Date
+  reason    String?
+  createdAt DateTime @default(now())
+
+  doctor Doctor @relation(fields: [doctorId], references: [id])
+
+  @@unique([doctorId, date])
+}
+
 model Appointment {
   id          String            @id @default(cuid())
   patientId   String
   doctorId    String
   scheduledAt DateTime
-  status      AppointmentStatus @default(PENDING)
-  meetingUrl  String?
-  notes       String?
-  createdAt   DateTime          @default(now())
+  status              AppointmentStatus @default(PENDING)
+  meetingUrl          String?
+  notes               String?
+  cancellationReason  String?
+  reminderOneHourSentAt DateTime?
+  reminderTenMinSentAt  DateTime?
+  createdAt           DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 
   patient          Patient           @relation(fields: [patientId], references: [id])
   doctor           Doctor            @relation(fields: [doctorId], references: [id])
   consultationNote ConsultationNote?
   prescriptions    Prescription[]
+  review           DoctorReview?
 }
 
 // ── Post-Consultation ──
@@ -131,6 +171,41 @@ model Prescription {
   createdAt     DateTime @default(now())
 
   appointment Appointment @relation(fields: [appointmentId], references: [id])
+}
+
+// ── AI Recommendations ──
+
+model Recommendation {
+  id             String               @id @default(cuid())
+  patientId      String
+  source         RecommendationSource
+  input          String
+  specialization String
+  explanation    String
+  doctorIds      String[]
+  createdAt      DateTime             @default(now())
+
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@index([patientId, source, createdAt])
+}
+
+// ── Doctor Reviews ──
+
+model DoctorReview {
+  id            String   @id @default(cuid())
+  appointmentId String   @unique
+  patientId     String
+  doctorId      String
+  rating        Int
+  comment       String?
+  createdAt     DateTime @default(now())
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+  patient     Patient     @relation(fields: [patientId], references: [id])
+  doctor      Doctor      @relation(fields: [doctorId], references: [id])
+
+  @@index([doctorId])
 }
 
 // ── Notifications ──

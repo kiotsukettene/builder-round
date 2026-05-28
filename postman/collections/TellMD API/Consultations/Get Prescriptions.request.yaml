@@ -1,0 +1,9 @@
+$kind: http-request
+name: Get Prescriptions
+method: GET
+url: "{{baseUrl}}/api/v1/consultations/cmpo76h010009dkglo0g8mw7d/prescriptions"
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"
+order: 6000

@@ -1,0 +1,9 @@
+$kind: http-request
+name: Join Consultation
+method: POST
+url: "{{baseUrl}}/api/v1/consultations/cmpo76h010009dkglo0g8mw7d/join"
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"
+order: 1000

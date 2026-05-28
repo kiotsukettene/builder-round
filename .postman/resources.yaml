@@ -1,0 +1,15 @@
+workspace:
+  id: 7870d3c8-d9bb-463f-b587-09b857f329e1
+
+localResources:
+  collections:
+    - ../postman/collections/TellMD API
+  docs:
+    - ..\frontend\README.md
+    - ..\TELLMD_CONTEXT.md
+
+# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
+
+cloudResources:
+  collections:
+    ../postman/collections/TellMD API: 39028661-0a93f26e-f683-4933-8675-ab141c566858

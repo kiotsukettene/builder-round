@@ -1,0 +1,12 @@
+$kind: http-request
+name: Browse Doctors
+method: GET
+url: "{{baseUrl}}/api/v1/doctors?page=1&limit=10"
+queryParams:
+  page: "1"
+  limit: "10"
+order: 5000
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"

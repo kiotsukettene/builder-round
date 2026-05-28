@@ -1,0 +1,9 @@
+$kind: http-request
+name: Get Consultation Note
+method: GET
+url: "{{baseUrl}}/api/v1/consultations/cmpo76h010009dkglo0g8mw7d/notes"
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"
+order: 4000

@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/api/v1/patients/me"
+method: PATCH
+body:
+  type: json
+  content: |-
+    {
+      "phone": "+1987654321",
+      "weight": 66
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"
+order: 3000
