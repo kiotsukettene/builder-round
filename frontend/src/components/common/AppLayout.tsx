@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom"
-import { User, LogOut, Menu, Stethoscope, Sparkles, CalendarDays, CalendarClock } from "lucide-react"
+import { User, LogOut, Menu, Stethoscope, Sparkles, CalendarDays, CalendarClock, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -65,6 +65,13 @@ export function AppLayout({ children }: AppLayoutProps) {
                   <CalendarDays className="size-3.5" />
                   Appointments
                 </Link>
+                <Link
+                  to="/medical-records"
+                  className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground sm:flex"
+                >
+                  <FileText className="size-3.5" />
+                  Medical Records
+                </Link>
               </>
             )}
             {user?.role === "DOCTOR" && (
@@ -82,6 +89,13 @@ export function AppLayout({ children }: AppLayoutProps) {
                 >
                   <CalendarDays className="size-3.5" />
                   Appointments
+                </Link>
+                <Link
+                  to="/doctor/medical-records"
+                  className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground sm:flex"
+                >
+                  <FileText className="size-3.5" />
+                  Medical Records
                 </Link>
               </>
             )}
@@ -121,6 +135,10 @@ export function AppLayout({ children }: AppLayoutProps) {
                       <CalendarDays className="size-4" />
                       Appointments
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/medical-records")}>
+                      <FileText className="size-4" />
+                      Medical Records
+                    </DropdownMenuItem>
                   </>
                 )}
                 {user?.role === "DOCTOR" && (
@@ -132,6 +150,10 @@ export function AppLayout({ children }: AppLayoutProps) {
                     <DropdownMenuItem onClick={() => navigate("/doctor/appointments")}>
                       <CalendarDays className="size-4" />
                       Appointments
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/doctor/medical-records")}>
+                      <FileText className="size-4" />
+                      Medical Records
                     </DropdownMenuItem>
                   </>
                 )}

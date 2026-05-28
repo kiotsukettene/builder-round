@@ -61,6 +61,11 @@ const PatientAppointmentsPage = lazy(() =>
     default: m.AppointmentsPage,
   }))
 )
+const PatientMedicalRecordsPage = lazy(() =>
+  import("@/features/patients/MedicalRecordsPage").then((m) => ({
+    default: m.MedicalRecordsPage,
+  }))
+)
 const DoctorSchedulePage = lazy(() =>
   import("@/features/doctors/ScheduleManagementPage").then((m) => ({
     default: m.ScheduleManagementPage,
@@ -69,6 +74,11 @@ const DoctorSchedulePage = lazy(() =>
 const DoctorAppointmentsPage = lazy(() =>
   import("@/features/doctors/AppointmentsPage").then((m) => ({
     default: m.DoctorAppointmentsPage,
+  }))
+)
+const DoctorMedicalRecordsPage = lazy(() =>
+  import("@/features/doctors/MedicalRecordsPage").then((m) => ({
+    default: m.DoctorMedicalRecordsPage,
   }))
 )
 
@@ -144,6 +154,7 @@ function App() {
               <Route path="/doctors" element={<DoctorDiscoveryPage />} />
               <Route path="/doctors/:id" element={<DoctorDetailPage />} />
               <Route path="/appointments" element={<PatientAppointmentsPage />} />
+              <Route path="/medical-records" element={<PatientMedicalRecordsPage />} />
             </Route>
 
             {/* Doctor protected routes — needs complete profile */}
@@ -159,6 +170,7 @@ function App() {
               <Route path="/doctor/profile" element={<DoctorProfilePage />} />
               <Route path="/doctor/schedule" element={<DoctorSchedulePage />} />
               <Route path="/doctor/appointments" element={<DoctorAppointmentsPage />} />
+              <Route path="/doctor/medical-records" element={<DoctorMedicalRecordsPage />} />
             </Route>
 
             {/* Consultation room — requires auth only */}
