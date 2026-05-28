@@ -9,10 +9,6 @@ import {
   ChevronLeft,
   ChevronRight,
   CalendarOff,
-  Phone,
-  Cake,
-  Ruler,
-  Weight,
   FileText,
 } from "lucide-react"
 import { AppLayout } from "@/components/common/AppLayout"
@@ -34,8 +30,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useMyAppointments, useCancelAppointment } from "@/hooks/use-appointments"
-import { MedicalRecordDialog } from "@/features/patients/components/MedicalRecordDialog"
-import type { Appointment, AppointmentPatient, AppointmentStatus } from "@/types/appointment"
+import { PatientDetails } from "@/components/common/PatientDetails"
+import type { Appointment, AppointmentStatus } from "@/types/appointment"
 import {
   getRelativeTimeLabel,
   isWithinJoinWindow,
@@ -59,96 +55,9 @@ const STATUS_CONFIG = {
 
 const CONSULTATION_DURATION_MIN = 30
 
-function getAge(birthday: string): number {
-  const birth = new Date(birthday)
-  const today = new Date()
-  let age = today.getFullYear() - birth.getFullYear()
-  const monthDiff = today.getMonth() - birth.getMonth()
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-    age -= 1
-  }
-  return age
-}
-
-function formatBirthday(birthday: string | null): string | null {
-  if (!birthday) return null
-  const date = new Date(birthday)
-  const formatted = date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  })
-  return `${formatted} (${getAge(birthday)} yrs)`
-}
-
-function PatientDetails({ patient }: { patient: AppointmentPatient }) {
-  const birthday = formatBirthday(patient.birthday)
-  const hasVitals = patient.weight !== null || patient.height !== null
-  const vitals =
-    patient.weight !== null && patient.height !== null
-      ? `${patient.weight} kg · ${patient.height} cm`
-      : patient.weight !== null
-        ? `${patient.weight} kg`
-        : patient.height !== null
-          ? `${patient.height} cm`
-          : null
-
-  const hasDetails = patient.phone || birthday || hasVitals || patient.history
-
-  if (!hasDetails) {
-    return (
-      <p className="text-xs text-muted-foreground">
-        No additional patient profile details available.
-      </p>
-    )
-  }
-
-  return (
-    <div className="space-y-2">
-      {(patient.phone || birthday) && (
-        <div className="flex flex-wrap gap-x-4 gap-y-1.5">
-          {patient.phone && (
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Phone className="size-3.5 shrink-0" />
-              <span>{patient.phone}</span>
-            </div>
-          )}
-          {birthday && (
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Cake className="size-3.5 shrink-0" />
-              <span>{birthday}</span>
-            </div>
-          )}
-        </div>
-      )}
-
-      {vitals && (
-        <div className="flex flex-wrap gap-x-4 gap-y-1.5">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Weight className="size-3.5 shrink-0" />
-            <Ruler className="size-3.5 shrink-0" />
-            <span>{vitals}</span>
-          </div>
-        </div>
-      )}
-
-      {patient.history && (
-        <div className="rounded-md bg-muted/40 p-2.5">
-          <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-            <FileText className="size-3.5" />
-            Medical History
-          </div>
-          <p className="text-xs leading-relaxed text-foreground/80">{patient.history}</p>
-        </div>
-      )}
-    </div>
-  )
-}
-
 function DoctorAppointmentCard({ appointment }: { appointment: Appointment }) {
   const navigate = useNavigate()
   const { mutate: cancelAppointment, isPending: isCancelling } = useCancelAppointment()
-  const [recordsOpen, setRecordsOpen] = useState(false)
 
   const statusConfig = STATUS_CONFIG[appointment.status]
   const canCancel = appointment.status === "PENDING" || appointment.status === "CONFIRMED"
@@ -162,7 +71,6 @@ function DoctorAppointmentCard({ appointment }: { appointment: Appointment }) {
     appointment.scheduledAt,
     CONSULTATION_DURATION_MIN,
   )
-  const patientName = `${appointment.patient.firstName} ${appointment.patient.lastName}`
 
   const scheduledDate = new Date(appointment.scheduledAt)
   const dateStr = scheduledDate.toLocaleDateString("en-US", {
@@ -246,7 +154,9 @@ function DoctorAppointmentCard({ appointment }: { appointment: Appointment }) {
                 variant="outline"
                 size="sm"
                 className="gap-1.5"
-                onClick={() => setRecordsOpen(true)}
+                onClick={() =>
+                  navigate(`/doctor/medical-records?appointment=${appointment.id}`)
+                }
               >
                 <FileText className="size-3.5" />
                 View Records
@@ -290,15 +200,6 @@ function DoctorAppointmentCard({ appointment }: { appointment: Appointment }) {
         )}
       </CardContent>
     </Card>
-
-      {isCompleted && (
-        <MedicalRecordDialog
-          open={recordsOpen}
-          onOpenChange={setRecordsOpen}
-          appointmentId={appointment.id}
-          counterpartName={patientName}
-        />
-      )}
     </>
   )
 }
