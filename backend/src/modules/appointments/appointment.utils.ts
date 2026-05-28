@@ -17,6 +17,7 @@ export function toAppointmentDto(appointment: AppointmentWithRelations) {
     status: appointment.status,
     meetingUrl: appointment.meetingUrl,
     notes: appointment.notes,
+    cancellationReason: appointment.cancellationReason,
     createdAt: appointment.createdAt,
     updatedAt: appointment.updatedAt,
     patient: {

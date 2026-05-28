@@ -8,6 +8,15 @@ export const bookAppointmentSchema = z.object({
       offset: true,
       message: "scheduledAt must be a valid ISO 8601 datetime",
     }),
+  notes: z.string().trim().max(1000).optional(),
+});
+
+export const cancelAppointmentSchema = z.object({
+  cancellationReason: z
+    .string()
+    .trim()
+    .min(1, "Cancellation reason is required")
+    .max(500),
 });
 
 export const rescheduleAppointmentSchema = z.object({
@@ -28,6 +37,7 @@ export const listAppointmentsQuerySchema = z.object({
 });
 
 export type BookAppointmentInput = z.infer<typeof bookAppointmentSchema>;
+export type CancelAppointmentInput = z.infer<typeof cancelAppointmentSchema>;
 export type RescheduleAppointmentInput = z.infer<
   typeof rescheduleAppointmentSchema
 >;
