@@ -85,7 +85,12 @@ async function buildRecommendation(input: string) {
 }
 
 export async function getDefaultRecommendation(userId: string) {
-  const patient = await patientRepository.findPatientByUserId(userId);
+  // Fetch the patient profile and available specializations in parallel
+  // so the specialization list is ready by the time we validate patient history.
+  const [patient, specializations] = await Promise.all([
+    patientRepository.findPatientByUserId(userId),
+    doctorRepository.getAllSpecializations(),
+  ]);
 
   if (!patient) {
     throw new AppError("Patient profile not found", 404);
@@ -98,7 +103,25 @@ export async function getDefaultRecommendation(userId: string) {
     );
   }
 
-  return buildRecommendation(patient.history);
+  if (specializations.length === 0) {
+    throw new AppError(
+      "No doctors available for recommendations at this time",
+      404,
+    );
+  }
+
+  const prompt = buildPrompt(patient.history, specializations);
+  const raw = await generateContent(prompt);
+  const recommendation = parseGeminiResponse(raw);
+
+  const matchedDoctors = await doctorRepository.findDoctorsBySpecialization(
+    recommendation.specialization,
+  );
+
+  return {
+    recommendation,
+    doctors: matchedDoctors.map(toPublicDoctorDto),
+  };
 }
 
 export async function getCustomRecommendation(symptoms: string) {

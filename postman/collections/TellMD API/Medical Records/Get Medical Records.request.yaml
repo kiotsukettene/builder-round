@@ -1,0 +1,12 @@
+$kind: http-request
+name: Get Medical Records
+method: GET
+url: "{{baseUrl}}/api/v1/medical-records?page=1&limit=10"
+queryParams:
+  page: "1"
+  limit: "10"
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"
+order: 1000

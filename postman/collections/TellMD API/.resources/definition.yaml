@@ -1,4 +1,5 @@
 $kind: collection
+name: TellMD API
 variables:
   baseUrl: http://localhost:3000
   accessToken: ""

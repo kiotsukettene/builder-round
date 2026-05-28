@@ -72,12 +72,15 @@ export async function bookAppointment(
   patientUserId: string,
   input: BookAppointmentInput,
 ) {
-  const patient = await getPatientOrThrow(patientUserId);
-  const doctor = await getDoctorWithAvailabilityOrThrow(input.doctorId);
-
   const scheduledAt = new Date(input.scheduledAt);
-
   requireFutureDate(scheduledAt);
+
+  // Fetch patient, doctor, and blocked-date status all at once
+  const [patient, doctor, isBlocked] = await Promise.all([
+    getPatientOrThrow(patientUserId),
+    getDoctorWithAvailabilityOrThrow(input.doctorId),
+    appointmentRepository.isDateBlockedForDoctor(input.doctorId, scheduledAt),
+  ]);
 
   if (!isSlotWithinAvailability(scheduledAt, doctor.consultationDuration, doctor.availabilities)) {
     throw new AppError(
@@ -86,10 +89,6 @@ export async function bookAppointment(
     );
   }
 
-  const isBlocked = await appointmentRepository.isDateBlockedForDoctor(
-    doctor.id,
-    scheduledAt,
-  );
   if (isBlocked) {
     throw new AppError("The doctor is not available on this date", 400);
   }
@@ -196,9 +195,13 @@ export async function rescheduleAppointment(
   }
 
   const scheduledAt = new Date(input.scheduledAt);
-  const doctor = await getDoctorWithAvailabilityOrThrow(appointment.doctor.id);
-
   requireFutureDate(scheduledAt);
+
+  // Fetch doctor profile and blocked-date status in parallel
+  const [doctor, isBlocked] = await Promise.all([
+    getDoctorWithAvailabilityOrThrow(appointment.doctor.id),
+    appointmentRepository.isDateBlockedForDoctor(appointment.doctor.id, scheduledAt),
+  ]);
 
   if (!isSlotWithinAvailability(scheduledAt, doctor.consultationDuration, doctor.availabilities)) {
     throw new AppError(
@@ -207,10 +210,6 @@ export async function rescheduleAppointment(
     );
   }
 
-  const isBlocked = await appointmentRepository.isDateBlockedForDoctor(
-    doctor.id,
-    scheduledAt,
-  );
   if (isBlocked) {
     throw new AppError("The doctor is not available on this date", 400);
   }
