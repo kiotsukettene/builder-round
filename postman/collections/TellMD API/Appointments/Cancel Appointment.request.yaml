@@ -6,4 +6,10 @@ auth:
   type: bearer
   credentials:
     token: "{{accessToken}}"
+body:
+  type: json
+  content: |-
+    {
+      "cancellationReason": "Patient requested to cancel due to scheduling conflict."
+    }
 order: 4000
