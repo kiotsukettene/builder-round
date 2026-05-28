@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
-import { useLocation, useSearchParams } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { Search, SlidersHorizontal, ChevronLeft, ChevronRight, Stethoscope } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
@@ -14,16 +15,10 @@ import {
 } from "@/components/ui/select"
 import { AppLayout } from "@/components/common/AppLayout"
 import { DoctorCard } from "@/features/patients/components/DoctorCard"
-import { RecommendationBanner } from "@/features/patients/components/RecommendationBanner"
 import { SymptomSearchDialog } from "@/features/patients/components/SymptomSearchDialog"
 import { useDoctorList } from "@/hooks/use-discovery"
-import type { RecommendationResult } from "@/types/recommendation"
-import type { PublicDoctor } from "@/types/recommendation"
-
-interface LocationState {
-  recommendation?: RecommendationResult
-  doctors?: PublicDoctor[]
-}
+import { useCustomRecommendation } from "@/hooks/use-recommendation"
+import { useRecommendationLimit } from "@/hooks/use-recommendation-limit"
 
 const ITEMS_PER_PAGE = 9
 
@@ -50,9 +45,12 @@ function DoctorGridSkeleton() {
 }
 
 export function DoctorDiscoveryPage() {
-  const location = useLocation()
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const locationState = location.state as LocationState | null
+
+  const { mutateAsync: getCustomRecommendation, isPending: isCustomPending } =
+    useCustomRecommendation()
+  const { remaining, canUse, resetLabel, maxAttempts, recordUsage } = useRecommendationLimit()
 
   // Filters driven by URL params for shareability
   const [search, setSearch] = useState(searchParams.get("search") ?? "")
@@ -113,12 +111,22 @@ export function DoctorDiscoveryPage() {
   const totalPages = meta?.totalPages ?? 1
   const totalResults = meta?.total ?? 0
 
-  // Custom recommendation from symptom dialog (passed via location state)
-  const customRec = locationState?.recommendation
-  const customDoctors = locationState?.doctors
+  async function handleSymptomSubmit(symptoms: string) {
+    if (!canUse) {
+      toast.error(
+        resetLabel
+          ? `You've used all symptom-based recommendations. Try again in ${resetLabel}.`
+          : "You've reached the symptom-based recommendation limit for now."
+      )
+      throw new Error("limit reached")
+    }
 
-  // Show custom recommendation doctors at the top when arriving from the symptom dialog
-  const showCustomResults = !!customRec && !!customDoctors && !debouncedSearch && !specialization && page === 1
+    const res = await getCustomRecommendation(symptoms)
+    recordUsage()
+    navigate("/recommendations", {
+      state: { customRecommendation: res.data },
+    })
+  }
 
   return (
     <AppLayout>
@@ -132,24 +140,20 @@ export function DoctorDiscoveryPage() {
             </p>
           </div>
           <SymptomSearchDialog
+            onSubmit={handleSymptomSubmit}
+            isPending={isCustomPending}
+            disabled={!canUse}
+            remainingAttempts={remaining}
+            maxAttempts={maxAttempts}
+            resetLabel={resetLabel}
             trigger={
-              <Button variant="outline">
+              <Button variant="outline" disabled={!canUse}>
                 <Search className="size-4" />
                 Search by Symptoms
               </Button>
             }
           />
         </div>
-
-        {/* AI recommendation banner — shown when navigating from /recommendations with ?specialization= or location state */}
-        {customRec && (
-          <div className="mb-5">
-            <RecommendationBanner
-              specialization={customRec.specialization}
-              explanation={customRec.explanation}
-            />
-          </div>
-        )}
 
         {/* Filters */}
         <div className="mb-6 flex flex-wrap gap-3">
@@ -183,26 +187,6 @@ export function DoctorDiscoveryPage() {
             </Select>
           </div>
         </div>
-
-        {/* Custom recommendation results section */}
-        {showCustomResults && (
-          <div className="mb-8 space-y-3">
-            <div>
-              <h2 className="text-base font-semibold">
-                Recommended: {customRec.specialization}
-              </h2>
-              <p className="text-sm text-muted-foreground">{customDoctors.length} matching doctor{customDoctors.length !== 1 ? "s" : ""}</p>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {customDoctors.map((d) => (
-                <DoctorCard key={d.id} doctor={d} isRecommended />
-              ))}
-            </div>
-            <div className="border-t pt-6">
-              <p className="mb-4 text-sm font-medium text-muted-foreground">All Doctors</p>
-            </div>
-          </div>
-        )}
 
         {/* Doctor grid */}
         {(isLoading || isFetching) && doctors.length === 0 ? (

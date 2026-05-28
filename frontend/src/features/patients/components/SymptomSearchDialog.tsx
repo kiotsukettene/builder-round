@@ -1,9 +1,9 @@
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Sparkles, Search } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -23,7 +23,6 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Textarea } from "@/components/ui/textarea"
-import { useCustomRecommendation } from "@/hooks/use-recommendation"
 
 const symptomSchema = z.object({
   symptoms: z
@@ -36,38 +35,72 @@ type SymptomFormValues = z.infer<typeof symptomSchema>
 
 interface SymptomSearchDialogProps {
   trigger?: React.ReactNode
+  onSubmit: (symptoms: string) => void | Promise<void>
+  isPending?: boolean
+  disabled?: boolean
+  remainingAttempts?: number
+  maxAttempts?: number
+  resetLabel?: string
 }
 
-export function SymptomSearchDialog({ trigger }: SymptomSearchDialogProps) {
+export function SymptomSearchDialog({
+  trigger,
+  onSubmit,
+  isPending = false,
+  disabled = false,
+  remainingAttempts,
+  maxAttempts = 2,
+  resetLabel,
+}: SymptomSearchDialogProps) {
   const [open, setOpen] = useState(false)
-  const navigate = useNavigate()
-  const { mutate: getCustomRecommendation, isPending } = useCustomRecommendation()
 
   const form = useForm<SymptomFormValues>({
     resolver: zodResolver(symptomSchema),
     defaultValues: { symptoms: "" },
   })
 
-  function onSubmit(values: SymptomFormValues) {
-    getCustomRecommendation(values.symptoms, {
-      onSuccess: (res) => {
-        setOpen(false)
-        form.reset()
-        navigate("/doctors", {
-          state: {
-            recommendation: res.data.recommendation,
-            doctors: res.data.doctors,
-          },
-        })
-      },
-    })
+  async function handleSubmit(values: SymptomFormValues) {
+    if (disabled) {
+      toast.error(
+        resetLabel
+          ? `You've used all symptom-based recommendations. Try again in ${resetLabel}.`
+          : "You've reached the symptom-based recommendation limit for now."
+      )
+      return
+    }
+
+    try {
+      await onSubmit(values.symptoms)
+      setOpen(false)
+      form.reset()
+    } catch {
+      // Parent handles error toasts
+    }
   }
 
+  function handleOpenChange(nextOpen: boolean) {
+    if (disabled && nextOpen) {
+      toast.error(
+        resetLabel
+          ? `You've used all symptom-based recommendations. Try again in ${resetLabel}.`
+          : "You've reached the symptom-based recommendation limit for now."
+      )
+      return
+    }
+    setOpen(nextOpen)
+    if (!nextOpen) form.reset()
+  }
+
+  const attemptsLabel =
+    remainingAttempts !== undefined
+      ? `${remainingAttempts} of ${maxAttempts} symptom checks left today`
+      : null
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {trigger ?? (
-          <Button variant="outline">
+          <Button variant="outline" disabled={disabled}>
             <Search className="size-4" />
             Describe Symptoms
           </Button>
@@ -78,21 +111,26 @@ export function SymptomSearchDialog({ trigger }: SymptomSearchDialogProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="size-5 text-primary" />
-            Find a Doctor by Symptoms
+            Update Recommendation by Symptoms
           </DialogTitle>
           <DialogDescription>
-            Describe what you're experiencing and our AI will suggest the right type of specialist.
+            Your first recommendation uses your medical history. Describe what you're feeling now
+            if your current symptoms are different.
           </DialogDescription>
         </DialogHeader>
 
+        {attemptsLabel && (
+          <p className="text-xs text-muted-foreground">{attemptsLabel}</p>
+        )}
+
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="symptoms"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Describe your symptoms</FormLabel>
+                  <FormLabel>Describe your current symptoms</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="e.g. I've been having persistent chest tightness, shortness of breath when climbing stairs, and occasional palpitations for the past two weeks..."
@@ -112,17 +150,14 @@ export function SymptomSearchDialog({ trigger }: SymptomSearchDialogProps) {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => {
-                  setOpen(false)
-                  form.reset()
-                }}
+                onClick={() => handleOpenChange(false)}
                 disabled={isPending}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button type="submit" disabled={isPending || disabled}>
                 <Sparkles className="size-4" />
-                {isPending ? "Analyzing..." : "Get Recommendation"}
+                {isPending ? "Analyzing..." : "Update Recommendation"}
               </Button>
             </div>
           </form>
