@@ -56,6 +56,21 @@ const DoctorDetailPage = lazy(() =>
     default: m.DoctorDetailPage,
   }))
 )
+const PatientAppointmentsPage = lazy(() =>
+  import("@/features/patients/AppointmentsPage").then((m) => ({
+    default: m.AppointmentsPage,
+  }))
+)
+const DoctorSchedulePage = lazy(() =>
+  import("@/features/doctors/ScheduleManagementPage").then((m) => ({
+    default: m.ScheduleManagementPage,
+  }))
+)
+const DoctorAppointmentsPage = lazy(() =>
+  import("@/features/doctors/AppointmentsPage").then((m) => ({
+    default: m.DoctorAppointmentsPage,
+  }))
+)
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -128,6 +143,7 @@ function App() {
               <Route path="/recommendations" element={<RecommendationPage />} />
               <Route path="/doctors" element={<DoctorDiscoveryPage />} />
               <Route path="/doctors/:id" element={<DoctorDetailPage />} />
+              <Route path="/appointments" element={<PatientAppointmentsPage />} />
             </Route>
 
             {/* Doctor protected routes — needs complete profile */}
@@ -141,6 +157,8 @@ function App() {
               }
             >
               <Route path="/doctor/profile" element={<DoctorProfilePage />} />
+              <Route path="/doctor/schedule" element={<DoctorSchedulePage />} />
+              <Route path="/doctor/appointments" element={<DoctorAppointmentsPage />} />
             </Route>
 
             {/* Consultation room — requires auth only */}

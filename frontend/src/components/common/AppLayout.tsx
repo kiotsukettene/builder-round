@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom"
-import { User, LogOut, Menu, Stethoscope, Sparkles } from "lucide-react"
+import { User, LogOut, Menu, Stethoscope, Sparkles, CalendarDays, CalendarClock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -12,6 +12,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuthStore } from "@/store/auth.store"
 import { useLogout } from "@/hooks/use-auth"
+import { NotificationBell } from "@/components/common/NotificationBell"
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -40,7 +41,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             <span className="text-lg font-bold tracking-tight">TellMD</span>
           </Link>
 
-          <nav className="flex items-center gap-2">
+          <nav className="flex items-center gap-1">
             {user?.role === "PATIENT" && (
               <>
                 <Link
@@ -57,8 +58,34 @@ export function AppLayout({ children }: AppLayoutProps) {
                   <Stethoscope className="size-3.5" />
                   Find Doctors
                 </Link>
+                <Link
+                  to="/appointments"
+                  className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground sm:flex"
+                >
+                  <CalendarDays className="size-3.5" />
+                  Appointments
+                </Link>
               </>
             )}
+            {user?.role === "DOCTOR" && (
+              <>
+                <Link
+                  to="/doctor/schedule"
+                  className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground sm:flex"
+                >
+                  <CalendarClock className="size-3.5" />
+                  Schedule
+                </Link>
+                <Link
+                  to="/doctor/appointments"
+                  className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground sm:flex"
+                >
+                  <CalendarDays className="size-3.5" />
+                  Appointments
+                </Link>
+              </>
+            )}
+            <NotificationBell />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2 px-2">
@@ -89,6 +116,22 @@ export function AppLayout({ children }: AppLayoutProps) {
                     <DropdownMenuItem onClick={() => navigate("/doctors")}>
                       <Stethoscope className="size-4" />
                       Find Doctors
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/appointments")}>
+                      <CalendarDays className="size-4" />
+                      Appointments
+                    </DropdownMenuItem>
+                  </>
+                )}
+                {user?.role === "DOCTOR" && (
+                  <>
+                    <DropdownMenuItem onClick={() => navigate("/doctor/schedule")}>
+                      <CalendarClock className="size-4" />
+                      Schedule
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/doctor/appointments")}>
+                      <CalendarDays className="size-4" />
+                      Appointments
                     </DropdownMenuItem>
                   </>
                 )}
