@@ -393,6 +393,8 @@ export const ModelName = {
   Appointment: 'Appointment',
   ConsultationNote: 'ConsultationNote',
   Prescription: 'Prescription',
+  Recommendation: 'Recommendation',
+  DoctorReview: 'DoctorReview',
   Notification: 'Notification'
 } as const
 
@@ -409,7 +411,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "revokedRefreshToken" | "patient" | "doctor" | "doctorAvailability" | "blockedDate" | "appointment" | "consultationNote" | "prescription" | "notification"
+    modelProps: "user" | "revokedRefreshToken" | "patient" | "doctor" | "doctorAvailability" | "blockedDate" | "appointment" | "consultationNote" | "prescription" | "recommendation" | "doctorReview" | "notification"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1079,6 +1081,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Recommendation: {
+      payload: Prisma.$RecommendationPayload<ExtArgs>
+      fields: Prisma.RecommendationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RecommendationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RecommendationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendationPayload>
+        }
+        findFirst: {
+          args: Prisma.RecommendationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RecommendationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendationPayload>
+        }
+        findMany: {
+          args: Prisma.RecommendationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendationPayload>[]
+        }
+        create: {
+          args: Prisma.RecommendationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendationPayload>
+        }
+        createMany: {
+          args: Prisma.RecommendationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RecommendationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendationPayload>[]
+        }
+        delete: {
+          args: Prisma.RecommendationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendationPayload>
+        }
+        update: {
+          args: Prisma.RecommendationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendationPayload>
+        }
+        deleteMany: {
+          args: Prisma.RecommendationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RecommendationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RecommendationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendationPayload>[]
+        }
+        upsert: {
+          args: Prisma.RecommendationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecommendationPayload>
+        }
+        aggregate: {
+          args: Prisma.RecommendationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRecommendation>
+        }
+        groupBy: {
+          args: Prisma.RecommendationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RecommendationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RecommendationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RecommendationCountAggregateOutputType> | number
+        }
+      }
+    }
+    DoctorReview: {
+      payload: Prisma.$DoctorReviewPayload<ExtArgs>
+      fields: Prisma.DoctorReviewFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DoctorReviewFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DoctorReviewPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DoctorReviewFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DoctorReviewPayload>
+        }
+        findFirst: {
+          args: Prisma.DoctorReviewFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DoctorReviewPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DoctorReviewFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DoctorReviewPayload>
+        }
+        findMany: {
+          args: Prisma.DoctorReviewFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DoctorReviewPayload>[]
+        }
+        create: {
+          args: Prisma.DoctorReviewCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DoctorReviewPayload>
+        }
+        createMany: {
+          args: Prisma.DoctorReviewCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DoctorReviewCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DoctorReviewPayload>[]
+        }
+        delete: {
+          args: Prisma.DoctorReviewDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DoctorReviewPayload>
+        }
+        update: {
+          args: Prisma.DoctorReviewUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DoctorReviewPayload>
+        }
+        deleteMany: {
+          args: Prisma.DoctorReviewDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DoctorReviewUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DoctorReviewUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DoctorReviewPayload>[]
+        }
+        upsert: {
+          args: Prisma.DoctorReviewUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DoctorReviewPayload>
+        }
+        aggregate: {
+          args: Prisma.DoctorReviewAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDoctorReview>
+        }
+        groupBy: {
+          args: Prisma.DoctorReviewGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DoctorReviewGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DoctorReviewCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DoctorReviewCountAggregateOutputType> | number
+        }
+      }
+    }
     Notification: {
       payload: Prisma.$NotificationPayload<ExtArgs>
       fields: Prisma.NotificationFieldRefs
@@ -1314,6 +1464,33 @@ export const PrescriptionScalarFieldEnum = {
 export type PrescriptionScalarFieldEnum = (typeof PrescriptionScalarFieldEnum)[keyof typeof PrescriptionScalarFieldEnum]
 
 
+export const RecommendationScalarFieldEnum = {
+  id: 'id',
+  patientId: 'patientId',
+  source: 'source',
+  input: 'input',
+  specialization: 'specialization',
+  explanation: 'explanation',
+  doctorIds: 'doctorIds',
+  createdAt: 'createdAt'
+} as const
+
+export type RecommendationScalarFieldEnum = (typeof RecommendationScalarFieldEnum)[keyof typeof RecommendationScalarFieldEnum]
+
+
+export const DoctorReviewScalarFieldEnum = {
+  id: 'id',
+  appointmentId: 'appointmentId',
+  patientId: 'patientId',
+  doctorId: 'doctorId',
+  rating: 'rating',
+  comment: 'comment',
+  createdAt: 'createdAt'
+} as const
+
+export type DoctorReviewScalarFieldEnum = (typeof DoctorReviewScalarFieldEnum)[keyof typeof DoctorReviewScalarFieldEnum]
+
+
 export const NotificationScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -1450,6 +1627,20 @@ export type ListEnumAppointmentStatusFieldRefInput<$PrismaModel> = FieldRefInput
 
 
 /**
+ * Reference to a field of type 'RecommendationSource'
+ */
+export type EnumRecommendationSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RecommendationSource'>
+    
+
+
+/**
+ * Reference to a field of type 'RecommendationSource[]'
+ */
+export type ListEnumRecommendationSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RecommendationSource[]'>
+    
+
+
+/**
  * Reference to a field of type 'NotificationType'
  */
 export type EnumNotificationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NotificationType'>
@@ -1581,6 +1772,8 @@ export type GlobalOmitConfig = {
   appointment?: Prisma.AppointmentOmit
   consultationNote?: Prisma.ConsultationNoteOmit
   prescription?: Prisma.PrescriptionOmit
+  recommendation?: Prisma.RecommendationOmit
+  doctorReview?: Prisma.DoctorReviewOmit
   notification?: Prisma.NotificationOmit
 }
 

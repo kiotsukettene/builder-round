@@ -60,6 +60,8 @@ export const ModelName = {
   Appointment: 'Appointment',
   ConsultationNote: 'ConsultationNote',
   Prescription: 'Prescription',
+  Recommendation: 'Recommendation',
+  DoctorReview: 'DoctorReview',
   Notification: 'Notification'
 } as const
 
@@ -199,6 +201,33 @@ export const PrescriptionScalarFieldEnum = {
 } as const
 
 export type PrescriptionScalarFieldEnum = (typeof PrescriptionScalarFieldEnum)[keyof typeof PrescriptionScalarFieldEnum]
+
+
+export const RecommendationScalarFieldEnum = {
+  id: 'id',
+  patientId: 'patientId',
+  source: 'source',
+  input: 'input',
+  specialization: 'specialization',
+  explanation: 'explanation',
+  doctorIds: 'doctorIds',
+  createdAt: 'createdAt'
+} as const
+
+export type RecommendationScalarFieldEnum = (typeof RecommendationScalarFieldEnum)[keyof typeof RecommendationScalarFieldEnum]
+
+
+export const DoctorReviewScalarFieldEnum = {
+  id: 'id',
+  appointmentId: 'appointmentId',
+  patientId: 'patientId',
+  doctorId: 'doctorId',
+  rating: 'rating',
+  comment: 'comment',
+  createdAt: 'createdAt'
+} as const
+
+export type DoctorReviewScalarFieldEnum = (typeof DoctorReviewScalarFieldEnum)[keyof typeof DoctorReviewScalarFieldEnum]
 
 
 export const NotificationScalarFieldEnum = {
