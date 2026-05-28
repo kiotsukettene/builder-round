@@ -17,7 +17,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { RescheduleDialog } from "@/features/patients/components/RescheduleDialog"
-import { MedicalRecordDialog } from "@/features/patients/components/MedicalRecordDialog"
 import { useCancelAppointment } from "@/hooks/use-appointments"
 import type { Appointment } from "@/types/appointment"
 import {
@@ -43,7 +42,6 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
   const navigate = useNavigate()
   const { mutate: cancelAppointment, isPending: isCancelling } = useCancelAppointment()
   const [rescheduleOpen, setRescheduleOpen] = useState(false)
-  const [recordsOpen, setRecordsOpen] = useState(false)
 
   const isPatient = role === "PATIENT"
   const counterpart = isPatient ? appointment.doctor : appointment.patient
@@ -65,6 +63,9 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
     CONSULTATION_DURATION_MIN,
   )
   const isCompleted = appointment.status === "COMPLETED"
+  const medicalRecordsPath = isPatient
+    ? `/medical-records?appointment=${appointment.id}`
+    : `/doctor/medical-records?appointment=${appointment.id}`
 
   const scheduledDate = new Date(appointment.scheduledAt)
   const dateStr = scheduledDate.toLocaleDateString("en-US", {
@@ -169,7 +170,7 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
                   variant="outline"
                   size="sm"
                   className="gap-1.5"
-                  onClick={() => setRecordsOpen(true)}
+                  onClick={() => navigate(medicalRecordsPath)}
                 >
                   <FileText className="size-3.5" />
                   View Records
@@ -231,15 +232,6 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
           open={rescheduleOpen}
           onOpenChange={setRescheduleOpen}
           appointment={appointment}
-        />
-      )}
-
-      {isCompleted && (
-        <MedicalRecordDialog
-          open={recordsOpen}
-          onOpenChange={setRecordsOpen}
-          appointmentId={appointment.id}
-          counterpartName={counterpartName}
         />
       )}
     </>
