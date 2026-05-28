@@ -1,0 +1,9 @@
+$kind: http-request
+name: Get Medical Record
+method: GET
+url: "{{baseUrl}}/api/v1/consultations/cmpo76h010009dkglo0g8mw7d/medical-record"
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"
+order: 9000
