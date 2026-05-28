@@ -35,9 +35,9 @@ export function formatSlotTime(time: string): string {
   return `${hour}:${String(m).padStart(2, "0")} ${ampm}`
 }
 
-const JOIN_WINDOW_BEFORE_MIN = 30
+const JOIN_WINDOW_BEFORE_MIN = 10
 
-/** Whether the current time is within the joinable window (30 min before through session end). */
+/** Whether the current time is within the joinable window (10 min before through session end). */
 export function isWithinJoinWindow(
   scheduledAt: string,
   durationMin = 30,
