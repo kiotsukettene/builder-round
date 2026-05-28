@@ -4,6 +4,11 @@ import * as appointmentRepository from "./appointment.repository.js";
 import * as patientRepository from "../patients/patient.repository.js";
 import * as doctorRepository from "../doctors/doctor.repository.js";
 import { toAppointmentDto } from "./appointment.utils.js";
+import {
+  addMinutesToTimeStr,
+  formatAppointmentDateTime,
+  getWallClockParts,
+} from "../../utils/schedule-datetime.js";
 import type {
   BookAppointmentInput,
   ListAppointmentsQueryInput,
@@ -24,20 +29,12 @@ function isSlotWithinAvailability(
   durationMinutes: number,
   availabilities: { dayOfWeek: number; startTime: string; endTime: string }[],
 ): boolean {
-  const dayOfWeek = scheduledAt.getUTCDay();
-  const startH = scheduledAt.getUTCHours().toString().padStart(2, "0");
-  const startM = scheduledAt.getUTCMinutes().toString().padStart(2, "0");
-  const startStr = `${startH}:${startM}`;
-
-  const slotEndMs = scheduledAt.getTime() + durationMinutes * 60 * 1000;
-  const slotEnd = new Date(slotEndMs);
-  const endH = slotEnd.getUTCHours().toString().padStart(2, "0");
-  const endM = slotEnd.getUTCMinutes().toString().padStart(2, "0");
-  const endStr = `${endH}:${endM}`;
+  const wall = getWallClockParts(scheduledAt);
+  const endStr = addMinutesToTimeStr(wall.timeStr, durationMinutes);
 
   return availabilities.some((window) => {
-    if (window.dayOfWeek !== dayOfWeek) return false;
-    return startStr >= window.startTime && endStr <= window.endTime;
+    if (window.dayOfWeek !== wall.dayOfWeek) return false;
+    return wall.timeStr >= window.startTime && endStr <= window.endTime;
   });
 }
 
@@ -113,7 +110,7 @@ export async function bookAppointment(
     userId: appointment.doctor.user.id,
     type: "APPOINTMENT_BOOKED",
     title: "New Appointment Booked",
-    message: `${patient.firstName} ${patient.lastName} has booked an appointment on ${scheduledAt.toUTCString()}.`,
+    message: `${patient.firstName} ${patient.lastName} has booked an appointment on ${formatAppointmentDateTime(scheduledAt)}.`,
     relatedId: appointment.id,
   });
 
@@ -162,7 +159,7 @@ export async function cancelAppointment(
     userId: notifyUserId,
     type: "APPOINTMENT_CANCELLED",
     title: "Appointment Cancelled",
-    message: `Your appointment on ${appointment.scheduledAt.toUTCString()} has been cancelled by ${notifyName}.`,
+    message: `Your appointment on ${formatAppointmentDateTime(appointment.scheduledAt)} has been cancelled by ${notifyName}.`,
     relatedId: appointment.id,
   });
 
@@ -234,7 +231,7 @@ export async function rescheduleAppointment(
     userId: appointment.doctor.user.id,
     type: "SCHEDULE_UPDATED",
     title: "Appointment Rescheduled",
-    message: `${appointment.patient.firstName} ${appointment.patient.lastName} has rescheduled their appointment to ${scheduledAt.toUTCString()}.`,
+    message: `${appointment.patient.firstName} ${appointment.patient.lastName} has rescheduled their appointment to ${formatAppointmentDateTime(scheduledAt)}.`,
     relatedId: appointment.id,
   });
 
