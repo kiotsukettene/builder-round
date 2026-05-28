@@ -5,6 +5,7 @@ import {
   requireVerifiedEmail,
 } from "../../middleware/auth.middleware.js";
 import * as consultationController from "./consultation.controller.js";
+import * as ratingController from "../ratings/rating.controller.js";
 
 const router = Router();
 
@@ -24,6 +25,14 @@ router.patch(
   authorize("DOCTOR"),
   requireVerifiedEmail,
   consultationController.endConsultation,
+);
+
+router.post(
+  "/:appointmentId/review",
+  authenticate,
+  authorize("PATIENT"),
+  requireVerifiedEmail,
+  ratingController.submitReview,
 );
 
 // ── Notes ──

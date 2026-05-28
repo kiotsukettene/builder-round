@@ -6,6 +6,7 @@ import {
 } from "../../middleware/auth.middleware.js";
 import { uploadProfilePicture as uploadProfilePictureMiddleware } from "../../middleware/upload.middleware.js";
 import * as doctorController from "./doctor.controller.js";
+import * as ratingController from "../ratings/rating.controller.js";
 
 const router = Router();
 
@@ -56,6 +57,14 @@ router.get(
   authorize("PATIENT"),
   requireVerifiedEmail,
   doctorController.getAvailableSlots,
+);
+
+router.get(
+  "/:id/reviews",
+  authenticate,
+  authorize("PATIENT"),
+  requireVerifiedEmail,
+  ratingController.listDoctorReviews,
 );
 
 router.get(

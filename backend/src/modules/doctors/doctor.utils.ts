@@ -16,6 +16,11 @@ type DoctorWithAvailabilities = PublicDoctorFields & {
   availabilities: DoctorAvailability[];
 };
 
+export interface DoctorRatingStats {
+  averageRating: number | null;
+  totalReviews: number;
+}
+
 export function isDoctorProfileComplete(
   doctor: Pick<Doctor, "profileCompletedAt">,
 ): boolean {
@@ -42,7 +47,10 @@ export function formatUserWithDoctorDto<T extends { doctor?: Doctor | null }>(
   };
 }
 
-export function toPublicDoctorDto(doctor: PublicDoctorFields) {
+export function toPublicDoctorDto(
+  doctor: PublicDoctorFields,
+  ratingStats?: DoctorRatingStats,
+) {
   return {
     id: doctor.id,
     firstName: doctor.firstName,
@@ -52,14 +60,17 @@ export function toPublicDoctorDto(doctor: PublicDoctorFields) {
     fee: doctor.fee,
     consultationDuration: doctor.consultationDuration,
     profilePicture: doctor.profilePicture,
+    averageRating: ratingStats?.averageRating ?? null,
+    totalReviews: ratingStats?.totalReviews ?? 0,
   };
 }
 
 export function toPublicDoctorWithAvailabilityDto(
   doctor: DoctorWithAvailabilities,
+  ratingStats?: DoctorRatingStats,
 ) {
   return {
-    ...toPublicDoctorDto(doctor),
+    ...toPublicDoctorDto(doctor, ratingStats),
     availabilities: doctor.availabilities.map(
       ({ id, dayOfWeek, startTime, endTime }) => ({
         id,
