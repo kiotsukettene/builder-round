@@ -2,6 +2,7 @@ import { createServer } from "http";
 import app from "./app.js";
 import { initializeSocket } from "./lib/socket.js";
 import prisma from "./lib/prisma.js";
+import { startAppointmentReminderJob } from "./jobs/appointment-reminder.job.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -20,6 +21,8 @@ setInterval(async () => {
     // Ignore — transient failures won't crash the server
   }
 }, DB_KEEPALIVE_INTERVAL_MS);
+
+startAppointmentReminderJob();
 
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

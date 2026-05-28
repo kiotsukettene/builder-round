@@ -23,6 +23,7 @@ enum AppointmentStatus {
 
 enum NotificationType {
   APPOINTMENT_BOOKED
+  APPOINTMENT_CONFIRMED
   APPOINTMENT_CANCELLED
   APPOINTMENT_REMINDER
   SCHEDULE_UPDATED
@@ -129,10 +130,13 @@ model Appointment {
   patientId   String
   doctorId    String
   scheduledAt DateTime
-  status      AppointmentStatus @default(PENDING)
-  meetingUrl  String?
-  notes       String?
-  createdAt   DateTime          @default(now())
+  status              AppointmentStatus @default(PENDING)
+  meetingUrl          String?
+  notes               String?
+  cancellationReason  String?
+  reminderOneHourSentAt DateTime?
+  reminderTenMinSentAt  DateTime?
+  createdAt           DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 
   patient          Patient           @relation(fields: [patientId], references: [id])
