@@ -22,6 +22,8 @@ const envSchema = z.object({
   CLOUDINARY_API_KEY: z.string().min(1),
   CLOUDINARY_API_SECRET: z.string().min(1),
   GEMINI_API_KEY: z.string().min(1),
+  ZEGOCLOUD_APP_ID: z.coerce.number().int().positive(),
+  ZEGOCLOUD_SERVER_SECRET: z.string().min(1),
 });
 
 const parsed = envSchema.parse(process.env);
