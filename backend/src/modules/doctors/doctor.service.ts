@@ -6,6 +6,10 @@ import {
 } from "../../lib/cloudinary.js";
 import * as doctorRepository from "./doctor.repository.js";
 import {
+  getDayOfWeekFromDateStr,
+  getWallClockParts,
+} from "../../utils/schedule-datetime.js";
+import {
   isDoctorProfileComplete,
   toDoctorDto,
   toPublicDoctorDto,
@@ -147,16 +151,11 @@ export async function getAvailableSlots(doctorId: string, dateStr: string) {
     throw new AppError("Doctor not found", 404);
   }
 
-  const date = new Date(dateStr);
-  const dayOfWeek = date.getUTCDay();
+  const dayOfWeek = getDayOfWeekFromDateStr(dateStr);
 
   const isBlocked = doctor.blockedDates.some((b) => {
-    const blocked = new Date(b.date);
-    return (
-      blocked.getUTCFullYear() === date.getUTCFullYear() &&
-      blocked.getUTCMonth() === date.getUTCMonth() &&
-      blocked.getUTCDate() === date.getUTCDate()
-    );
+    const blockedDateStr = getWallClockParts(new Date(b.date)).dateStr;
+    return blockedDateStr === dateStr;
   });
 
   if (isBlocked) {
@@ -183,15 +182,11 @@ export async function getAvailableSlots(doctorId: string, dateStr: string) {
 
   const bookedAppointments = await doctorRepository.findAppointmentsOnDate(
     doctor.id,
-    date,
+    dateStr,
   );
 
   const bookedTimes = new Set(
-    bookedAppointments.map((a) => {
-      const h = a.scheduledAt.getUTCHours().toString().padStart(2, "0");
-      const m = a.scheduledAt.getUTCMinutes().toString().padStart(2, "0");
-      return `${h}:${m}`;
-    }),
+    bookedAppointments.map((a) => getWallClockParts(a.scheduledAt).timeStr),
   );
 
   const duration = doctor.consultationDuration;
