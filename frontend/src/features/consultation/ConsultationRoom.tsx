@@ -45,13 +45,14 @@ export function ConsultationRoom() {
     if (!credentials || !videoContainerRef.current || !user) return;
 
     const { roomId, token, appId } = credentials;
-    const userName = `${user.firstName} ${user.lastName}`;
+    const profile = user.role === "PATIENT" ? user.patient : user.doctor;
+    const userName = profile ? `${profile.firstName} ${profile.lastName}` : user.email;
 
     const kitToken = ZegoUIKitPrebuilt.generateKitTokenForProduction(
       appId,
       token,
       roomId,
-      user.userId,
+      user.id,
       userName,
     );
 
