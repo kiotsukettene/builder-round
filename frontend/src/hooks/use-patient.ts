@@ -16,8 +16,8 @@ export function useCompletePatientProfile() {
     onSuccess: (res) => {
       updateProfile(res.data)
       queryClient.invalidateQueries({ queryKey: ["me"] })
-      toast.success("Profile completed successfully!")
-      navigate("/profile")
+      toast.success("Profile completed! Here's your AI doctor recommendation.")
+      navigate("/recommendations")
     },
     onError: (error: { response?: { data?: { message?: string } } }) => {
       const message = error?.response?.data?.message ?? "Failed to complete profile."
