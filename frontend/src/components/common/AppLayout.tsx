@@ -131,7 +131,6 @@ export function AppLayout({ children }: AppLayoutProps) {
                     <AvatarImage src={profile?.profilePicture ?? undefined} alt={displayName} />
                     <AvatarFallback className="text-xs">{initials}</AvatarFallback>
                   </Avatar>
-                  <span className="hidden text-sm font-medium sm:inline">Profile</span>
                   <Menu className="size-4 sm:hidden" />
                 </Button>
               </DropdownMenuTrigger>
