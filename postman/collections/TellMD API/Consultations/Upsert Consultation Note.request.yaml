@@ -1,0 +1,17 @@
+$kind: http-request
+name: Upsert Consultation Note
+method: POST
+url: "{{baseUrl}}/api/v1/consultations/cmpo76h010009dkglo0g8mw7d/notes"
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"
+body:
+  type: json
+  content: |-
+    {
+      "diagnosis": "Upper respiratory tract infection",
+      "notes": "Patient presents with fever, sore throat, and mild cough for 3 days.",
+      "recommendations": "Rest, stay hydrated, follow-up in 5 days if no improvement."
+    }
+order: 3000

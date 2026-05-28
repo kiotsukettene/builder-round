@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/v1/patients/me/profile-picture"
+method: POST
+body:
+  type: formdata
+  content:
+    - type: file
+      key: profilePicture
+      src: ""
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"
+order: 1000

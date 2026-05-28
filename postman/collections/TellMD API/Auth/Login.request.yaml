@@ -1,0 +1,19 @@
+$kind: http-request
+name: Login
+url: "{{baseUrl}}/api/v1/auth/login"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+      "email": "loretorussellkelvinanthony@gmail.com",
+      "password": "password123"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      const res = pm.response.json();
+      if (res.data?.accessToken) pm.collectionVariables.set("accessToken", res.data.accessToken);
+      if (res.data?.refreshToken) pm.collectionVariables.set("refreshToken", res.data.refreshToken);
+    language: text/javascript
+order: 5000

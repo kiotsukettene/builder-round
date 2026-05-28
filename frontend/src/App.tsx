@@ -1,121 +1,191 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { lazy, Suspense } from "react"
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { Toaster } from "@/components/ui/sonner"
+import { ProtectedRoute } from "@/components/common/ProtectedRoute"
+
+const ConsultationRoom = lazy(() =>
+  import("@/features/consultation/ConsultationRoom").then((m) => ({ default: m.ConsultationRoom }))
+)
+const LoginPage = lazy(() =>
+  import("@/features/auth/LoginPage").then((m) => ({ default: m.LoginPage }))
+)
+const RegisterPage = lazy(() =>
+  import("@/features/auth/RegisterPage").then((m) => ({ default: m.RegisterPage }))
+)
+const VerifyEmailPage = lazy(() =>
+  import("@/features/auth/VerifyEmailPage").then((m) => ({ default: m.VerifyEmailPage }))
+)
+const EmailVerificationPending = lazy(() =>
+  import("@/features/auth/EmailVerificationPending").then((m) => ({
+    default: m.EmailVerificationPending,
+  }))
+)
+const PatientCompleteProfilePage = lazy(() =>
+  import("@/features/patients/CompleteProfilePage").then((m) => ({
+    default: m.CompleteProfilePage,
+  }))
+)
+const PatientProfilePage = lazy(() =>
+  import("@/features/patients/PatientProfilePage").then((m) => ({
+    default: m.PatientProfilePage,
+  }))
+)
+const DoctorCompleteProfilePage = lazy(() =>
+  import("@/features/doctors/CompleteProfilePage").then((m) => ({
+    default: m.DoctorCompleteProfilePage,
+  }))
+)
+const DoctorProfilePage = lazy(() =>
+  import("@/features/doctors/DoctorProfilePage").then((m) => ({
+    default: m.DoctorProfilePage,
+  }))
+)
+const RecommendationPage = lazy(() =>
+  import("@/features/patients/RecommendationPage").then((m) => ({
+    default: m.RecommendationPage,
+  }))
+)
+const DoctorDiscoveryPage = lazy(() =>
+  import("@/features/patients/DoctorDiscoveryPage").then((m) => ({
+    default: m.DoctorDiscoveryPage,
+  }))
+)
+const DoctorDetailPage = lazy(() =>
+  import("@/features/patients/DoctorDetailPage").then((m) => ({
+    default: m.DoctorDetailPage,
+  }))
+)
+const PatientAppointmentsPage = lazy(() =>
+  import("@/features/patients/AppointmentsPage").then((m) => ({
+    default: m.AppointmentsPage,
+  }))
+)
+const PatientMedicalRecordsPage = lazy(() =>
+  import("@/features/patients/MedicalRecordsPage").then((m) => ({
+    default: m.MedicalRecordsPage,
+  }))
+)
+const DoctorSchedulePage = lazy(() =>
+  import("@/features/doctors/ScheduleManagementPage").then((m) => ({
+    default: m.ScheduleManagementPage,
+  }))
+)
+const DoctorAppointmentsPage = lazy(() =>
+  import("@/features/doctors/AppointmentsPage").then((m) => ({
+    default: m.DoctorAppointmentsPage,
+  }))
+)
+const DoctorMedicalRecordsPage = lazy(() =>
+  import("@/features/doctors/MedicalRecordsPage").then((m) => ({
+    default: m.DoctorMedicalRecordsPage,
+  }))
+)
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60,
+      retry: 1,
+    },
+  },
+})
+
+function PageLoader() {
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="size-8 animate-spin rounded-full border-4 border-muted border-t-foreground" />
+    </div>
+  )
+}
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            {/* Public routes — redirect if already authenticated */}
+            <Route element={<ProtectedRoute redirectIfAuthenticated />}>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+            </Route>
 
-      <div className="ticks"></div>
+            {/* Email verification (always accessible) */}
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
+            <Route path="/verify-email-pending" element={<EmailVerificationPending />} />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+            {/* Patient: complete profile — auth + patient role + verified, profile NOT complete */}
+            <Route
+              element={
+                <ProtectedRoute
+                  requiredRole="PATIENT"
+                  requireVerified
+                />
+              }
+            >
+              <Route path="/complete-profile" element={<PatientCompleteProfilePage />} />
+            </Route>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+            {/* Doctor: complete profile — auth + doctor role + verified, profile NOT complete */}
+            <Route
+              element={
+                <ProtectedRoute
+                  requiredRole="DOCTOR"
+                  requireVerified
+                />
+              }
+            >
+              <Route path="/doctor/complete-profile" element={<DoctorCompleteProfilePage />} />
+            </Route>
+
+            {/* Patient protected routes — needs complete profile */}
+            <Route
+              element={
+                <ProtectedRoute
+                  requiredRole="PATIENT"
+                  requireVerified
+                  requireCompleteProfile
+                />
+              }
+            >
+              <Route path="/profile" element={<PatientProfilePage />} />
+              <Route path="/recommendations" element={<RecommendationPage />} />
+              <Route path="/doctors" element={<DoctorDiscoveryPage />} />
+              <Route path="/doctors/:id" element={<DoctorDetailPage />} />
+              <Route path="/appointments" element={<PatientAppointmentsPage />} />
+              <Route path="/medical-records" element={<PatientMedicalRecordsPage />} />
+            </Route>
+
+            {/* Doctor protected routes — needs complete profile */}
+            <Route
+              element={
+                <ProtectedRoute
+                  requiredRole="DOCTOR"
+                  requireVerified
+                  requireCompleteProfile
+                />
+              }
+            >
+              <Route path="/doctor/profile" element={<DoctorProfilePage />} />
+              <Route path="/doctor/schedule" element={<DoctorSchedulePage />} />
+              <Route path="/doctor/appointments" element={<DoctorAppointmentsPage />} />
+              <Route path="/doctor/medical-records" element={<DoctorMedicalRecordsPage />} />
+            </Route>
+
+            {/* Consultation room — requires auth only */}
+            <Route element={<ProtectedRoute requireVerified />}>
+              <Route path="/consultation/:appointmentId" element={<ConsultationRoom />} />
+            </Route>
+
+            {/* Catch-all: redirect to login */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </Suspense>
+
+        <Toaster richColors closeButton />
+      </BrowserRouter>
+    </QueryClientProvider>
   )
 }
 

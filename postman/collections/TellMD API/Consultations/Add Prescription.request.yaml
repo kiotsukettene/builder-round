@@ -1,0 +1,19 @@
+$kind: http-request
+name: Add Prescription
+method: POST
+url: "{{baseUrl}}/api/v1/consultations/cmpo76h010009dkglo0g8mw7d/prescriptions"
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"
+body:
+  type: json
+  content: |-
+    {
+      "medication": "Amoxicillin",
+      "dosage": "500mg",
+      "frequency": "Three times daily",
+      "duration": "7 days",
+      "instructions": "Take with food. Complete the full course."
+    }
+order: 5000

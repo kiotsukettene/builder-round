@@ -1,0 +1,15 @@
+$kind: http-request
+name: Cancel Appointment
+method: PATCH
+url: "{{baseUrl}}/api/v1/appointments/APPOINTMENT_ID_HERE/cancel"
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"
+body:
+  type: json
+  content: |-
+    {
+      "cancellationReason": "Patient requested to cancel due to scheduling conflict."
+    }
+order: 4000

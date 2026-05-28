@@ -1,0 +1,9 @@
+$kind: http-request
+name: Confirm Appointment
+method: PATCH
+url: "{{baseUrl}}/api/v1/appointments/APPOINTMENT_ID_HERE/confirm"
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"
+order: 3500
