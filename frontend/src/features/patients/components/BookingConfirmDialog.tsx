@@ -1,5 +1,6 @@
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { CalendarDays, Clock, DollarSign, User } from "lucide-react"
+import { CalendarDays, Clock, DollarSign } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -9,9 +10,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
 import { useBookAppointment } from "@/hooks/use-appointments"
 import type { PublicDoctorWithAvailability } from "@/types/doctor"
 import { buildScheduledAtIso, formatSlotTime } from "@/utils/appointment-datetime"
@@ -36,109 +36,94 @@ export function BookingConfirmDialog({
   consultationFee,
 }: BookingConfirmDialogProps) {
   const navigate = useNavigate()
+  const [note, setNote] = useState("")
   const { mutate: bookAppointment, isPending } = useBookAppointment()
 
-  const { dateStr, timeStr } = {
-    dateStr: selectedDate.toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    }),
-    timeStr: formatSlotTime(selectedSlot),
+  const dateLabel = selectedDate.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  })
+  const timeLabel = formatSlotTime(selectedSlot)
+
+  function handleClose() {
+    onOpenChange(false)
+    setNote("")
   }
 
   function handleConfirm() {
+    const trimmedNote = note.trim()
     bookAppointment(
-      { doctorId: doctor.id, scheduledAt: buildScheduledAtIso(selectedDate, selectedSlot) },
+      {
+        doctorId: doctor.id,
+        scheduledAt: buildScheduledAtIso(selectedDate, selectedSlot),
+        ...(trimmedNote && { notes: trimmedNote }),
+      },
       {
         onSuccess: () => {
-          onOpenChange(false)
+          handleClose()
           navigate("/appointments")
         },
-      }
+      },
     )
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(next) => !next && handleClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Confirm Appointment</DialogTitle>
+          <DialogTitle>Confirm consultation booking</DialogTitle>
           <DialogDescription>
-            Review the details below before confirming your booking.
+            Review your appointment details before confirming.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-2">
-          {/* Doctor info */}
-          <div className="flex items-center gap-3">
-            <Avatar className="size-12 shrink-0">
-              <AvatarImage
-                src={doctor.profilePicture ?? undefined}
-                alt={`Dr. ${doctor.firstName} ${doctor.lastName}`}
-              />
-              <AvatarFallback>
-                <User className="size-5" />
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="font-semibold">
-                Dr. {doctor.firstName} {doctor.lastName}
-              </p>
-              <Badge variant="outline" className="mt-0.5 text-xs">
-                {doctor.specialization}
-              </Badge>
+        <div className="space-y-3 rounded-lg border bg-muted/30 p-4 text-sm">
+          <p className="font-medium">
+            Dr. {doctor.firstName} {doctor.lastName}
+          </p>
+          <div className="space-y-1.5 text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <CalendarDays className="size-4 shrink-0" />
+              <span>{dateLabel}</span>
             </div>
-          </div>
-
-          <Separator />
-
-          {/* Booking details */}
-          <div className="space-y-3">
-            <div className="flex items-start gap-3">
-              <CalendarDays className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">{dateStr}</p>
-                <p className="text-sm text-muted-foreground">at {timeStr}</p>
-              </div>
+            <div className="flex items-center gap-2">
+              <Clock className="size-4 shrink-0" />
+              <span>
+                {timeLabel} · {consultationDuration} min
+              </span>
             </div>
-
-            <div className="flex items-center gap-3">
-              <Clock className="size-4 shrink-0 text-muted-foreground" />
-              <p className="text-sm">
-                <span className="font-medium">{consultationDuration} min</span>
-                <span className="text-muted-foreground"> consultation</span>
-              </p>
-            </div>
-
             {consultationFee !== null && (
-              <div className="flex items-center gap-3">
-                <DollarSign className="size-4 shrink-0 text-muted-foreground" />
-                <p className="text-sm">
-                  <span className="font-medium">${consultationFee}</span>
-                  <span className="text-muted-foreground"> consultation fee</span>
-                </p>
+              <div className="flex items-center gap-2">
+                <DollarSign className="size-4 shrink-0" />
+                <span>${consultationFee} consultation fee</span>
               </div>
             )}
           </div>
-
-          <div className="rounded-md bg-muted/50 p-3 text-xs text-muted-foreground">
-            Your appointment will be marked as <strong>Pending</strong> until the doctor confirms
-            it. You will receive a notification once confirmed.
-          </div>
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-0">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isPending}
-          >
-            Cancel
+        <div className="space-y-1.5">
+          <Label htmlFor="booking-note" className="text-sm">
+            Note for doctor <span className="text-muted-foreground">(optional)</span>
+          </Label>
+          <Textarea
+            id="booking-note"
+            placeholder="Share symptoms, concerns, or anything the doctor should know..."
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            rows={3}
+            maxLength={1000}
+            className="resize-none text-sm"
+          />
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={handleClose} disabled={isPending}>
+            Back
           </Button>
           <Button onClick={handleConfirm} disabled={isPending}>
-            {isPending ? "Booking..." : "Confirm Booking"}
+            Confirm Booking
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { User, LogOut, Menu, Stethoscope, Sparkles, CalendarDays, CalendarClock, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -13,15 +13,46 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuthStore } from "@/store/auth.store"
 import { useLogout } from "@/hooks/use-auth"
 import { NotificationBell } from "@/components/common/NotificationBell"
+import { cn } from "@/lib/utils"
 
 interface AppLayoutProps {
   children: React.ReactNode
+}
+
+function isNavActive(pathname: string, to: string): boolean {
+  return pathname === to || pathname.startsWith(`${to}/`)
+}
+
+const navLinkBase =
+  "hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm sm:flex"
+const navLinkInactive = "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+const navLinkActive = "bg-accent font-medium text-foreground"
+
+interface NavLinkItemProps {
+  to: string
+  pathname: string
+  icon: React.ReactNode
+  label: string
+}
+
+function NavLinkItem({ to, pathname, icon, label }: NavLinkItemProps) {
+  const active = isNavActive(pathname, to)
+  return (
+    <Link
+      to={to}
+      className={cn(navLinkBase, active ? navLinkActive : navLinkInactive)}
+    >
+      {icon}
+      {label}
+    </Link>
+  )
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
   const { user } = useAuthStore()
   const { mutate: logout, isPending } = useLogout()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
 
   const profile = user?.role === "PATIENT" ? user.patient : user?.doctor
   const displayName = profile
@@ -44,59 +75,52 @@ export function AppLayout({ children }: AppLayoutProps) {
           <nav className="flex items-center gap-1">
             {user?.role === "PATIENT" && (
               <>
-                <Link
+                <NavLinkItem
                   to="/recommendations"
-                  className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground sm:flex"
-                >
-                  <Sparkles className="size-3.5" />
-                  AI Match
-                </Link>
-                <Link
+                  pathname={pathname}
+                  icon={<Sparkles className="size-3.5" />}
+                  label="AI Match"
+                />
+                <NavLinkItem
                   to="/doctors"
-                  className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground sm:flex"
-                >
-                  <Stethoscope className="size-3.5" />
-                  Find Doctors
-                </Link>
-                <Link
+                  pathname={pathname}
+                  icon={<Stethoscope className="size-3.5" />}
+                  label="Find Doctors"
+                />
+                <NavLinkItem
                   to="/appointments"
-                  className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground sm:flex"
-                >
-                  <CalendarDays className="size-3.5" />
-                  Appointments
-                </Link>
-                <Link
+                  pathname={pathname}
+                  icon={<CalendarDays className="size-3.5" />}
+                  label="Appointments"
+                />
+                <NavLinkItem
                   to="/medical-records"
-                  className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground sm:flex"
-                >
-                  <FileText className="size-3.5" />
-                  Medical Records
-                </Link>
+                  pathname={pathname}
+                  icon={<FileText className="size-3.5" />}
+                  label="Medical Records"
+                />
               </>
             )}
             {user?.role === "DOCTOR" && (
               <>
-                <Link
+                <NavLinkItem
                   to="/doctor/schedule"
-                  className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground sm:flex"
-                >
-                  <CalendarClock className="size-3.5" />
-                  Schedule
-                </Link>
-                <Link
+                  pathname={pathname}
+                  icon={<CalendarClock className="size-3.5" />}
+                  label="Schedule"
+                />
+                <NavLinkItem
                   to="/doctor/appointments"
-                  className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground sm:flex"
-                >
-                  <CalendarDays className="size-3.5" />
-                  Appointments
-                </Link>
-                <Link
+                  pathname={pathname}
+                  icon={<CalendarDays className="size-3.5" />}
+                  label="Appointments"
+                />
+                <NavLinkItem
                   to="/doctor/medical-records"
-                  className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground sm:flex"
-                >
-                  <FileText className="size-3.5" />
-                  Medical Records
-                </Link>
+                  pathname={pathname}
+                  icon={<FileText className="size-3.5" />}
+                  label="Medical Records"
+                />
               </>
             )}
             <NotificationBell />
@@ -107,35 +131,47 @@ export function AppLayout({ children }: AppLayoutProps) {
                     <AvatarImage src={profile?.profilePicture ?? undefined} alt={displayName} />
                     <AvatarFallback className="text-xs">{initials}</AvatarFallback>
                   </Avatar>
-                  <span className="hidden text-sm font-medium sm:block">{displayName}</span>
+                  <span className="hidden text-sm font-medium sm:inline">Profile</span>
                   <Menu className="size-4 sm:hidden" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuLabel className="font-normal">
+                <DropdownMenuLabel className="font-normal sm:hidden">
                   <p className="text-sm font-medium">{displayName}</p>
                   <p className="text-xs text-muted-foreground">{user?.email}</p>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator />
+                <DropdownMenuSeparator className="sm:hidden" />
                 <DropdownMenuItem onClick={() => navigate(profilePath)}>
                   <User className="size-4" />
                   Profile
                 </DropdownMenuItem>
                 {user?.role === "PATIENT" && (
                   <>
-                    <DropdownMenuItem onClick={() => navigate("/recommendations")}>
+                    <DropdownMenuItem
+                      className="sm:hidden"
+                      onClick={() => navigate("/recommendations")}
+                    >
                       <Sparkles className="size-4" />
                       AI Match
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/doctors")}>
+                    <DropdownMenuItem
+                      className="sm:hidden"
+                      onClick={() => navigate("/doctors")}
+                    >
                       <Stethoscope className="size-4" />
                       Find Doctors
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/appointments")}>
+                    <DropdownMenuItem
+                      className="sm:hidden"
+                      onClick={() => navigate("/appointments")}
+                    >
                       <CalendarDays className="size-4" />
                       Appointments
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/medical-records")}>
+                    <DropdownMenuItem
+                      className="sm:hidden"
+                      onClick={() => navigate("/medical-records")}
+                    >
                       <FileText className="size-4" />
                       Medical Records
                     </DropdownMenuItem>
@@ -143,15 +179,24 @@ export function AppLayout({ children }: AppLayoutProps) {
                 )}
                 {user?.role === "DOCTOR" && (
                   <>
-                    <DropdownMenuItem onClick={() => navigate("/doctor/schedule")}>
+                    <DropdownMenuItem
+                      className="sm:hidden"
+                      onClick={() => navigate("/doctor/schedule")}
+                    >
                       <CalendarClock className="size-4" />
                       Schedule
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/doctor/appointments")}>
+                    <DropdownMenuItem
+                      className="sm:hidden"
+                      onClick={() => navigate("/doctor/appointments")}
+                    >
                       <CalendarDays className="size-4" />
                       Appointments
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/doctor/medical-records")}>
+                    <DropdownMenuItem
+                      className="sm:hidden"
+                      onClick={() => navigate("/doctor/medical-records")}
+                    >
                       <FileText className="size-4" />
                       Medical Records
                     </DropdownMenuItem>

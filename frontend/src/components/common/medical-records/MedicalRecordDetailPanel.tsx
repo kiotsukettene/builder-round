@@ -124,7 +124,10 @@ export function MedicalRecordDetailPanel({
                 {isLoadingAppointment ? (
                   <PatientDetailsSkeleton />
                 ) : appointment?.patient ? (
-                  <PatientDetails patient={appointment.patient} />
+                  <PatientDetails
+                    patient={appointment.patient}
+                    appointmentNotes={appointment.notes}
+                  />
                 ) : null}
               </div>
             </>

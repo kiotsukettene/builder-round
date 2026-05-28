@@ -1,28 +1,24 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { CalendarDays, Clock, User, Video, FileText, RotateCcw, X } from "lucide-react"
+import { CalendarDays, Clock, User, FileText, RotateCcw, X } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { JoinSessionButton } from "@/components/common/JoinSessionButton"
 import { RescheduleDialog } from "@/features/patients/components/RescheduleDialog"
 import { useCancelAppointment } from "@/hooks/use-appointments"
 import type { Appointment } from "@/types/appointment"
-import {
-  getRelativeTimeLabel,
-  isWithinJoinWindow,
-} from "@/utils/appointment-datetime"
 
 const STATUS_CONFIG = {
   PENDING: { label: "Pending", className: "bg-amber-100 text-amber-700 border-amber-200" },
@@ -42,6 +38,8 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
   const navigate = useNavigate()
   const { mutate: cancelAppointment, isPending: isCancelling } = useCancelAppointment()
   const [rescheduleOpen, setRescheduleOpen] = useState(false)
+  const [cancelOpen, setCancelOpen] = useState(false)
+  const [cancellationReason, setCancellationReason] = useState("")
 
   const isPatient = role === "PATIENT"
   const counterpart = isPatient ? appointment.doctor : appointment.patient
@@ -53,15 +51,7 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
   const statusConfig = STATUS_CONFIG[appointment.status]
   const canCancel = appointment.status === "PENDING" || appointment.status === "CONFIRMED"
   const canReschedule = isPatient && (appointment.status === "PENDING" || appointment.status === "CONFIRMED")
-  const isActive = appointment.status === "PENDING" || appointment.status === "CONFIRMED"
-  const isWithinWindow = isWithinJoinWindow(
-    appointment.scheduledAt,
-    CONSULTATION_DURATION_MIN,
-  )
-  const timeLabel = getRelativeTimeLabel(
-    appointment.scheduledAt,
-    CONSULTATION_DURATION_MIN,
-  )
+  const isConfirmed = appointment.status === "CONFIRMED"
   const isCompleted = appointment.status === "COMPLETED"
   const medicalRecordsPath = isPatient
     ? `/medical-records?appointment=${appointment.id}`
@@ -79,6 +69,21 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
     minute: "2-digit",
     hour12: true,
   })
+
+  function handleCancelClose() {
+    setCancelOpen(false)
+    setCancellationReason("")
+  }
+
+  function handleCancelSubmit() {
+    const reason = cancellationReason.trim()
+    if (!reason) return
+
+    cancelAppointment(
+      { id: appointment.id, payload: { cancellationReason: reason } },
+      { onSuccess: handleCancelClose },
+    )
+  }
 
   return (
     <>
@@ -148,21 +153,14 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
           </div>
 
           {/* Actions footer */}
-          {(canCancel || canReschedule || isActive || isCompleted) && (
+          {(canCancel || canReschedule || isConfirmed || isCompleted) && (
             <div className="flex flex-wrap items-center gap-2 border-t bg-muted/20 px-4 py-2.5">
-              {isActive && (
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button
-                    size="sm"
-                    variant={isWithinWindow ? "default" : "outline"}
-                    className="gap-1.5"
-                    onClick={() => navigate(`/consultation/${appointment.id}`)}
-                  >
-                    <Video className="size-3.5" />
-                    {isWithinWindow ? "Join Now" : "Join Session"}
-                  </Button>
-                  <span className="text-xs text-muted-foreground">{timeLabel}</span>
-                </div>
+              {isConfirmed && (
+                <JoinSessionButton
+                  appointmentId={appointment.id}
+                  scheduledAt={appointment.scheduledAt}
+                  durationMin={CONSULTATION_DURATION_MIN}
+                />
               )}
 
               {isCompleted && (
@@ -190,37 +188,55 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
               )}
 
               {canCancel && (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                      disabled={isCancelling}
-                    >
-                      <X className="size-3.5" />
-                      Cancel
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Cancel appointment?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will cancel your appointment with {counterpartName} on {dateStr} at {timeStr}.
-                        This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Keep Appointment</AlertDialogCancel>
-                      <AlertDialogAction
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        onClick={() => cancelAppointment(appointment.id)}
-                      >
-                        Cancel Appointment
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    disabled={isCancelling}
+                    onClick={() => setCancelOpen(true)}
+                  >
+                    <X className="size-3.5" />
+                    Cancel
+                  </Button>
+
+                  <Dialog open={cancelOpen} onOpenChange={(open) => !open && handleCancelClose()}>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Cancel appointment?</DialogTitle>
+                        <DialogDescription>
+                          This will cancel your appointment with {counterpartName} on {dateStr} at {timeStr}.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-1.5">
+                        <Label htmlFor={`cancel-reason-${appointment.id}`} className="text-sm">
+                          Reason for cancellation
+                        </Label>
+                        <Textarea
+                          id={`cancel-reason-${appointment.id}`}
+                          placeholder="Please provide a reason..."
+                          value={cancellationReason}
+                          onChange={(e) => setCancellationReason(e.target.value)}
+                          rows={3}
+                          maxLength={500}
+                          className="resize-none text-sm"
+                        />
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={handleCancelClose}>
+                          Keep Appointment
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          disabled={!cancellationReason.trim() || isCancelling}
+                          onClick={handleCancelSubmit}
+                        >
+                          Cancel Appointment
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </>
               )}
             </div>
           )}

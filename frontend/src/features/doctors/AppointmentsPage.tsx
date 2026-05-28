@@ -2,9 +2,9 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import {
   CalendarDays,
+  Check,
   Clock,
   User,
-  Video,
   X,
   ChevronLeft,
   ChevronRight,
@@ -18,6 +18,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,13 +31,22 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { useMyAppointments, useCancelAppointment } from "@/hooks/use-appointments"
-import { PatientDetails } from "@/components/common/PatientDetails"
-import type { Appointment, AppointmentStatus } from "@/types/appointment"
 import {
-  getRelativeTimeLabel,
-  isWithinJoinWindow,
-} from "@/utils/appointment-datetime"
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
+  useMyAppointments,
+  useCancelAppointment,
+  useConfirmAppointment,
+} from "@/hooks/use-appointments"
+import { PatientDetails } from "@/components/common/PatientDetails"
+import { JoinSessionButton } from "@/components/common/JoinSessionButton"
+import type { Appointment, AppointmentStatus } from "@/types/appointment"
 
 type TabValue = "upcoming" | "completed" | "cancelled" | "all"
 
@@ -49,7 +60,7 @@ const TAB_STATUS_MAP: Record<TabValue, AppointmentStatus | undefined> = {
 const STATUS_CONFIG = {
   PENDING: { label: "Pending", className: "bg-amber-100 text-amber-700 border-amber-200" },
   CONFIRMED: { label: "Confirmed", className: "bg-green-100 text-green-700 border-green-200" },
-  COMPLETED: { label: "Completed", className: "bg-muted text-muted-foreground border-border" },
+  COMPLETED: { label: "Completed", className: "bg-blue-100 text-blue-700 border-blue-200" },
   CANCELLED: { label: "Cancelled", className: "bg-red-50 text-red-600 border-red-200" },
 }
 
@@ -58,20 +69,15 @@ const CONSULTATION_DURATION_MIN = 30
 function DoctorAppointmentCard({ appointment }: { appointment: Appointment }) {
   const navigate = useNavigate()
   const { mutate: cancelAppointment, isPending: isCancelling } = useCancelAppointment()
+  const { mutate: confirmAppointment, isPending: isConfirming } = useConfirmAppointment()
+  const [cancelOpen, setCancelOpen] = useState(false)
+  const [cancellationReason, setCancellationReason] = useState("")
 
   const statusConfig = STATUS_CONFIG[appointment.status]
+  const isPending = appointment.status === "PENDING"
+  const isConfirmed = appointment.status === "CONFIRMED"
   const canCancel = appointment.status === "PENDING" || appointment.status === "CONFIRMED"
-  const isActive = appointment.status === "PENDING" || appointment.status === "CONFIRMED"
   const isCompleted = appointment.status === "COMPLETED"
-  const isWithinWindow = isWithinJoinWindow(
-    appointment.scheduledAt,
-    CONSULTATION_DURATION_MIN,
-  )
-  const timeLabel = getRelativeTimeLabel(
-    appointment.scheduledAt,
-    CONSULTATION_DURATION_MIN,
-  )
-
   const scheduledDate = new Date(appointment.scheduledAt)
   const dateStr = scheduledDate.toLocaleDateString("en-US", {
     weekday: "short",
@@ -85,121 +91,182 @@ function DoctorAppointmentCard({ appointment }: { appointment: Appointment }) {
     hour12: true,
   })
 
+  function handleCancelClose() {
+    setCancelOpen(false)
+    setCancellationReason("")
+  }
+
+  function handleCancelSubmit() {
+    const reason = cancellationReason.trim()
+    if (!reason) return
+
+    cancelAppointment(
+      { id: appointment.id, payload: { cancellationReason: reason } },
+      { onSuccess: handleCancelClose },
+    )
+  }
+
   return (
     <>
       <Card className="overflow-hidden">
         <CardContent className="p-0">
-        <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:gap-5">
-          {/* Patient info */}
-          <div className="flex min-w-0 flex-1 items-start gap-3">
-            <Avatar className="size-11 shrink-0">
-              <AvatarImage
-                src={appointment.patient.profilePicture ?? undefined}
-                alt={`${appointment.patient.firstName} ${appointment.patient.lastName}`}
-              />
-              <AvatarFallback>
-                <User className="size-5" />
-              </AvatarFallback>
-            </Avatar>
-            <div className="min-w-0 flex-1 space-y-3">
-              <div>
-                <p className="truncate font-semibold">
-                  {appointment.patient.firstName} {appointment.patient.lastName}
-                </p>
-                <p className="text-xs text-muted-foreground">Patient</p>
+          <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:gap-5">
+            <div className="flex min-w-0 flex-1 items-start gap-3">
+              <Avatar className="size-11 shrink-0">
+                <AvatarImage
+                  src={appointment.patient.profilePicture ?? undefined}
+                  alt={`${appointment.patient.firstName} ${appointment.patient.lastName}`}
+                />
+                <AvatarFallback>
+                  <User className="size-5" />
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 flex-1 space-y-3">
+                <div>
+                  <p className="truncate font-semibold">
+                    {appointment.patient.firstName} {appointment.patient.lastName}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Patient</p>
+                </div>
+                <PatientDetails
+                  patient={appointment.patient}
+                  appointmentNotes={appointment.notes}
+                />
               </div>
-              <PatientDetails patient={appointment.patient} />
             </div>
-          </div>
 
-          {/* Date + status */}
-          <div className="flex flex-wrap items-center gap-3 sm:flex-col sm:items-end sm:gap-1.5">
-            <Badge
-              variant="outline"
-              className={`shrink-0 text-xs font-medium ${statusConfig.className}`}
-            >
-              {statusConfig.label}
-            </Badge>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <CalendarDays className="size-3.5" />
-              {dateStr}
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Clock className="size-3.5" />
-              {timeStr}
-            </div>
-          </div>
-        </div>
-
-        {/* Actions */}
-        {(isActive || canCancel || isCompleted) && (
-          <div className="flex flex-wrap items-center gap-2 border-t bg-muted/20 px-4 py-2.5">
-            {isActive && (
-              <div className="flex flex-wrap items-center gap-2">
-                <Button
-                  size="sm"
-                  variant={isWithinWindow ? "default" : "outline"}
-                  className="gap-1.5"
-                  onClick={() => navigate(`/consultation/${appointment.id}`)}
-                >
-                  <Video className="size-3.5" />
-                  {isWithinWindow ? "Join Now" : "Join Session"}
-                </Button>
-                <span className="text-xs text-muted-foreground">{timeLabel}</span>
-              </div>
-            )}
-
-            {isCompleted && (
-              <Button
+            <div className="flex flex-wrap items-center gap-3 sm:flex-col sm:items-end sm:gap-1.5">
+              <Badge
                 variant="outline"
-                size="sm"
-                className="gap-1.5"
-                onClick={() =>
-                  navigate(`/doctor/medical-records?appointment=${appointment.id}`)
-                }
+                className={`shrink-0 text-xs font-medium ${statusConfig.className}`}
               >
-                <FileText className="size-3.5" />
-                View Records
-              </Button>
-            )}
+                {statusConfig.label}
+              </Badge>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <CalendarDays className="size-3.5" />
+                {dateStr}
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Clock className="size-3.5" />
+                {timeStr}
+              </div>
+            </div>
+          </div>
 
-            {canCancel && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
+          {(isPending || isConfirmed || canCancel || isCompleted) && (
+            <div className="flex flex-wrap items-center gap-2 border-t bg-muted/20 px-4 py-2.5">
+              {isPending && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      size="sm"
+                      className="gap-1.5"
+                      disabled={isConfirming}
+                    >
+                      <Check className="size-3.5" />
+                      Confirm
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Confirm appointment?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Confirm the appointment with {appointment.patient.firstName}{" "}
+                        {appointment.patient.lastName} on {dateStr} at {timeStr}. The
+                        patient will be notified and you can join the session once
+                        confirmed.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Not yet</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => confirmAppointment(appointment.id)}
+                      >
+                        Confirm Appointment
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+
+              {isConfirmed && (
+                <JoinSessionButton
+                  appointmentId={appointment.id}
+                  scheduledAt={appointment.scheduledAt}
+                  durationMin={CONSULTATION_DURATION_MIN}
+                />
+              )}
+
+              {isCompleted && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() =>
+                    navigate(`/doctor/medical-records?appointment=${appointment.id}`)
+                  }
+                >
+                  <FileText className="size-3.5" />
+                  View Records
+                </Button>
+              )}
+
+              {canCancel && (
+                <>
                   <Button
                     variant="ghost"
                     size="sm"
                     className="gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
                     disabled={isCancelling}
+                    onClick={() => setCancelOpen(true)}
                   >
                     <X className="size-3.5" />
-                    Cancel
+                    Cancel Appointment
                   </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Cancel appointment?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This will cancel the appointment with {appointment.patient.firstName}{" "}
-                      {appointment.patient.lastName} on {dateStr} at {timeStr}.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Keep</AlertDialogCancel>
-                    <AlertDialogAction
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      onClick={() => cancelAppointment(appointment.id)}
-                    >
-                      Cancel Appointment
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+
+                  <Dialog open={cancelOpen} onOpenChange={(open) => !open && handleCancelClose()}>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Cancel appointment?</DialogTitle>
+                        <DialogDescription>
+                          This will cancel the appointment with {appointment.patient.firstName}{" "}
+                          {appointment.patient.lastName} on {dateStr} at {timeStr}.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-1.5">
+                        <Label htmlFor={`cancel-reason-${appointment.id}`} className="text-sm">
+                          Reason for cancellation
+                        </Label>
+                        <Textarea
+                          id={`cancel-reason-${appointment.id}`}
+                          placeholder="Please provide a reason..."
+                          value={cancellationReason}
+                          onChange={(e) => setCancellationReason(e.target.value)}
+                          rows={3}
+                          maxLength={500}
+                          className="resize-none text-sm"
+                        />
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={handleCancelClose}>
+                          Keep Appointment
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          disabled={!cancellationReason.trim() || isCancelling}
+                          onClick={handleCancelSubmit}
+                        >
+                          Cancel Appointment
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </>
   )
 }
