@@ -4,6 +4,7 @@ import { asyncHandler } from "../../utils/async-handler.js";
 import * as appointmentService from "./appointment.service.js";
 import {
   bookAppointmentSchema,
+  cancelAppointmentSchema,
   listAppointmentsQuerySchema,
   rescheduleAppointmentSchema,
 } from "./appointment.validation.js";
@@ -45,7 +46,26 @@ export const bookAppointment = asyncHandler(
 export const cancelAppointment = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { userId, role } = getAuthUser(req);
+    const data = cancelAppointmentSchema.parse(req.body);
     const appointment = await appointmentService.cancelAppointment(
+      userId,
+      role,
+      getAppointmentId(req),
+      data,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Appointment cancelled successfully",
+      data: appointment,
+    });
+  },
+);
+
+export const confirmAppointment = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const { userId, role } = getAuthUser(req);
+    const appointment = await appointmentService.confirmAppointment(
       userId,
       role,
       getAppointmentId(req),
@@ -53,7 +73,7 @@ export const cancelAppointment = asyncHandler(
 
     res.status(200).json({
       success: true,
-      message: "Appointment cancelled successfully",
+      message: "Appointment confirmed successfully",
       data: appointment,
     });
   },

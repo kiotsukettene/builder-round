@@ -4,6 +4,7 @@ import * as appointmentService from "@/services/appointment.service";
 import type {
   AppointmentListQuery,
   BookAppointmentPayload,
+  CancelAppointmentPayload,
   RescheduleAppointmentPayload,
 } from "@/types/appointment";
 
@@ -43,11 +44,34 @@ export function useBookAppointment() {
   });
 }
 
+export function useConfirmAppointment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => appointmentService.confirmAppointment(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["appointments"] });
+      toast.success("Appointment confirmed.");
+    },
+    onError: (error: { response?: { data?: { message?: string } } }) => {
+      const message =
+        error?.response?.data?.message ?? "Failed to confirm appointment.";
+      toast.error(message);
+    },
+  });
+}
+
 export function useCancelAppointment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => appointmentService.cancelAppointment(id),
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: CancelAppointmentPayload;
+    }) => appointmentService.cancelAppointment(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["appointments"] });
       toast.success("Appointment cancelled.");

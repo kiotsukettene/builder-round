@@ -29,6 +29,7 @@ export interface Appointment {
   status: AppointmentStatus
   meetingUrl: string | null
   notes: string | null
+  cancellationReason: string | null
   createdAt: string
   updatedAt: string
   patient: AppointmentPatient
@@ -38,6 +39,11 @@ export interface Appointment {
 export interface BookAppointmentPayload {
   doctorId: string
   scheduledAt: string
+  notes?: string
+}
+
+export interface CancelAppointmentPayload {
+  cancellationReason: string
 }
 
 export interface RescheduleAppointmentPayload {

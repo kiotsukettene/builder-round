@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils"
 
 const TYPE_LABELS: Record<NotificationType, string> = {
   APPOINTMENT_BOOKED: "New Booking",
+  APPOINTMENT_CONFIRMED: "Confirmed",
   APPOINTMENT_CANCELLED: "Cancellation",
   APPOINTMENT_REMINDER: "Reminder",
   SCHEDULE_UPDATED: "Schedule Update",

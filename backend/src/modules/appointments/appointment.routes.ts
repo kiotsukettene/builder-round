@@ -43,6 +43,14 @@ router.patch(
 );
 
 router.patch(
+  "/:id/confirm",
+  authenticate,
+  authorize("DOCTOR"),
+  requireVerifiedEmail,
+  appointmentController.confirmAppointment,
+);
+
+router.patch(
   "/:id/reschedule",
   authenticate,
   authorize("PATIENT"),

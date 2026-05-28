@@ -8,7 +8,7 @@ import type {
   UpdatePrescriptionInput,
 } from "./consultation.validation.js";
 
-const JOINABLE_STATUSES = ["PENDING", "CONFIRMED"] as const;
+const JOINABLE_STATUSES = ["CONFIRMED"] as const;
 
 async function getAppointmentOrThrow(appointmentId: string) {
   const appointment =
@@ -56,13 +56,6 @@ export async function joinConsultation(
     throw new AppError(
       `Cannot join a consultation with status ${appointment.status}`,
       400,
-    );
-  }
-
-  if (participantRole === "DOCTOR" && appointment.status === "PENDING") {
-    await consultationRepository.updateAppointmentStatus(
-      appointmentId,
-      "CONFIRMED",
     );
   }
 

@@ -79,10 +79,15 @@ function AvailabilityGrid({ availabilities }: { availabilities: DoctorAvailabili
 
 interface SlotPickerProps {
   doctorId: string
-  onSlotSelect?: (slot: string | null, date: Date, slotsData: { consultationDuration: number; consultationFee: number | null } | null) => void
+  availabilities: DoctorAvailability[]
+  onSlotSelect?: (
+    slot: string | null,
+    date: Date,
+    slotsData: { consultationDuration: number; consultationFee: number | null } | null
+  ) => void
 }
 
-function SlotPicker({ doctorId, onSlotSelect }: SlotPickerProps) {
+function SlotPicker({ doctorId, availabilities, onSlotSelect }: SlotPickerProps) {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(today))
@@ -90,6 +95,15 @@ function SlotPicker({ doctorId, onSlotSelect }: SlotPickerProps) {
 
   const dateStr = formatDateQueryParam(selectedDate)
   const { data: slotsData, isLoading } = useDoctorSlots(doctorId, dateStr)
+
+  const dayHasSchedule = availabilities.some(
+    (a) => a.dayOfWeek === selectedDate.getDay(),
+  )
+  const hasBookableSlots =
+    !!slotsData?.slots.some((slot) => slot.available) 
+  const isDateUnavailable =
+    !dayHasSchedule ||
+    (!isLoading && !!slotsData && !hasBookableSlots)
 
   function shiftDate(days: number) {
     const d = new Date(selectedDate)
@@ -131,7 +145,13 @@ function SlotPicker({ doctorId, onSlotSelect }: SlotPickerProps) {
         >
           <ChevronLeft className="size-4" />
         </Button>
-        <span className="flex-1 text-center text-sm font-medium">{displayDate}</span>
+        <span
+          className={`flex-1 text-center text-sm font-medium ${
+            isDateUnavailable
+          }`}
+        >
+          {displayDate}
+        </span>
         <Button variant="ghost" size="icon" className="size-8" onClick={() => shiftDate(1)}>
           <ChevronRight className="size-4" />
         </Button>
@@ -160,7 +180,11 @@ function SlotPicker({ doctorId, onSlotSelect }: SlotPickerProps) {
           ))}
         </div>
       ) : (
-        <div className="flex items-center gap-2 rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+        <div
+          className={`flex items-center gap-2 rounded-md border border-dashed p-4 text-sm ${
+            isDateUnavailable ? "text-destructive" : "text-muted-foreground"
+          }`}
+        >
           <CalendarDays className="size-4 shrink-0" />
           No available slots for this day.
         </div>
@@ -168,9 +192,11 @@ function SlotPicker({ doctorId, onSlotSelect }: SlotPickerProps) {
 
       {slotsData && slotsData.consultationFee !== null && (
         <p className="text-xs text-muted-foreground">
-          Consultation fee: <span className="font-medium text-foreground">${slotsData.consultationFee}</span>
+          Consultation fee:{" "}
+          <span className="font-medium text-foreground">${slotsData.consultationFee}</span>
           {" · "}
-          Duration: <span className="font-medium text-foreground">{slotsData.consultationDuration} min</span>
+          Duration:{" "}
+          <span className="font-medium text-foreground">{slotsData.consultationDuration} min</span>
         </p>
       )}
     </div>
@@ -228,7 +254,7 @@ function DoctorDetailContent({ doctor }: { doctor: PublicDoctorWithAvailability 
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6">
       <Button
         variant="ghost"
         size="sm"
@@ -239,155 +265,160 @@ function DoctorDetailContent({ doctor }: { doctor: PublicDoctorWithAvailability 
         Back
       </Button>
 
-      {/* Doctor header card */}
-      <Card>
-        <CardContent className="flex flex-col gap-5 p-6 sm:flex-row sm:items-start">
-          <Avatar className="size-20 shrink-0 self-center sm:self-start">
-            <AvatarImage
-              src={doctor.profilePicture ?? undefined}
-              alt={`Dr. ${doctor.firstName} ${doctor.lastName}`}
-            />
-            <AvatarFallback className="text-xl">
-              <User className="size-8" />
-            </AvatarFallback>
-          </Avatar>
-
-          <div className="flex-1 space-y-3 text-center sm:text-left">
-            <div>
-              <h1 className="text-xl font-bold">
-                Dr. {doctor.firstName} {doctor.lastName}
-              </h1>
-              <Badge variant="outline" className="mt-1">
-                {doctor.specialization}
-              </Badge>
-              <div className="mt-2 flex justify-center sm:justify-start">
-                <StarRating
-                  rating={doctor.averageRating}
-                  totalReviews={doctor.totalReviews}
-                  size="md"
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-wrap justify-center gap-4 sm:justify-start">
-              {doctor.fee !== null && (
-                <div className="flex items-center gap-1.5 text-sm">
-                  <DollarSign className="size-4 text-muted-foreground" />
-                  <span className="font-medium">${doctor.fee}</span>
-                  <span className="text-muted-foreground">/ session</span>
-                </div>
-              )}
-              <div className="flex items-center gap-1.5 text-sm">
-                <Clock className="size-4 text-muted-foreground" />
-                <span className="font-medium">{doctor.consultationDuration} min</span>
-                <span className="text-muted-foreground">consultation</span>
-              </div>
-              {uniqueDays.length > 0 && (
-                <div className="flex items-center gap-1.5 text-sm">
-                  <Calendar className="size-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">{uniqueDays.join(", ")}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Bio */}
-      {doctor.bio && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">About</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm leading-relaxed text-muted-foreground">{doctor.bio}</p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Patient reviews */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Patient Reviews</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {isReviewsLoading ? (
-            <div className="space-y-3">
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-16 w-full" />
-              <Skeleton className="h-16 w-full" />
-            </div>
-          ) : reviewsData && reviewsData.reviews.length > 0 ? (
-            <>
-              <StarRating
-                rating={reviewsData.averageRating}
-                totalReviews={reviewsData.totalReviews}
-                size="md"
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+        <aside className="lg:col-span-1">
+          <Card className="lg:sticky lg:top-6">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <CalendarDays className="size-4" />
+                Available Slots
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <SlotPicker
+                doctorId={doctor.id}
+                availabilities={doctor.availabilities}
+                onSlotSelect={handleSlotSelect}
               />
+              <Separator />
               <div className="space-y-3">
-                {reviewsData.reviews.map((review) => (
-                  <div key={review.id} className="rounded-lg border p-4">
-                    <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                      <p className="text-sm font-medium">{review.patientName}</p>
-                      <StarRating rating={review.rating} showCount={false} />
-                    </div>
-                    {review.comment && (
-                      <p className="text-sm leading-relaxed text-muted-foreground">
-                        {review.comment}
-                      </p>
-                    )}
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      {new Date(review.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                ))}
+                <p className="text-sm text-muted-foreground">
+                  {bookingState
+                    ? `Selected: ${formatTime(bookingState.slot)} on ${bookingState.date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+                    : "Select a time slot to book your consultation."}
+                </p>
+                <Button
+                  disabled={!bookingState}
+                  className="w-full"
+                  onClick={() => setConfirmOpen(true)}
+                >
+                  Book Consultation
+                </Button>
               </div>
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              No patient reviews yet. Be the first to share your experience after a consultation.
-            </p>
+            </CardContent>
+          </Card>
+        </aside>
+
+        <div className="space-y-6 lg:col-span-3">
+          <Card>
+            <CardContent className="flex flex-col gap-5 p-6 sm:flex-row sm:items-start">
+              <Avatar className="size-20 shrink-0 self-center sm:self-start">
+                <AvatarImage
+                  src={doctor.profilePicture ?? undefined}
+                  alt={`Dr. ${doctor.firstName} ${doctor.lastName}`}
+                />
+                <AvatarFallback className="text-xl">
+                  <User className="size-8" />
+                </AvatarFallback>
+              </Avatar>
+
+              <div className="flex-1 space-y-3 text-center sm:text-left">
+                <div>
+                  <h1 className="text-xl font-bold">
+                    Dr. {doctor.firstName} {doctor.lastName}
+                  </h1>
+                  <Badge variant="outline" className="mt-1">
+                    {doctor.specialization}
+                  </Badge>
+                  <div className="mt-2 flex justify-center sm:justify-start">
+                    <StarRating
+                      rating={doctor.averageRating}
+                      totalReviews={doctor.totalReviews}
+                      size="md"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap justify-center gap-4 sm:justify-start">
+                  {doctor.fee !== null && (
+                    <div className="flex items-center gap-1.5 text-sm">
+                      <DollarSign className="size-4 text-muted-foreground" />
+                      <span className="font-medium">${doctor.fee}</span>
+                      <span className="text-muted-foreground">/ session</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1.5 text-sm">
+                    <Clock className="size-4 text-muted-foreground" />
+                    <span className="font-medium">{doctor.consultationDuration} min</span>
+                    <span className="text-muted-foreground">consultation</span>
+                  </div>
+                  {uniqueDays.length > 0 && (
+                    <div className="flex items-center gap-1.5 text-sm">
+                      <Calendar className="size-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">{uniqueDays.join(", ")}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {doctor.bio && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">About</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm leading-relaxed text-muted-foreground">{doctor.bio}</p>
+              </CardContent>
+            </Card>
           )}
-        </CardContent>
-      </Card>
 
-      {/* Weekly availability */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Weekly Schedule</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <AvailabilityGrid availabilities={doctor.availabilities} />
-        </CardContent>
-      </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Patient Reviews</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {isReviewsLoading ? (
+                <div className="space-y-3">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-16 w-full" />
+                  <Skeleton className="h-16 w-full" />
+                </div>
+              ) : reviewsData && reviewsData.reviews.length > 0 ? (
+                <>
+                  <StarRating
+                    rating={reviewsData.averageRating}
+                    totalReviews={reviewsData.totalReviews}
+                    size="md"
+                  />
+                  <div className="space-y-3">
+                    {reviewsData.reviews.map((review) => (
+                      <div key={review.id} className="rounded-lg border p-4">
+                        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                          <p className="text-sm font-medium">{review.patientName}</p>
+                          <StarRating rating={review.rating} showCount={false} />
+                        </div>
+                        {review.comment && (
+                          <p className="text-sm leading-relaxed text-muted-foreground">
+                            {review.comment}
+                          </p>
+                        )}
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          {new Date(review.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No patient reviews yet. Be the first to share your experience after a consultation.
+                </p>
+              )}
+            </CardContent>
+          </Card>
 
-      {/* Slot picker + booking CTA */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <CalendarDays className="size-4" />
-            Available Slots
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          <SlotPicker doctorId={doctor.id} onSlotSelect={handleSlotSelect} />
-          <Separator />
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-muted-foreground">
-              {bookingState
-                ? `Selected: ${formatTime(bookingState.slot)} on ${bookingState.date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
-                : "Select a time slot to book your consultation."}
-            </p>
-            <Button
-              disabled={!bookingState}
-              className="sm:shrink-0"
-              onClick={() => setConfirmOpen(true)}
-            >
-              Book Consultation
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Weekly Schedule</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <AvailabilityGrid availabilities={doctor.availabilities} />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       {bookingState && (
         <BookingConfirmDialog
@@ -412,7 +443,7 @@ export function DoctorDetailPage() {
   if (isLoading) {
     return (
       <AppLayout>
-        <div className="mx-auto max-w-3xl">
+        <div className="mx-auto max-w-6xl">
           <Button
             variant="ghost"
             size="sm"
@@ -431,7 +462,7 @@ export function DoctorDetailPage() {
   if (isError || !doctor) {
     return (
       <AppLayout>
-        <div className="mx-auto max-w-3xl">
+        <div className="mx-auto max-w-6xl">
           <Button
             variant="ghost"
             size="sm"

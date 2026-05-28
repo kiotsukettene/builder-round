@@ -111,10 +111,16 @@ export async function findAppointmentsByDoctorId(
 export async function updateAppointmentStatus(
   id: string,
   status: AppointmentStatus,
+  extra?: { cancellationReason?: string },
 ) {
   return prisma.appointment.update({
     where: { id },
-    data: { status },
+    data: {
+      status,
+      ...(extra?.cancellationReason !== undefined && {
+        cancellationReason: extra.cancellationReason,
+      }),
+    },
     include: appointmentWithRelations,
   });
 }
@@ -155,6 +161,7 @@ export async function createAppointmentSafe(data: {
   doctorId: string;
   scheduledAt: Date;
   durationMinutes: number;
+  notes?: string;
 }) {
   return prisma.$transaction(
     async (tx) => {
@@ -180,6 +187,7 @@ export async function createAppointmentSafe(data: {
           doctorId: data.doctorId,
           scheduledAt: data.scheduledAt,
           status: "PENDING",
+          ...(data.notes && { notes: data.notes }),
         },
         include: appointmentWithRelations,
       });
@@ -217,7 +225,12 @@ export async function updateAppointmentScheduleSafe(
 
       const appointment = await tx.appointment.update({
         where: { id },
-        data: { scheduledAt, status: "PENDING" },
+        data: {
+          scheduledAt,
+          status: "PENDING",
+          reminderOneHourSentAt: null,
+          reminderTenMinSentAt: null,
+        },
         include: appointmentWithRelations,
       });
 

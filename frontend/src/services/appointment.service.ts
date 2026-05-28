@@ -5,6 +5,7 @@ import type {
   AppointmentListMeta,
   AppointmentListQuery,
   BookAppointmentPayload,
+  CancelAppointmentPayload,
   RescheduleAppointmentPayload,
 } from "@/types/appointment";
 
@@ -45,9 +46,20 @@ export async function bookAppointment(
   return data.data;
 }
 
-export async function cancelAppointment(id: string): Promise<Appointment> {
+export async function confirmAppointment(id: string): Promise<Appointment> {
+  const { data } = await api.patch<ApiResponse<Appointment>>(
+    `/api/v1/appointments/${id}/confirm`,
+  );
+  return data.data;
+}
+
+export async function cancelAppointment(
+  id: string,
+  payload: CancelAppointmentPayload,
+): Promise<Appointment> {
   const { data } = await api.patch<ApiResponse<Appointment>>(
     `/api/v1/appointments/${id}/cancel`,
+    payload,
   );
   return data.data;
 }

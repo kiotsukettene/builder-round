@@ -11,6 +11,7 @@ import {
 } from "../../utils/schedule-datetime.js";
 import type {
   BookAppointmentInput,
+  CancelAppointmentInput,
   ListAppointmentsQueryInput,
   RescheduleAppointmentInput,
 } from "./appointment.validation.js";
@@ -95,6 +96,7 @@ export async function bookAppointment(
     doctorId: doctor.id,
     scheduledAt,
     durationMinutes: doctor.consultationDuration,
+    ...(input.notes && { notes: input.notes }),
   });
 
   if (result.conflict) {
@@ -117,10 +119,49 @@ export async function bookAppointment(
   return toAppointmentDto(appointment);
 }
 
+export async function confirmAppointment(
+  userId: string,
+  role: string,
+  appointmentId: string,
+) {
+  if (role !== "DOCTOR") {
+    throw new AppError("Only doctors can confirm appointments", 403);
+  }
+
+  const appointment = await getAppointmentOrThrow(appointmentId);
+
+  if (appointment.doctor.userId !== userId) {
+    throw new AppError("You do not have permission to confirm this appointment", 403);
+  }
+
+  if (appointment.status !== "PENDING") {
+    throw new AppError(
+      `Cannot confirm an appointment with status ${appointment.status}`,
+      400,
+    );
+  }
+
+  const updated = await appointmentRepository.updateAppointmentStatus(
+    appointmentId,
+    "CONFIRMED",
+  );
+
+  await sendNotification({
+    userId: appointment.patient.user.id,
+    type: "APPOINTMENT_CONFIRMED",
+    title: "Appointment Confirmed",
+    message: `Dr. ${appointment.doctor.firstName} ${appointment.doctor.lastName} has confirmed your appointment on ${formatAppointmentDateTime(appointment.scheduledAt)}.`,
+    relatedId: appointment.id,
+  });
+
+  return toAppointmentDto(updated);
+}
+
 export async function cancelAppointment(
   userId: string,
   role: string,
   appointmentId: string,
+  input: CancelAppointmentInput,
 ) {
   const appointment = await getAppointmentOrThrow(appointmentId);
 
@@ -145,6 +186,7 @@ export async function cancelAppointment(
   const updated = await appointmentRepository.updateAppointmentStatus(
     appointmentId,
     "CANCELLED",
+    { cancellationReason: input.cancellationReason },
   );
 
   const notifyUserId = isPatient
