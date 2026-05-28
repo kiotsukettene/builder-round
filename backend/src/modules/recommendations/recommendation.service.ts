@@ -2,7 +2,10 @@ import { AppError } from "../../errors/app-error.js";
 import { generateContent } from "../../lib/gemini.js";
 import * as doctorRepository from "../doctors/doctor.repository.js";
 import * as patientRepository from "../patients/patient.repository.js";
-import { toPublicDoctorDto } from "../doctors/doctor.utils.js";
+import {
+  toPublicDoctorDto,
+} from "../doctors/doctor.utils.js";
+import * as recommendationRepository from "./recommendation.repository.js";
 
 interface RecommendationResult {
   specialization: string;
@@ -60,7 +63,23 @@ function parseGeminiResponse(raw: string): RecommendationResult {
   return result;
 }
 
-async function buildRecommendation(input: string) {
+async function getMatchedDoctors(specialization: string) {
+  const matchedDoctors =
+    await doctorRepository.findDoctorsBySpecialization(specialization);
+  const ratingStats = await doctorRepository.getDoctorRatingStats(
+    matchedDoctors.map((d) => d.id),
+  );
+
+  return matchedDoctors.map((doctor) =>
+    toPublicDoctorDto(doctor, ratingStats.get(doctor.id)),
+  );
+}
+
+async function generateAndPersistRecommendation(
+  patientId: string,
+  source: "HISTORY" | "SYMPTOMS",
+  input: string,
+) {
   const specializations = await doctorRepository.getAllSpecializations();
 
   if (specializations.length === 0) {
@@ -74,19 +93,24 @@ async function buildRecommendation(input: string) {
   const raw = await generateContent(prompt);
   const recommendation = parseGeminiResponse(raw);
 
-  const matchedDoctors = await doctorRepository.findDoctorsBySpecialization(
-    recommendation.specialization,
-  );
+  const matchedDoctors = await getMatchedDoctors(recommendation.specialization);
+
+  await recommendationRepository.createRecommendation({
+    patientId,
+    source,
+    input,
+    specialization: recommendation.specialization,
+    explanation: recommendation.explanation,
+    doctorIds: matchedDoctors.map((d) => d.id),
+  });
 
   return {
     recommendation,
-    doctors: matchedDoctors.map(toPublicDoctorDto),
+    doctors: matchedDoctors,
   };
 }
 
 export async function getDefaultRecommendation(userId: string) {
-  // Fetch the patient profile and available specializations in parallel
-  // so the specialization list is ready by the time we validate patient history.
   const [patient, specializations] = await Promise.all([
     patientRepository.findPatientByUserId(userId),
     doctorRepository.getAllSpecializations(),
@@ -110,20 +134,51 @@ export async function getDefaultRecommendation(userId: string) {
     );
   }
 
-  const prompt = buildPrompt(patient.history, specializations);
-  const raw = await generateContent(prompt);
-  const recommendation = parseGeminiResponse(raw);
+  const cached = await recommendationRepository.findLatestByPatientAndSource(
+    patient.id,
+    "HISTORY",
+  );
 
-  const matchedDoctors = await doctorRepository.findDoctorsBySpecialization(
-    recommendation.specialization,
+  if (cached && cached.input === patient.history) {
+    const doctors = await getMatchedDoctors(cached.specialization);
+
+    return {
+      recommendation: {
+        specialization: cached.specialization,
+        explanation: cached.explanation,
+      },
+      doctors,
+      cached: true,
+    };
+  }
+
+  const result = await generateAndPersistRecommendation(
+    patient.id,
+    "HISTORY",
+    patient.history,
   );
 
   return {
-    recommendation,
-    doctors: matchedDoctors.map(toPublicDoctorDto),
+    ...result,
+    cached: false,
   };
 }
 
-export async function getCustomRecommendation(symptoms: string) {
-  return buildRecommendation(symptoms);
+export async function getCustomRecommendation(userId: string, symptoms: string) {
+  const patient = await patientRepository.findPatientByUserId(userId);
+
+  if (!patient) {
+    throw new AppError("Patient profile not found", 404);
+  }
+
+  const result = await generateAndPersistRecommendation(
+    patient.id,
+    "SYMPTOMS",
+    symptoms,
+  );
+
+  return {
+    ...result,
+    cached: false,
+  };
 }

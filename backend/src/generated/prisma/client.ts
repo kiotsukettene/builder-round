@@ -87,6 +87,16 @@ export type ConsultationNote = Prisma.ConsultationNoteModel
  */
 export type Prescription = Prisma.PrescriptionModel
 /**
+ * Model Recommendation
+ * 
+ */
+export type Recommendation = Prisma.RecommendationModel
+/**
+ * Model DoctorReview
+ * 
+ */
+export type DoctorReview = Prisma.DoctorReviewModel
+/**
  * Model Notification
  * 
  */

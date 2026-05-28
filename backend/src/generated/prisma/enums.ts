@@ -35,3 +35,11 @@ export const NotificationType = {
 } as const
 
 export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]
+
+
+export const RecommendationSource = {
+  HISTORY: 'HISTORY',
+  SYMPTOMS: 'SYMPTOMS'
+} as const
+
+export type RecommendationSource = (typeof RecommendationSource)[keyof typeof RecommendationSource]

@@ -1,5 +1,6 @@
 import prisma from "../../lib/prisma.js";
 import { getCached, setCache, invalidateCache } from "../../lib/cache.js";
+import type { DoctorRatingStats } from "./doctor.utils.js";
 import type {
   CompleteProfileInput,
   ListDoctorsQueryInput,
@@ -76,6 +77,39 @@ export async function updateProfilePicture(
   });
 }
 
+export async function getDoctorRatingStats(
+  doctorIds: string[],
+): Promise<Map<string, DoctorRatingStats>> {
+  const stats = new Map<string, DoctorRatingStats>();
+
+  if (doctorIds.length === 0) {
+    return stats;
+  }
+
+  const aggregates = await prisma.doctorReview.groupBy({
+    by: ["doctorId"],
+    where: { doctorId: { in: doctorIds } },
+    _avg: { rating: true },
+    _count: { rating: true },
+  });
+
+  for (const doctorId of doctorIds) {
+    stats.set(doctorId, { averageRating: null, totalReviews: 0 });
+  }
+
+  for (const row of aggregates) {
+    stats.set(row.doctorId, {
+      averageRating:
+        row._avg.rating !== null
+          ? Math.round(row._avg.rating * 10) / 10
+          : null,
+      totalReviews: row._count.rating,
+    });
+  }
+
+  return stats;
+}
+
 export async function findDoctors(filters: ListDoctorsQueryInput) {
   const { page, limit, search, specialization } = filters;
   const skip = (page - 1) * limit;
@@ -103,11 +137,13 @@ export async function findDoctors(filters: ListDoctorsQueryInput) {
     prisma.doctor.count({ where }),
   ]);
 
-  return { doctors, total };
+  const ratingStats = await getDoctorRatingStats(doctors.map((d) => d.id));
+
+  return { doctors, total, ratingStats };
 }
 
 export async function findDoctorById(id: string) {
-  return prisma.doctor.findFirst({
+  const doctor = await prisma.doctor.findFirst({
     where: {
       id,
       profileCompletedAt: { not: null },
@@ -118,6 +154,14 @@ export async function findDoctorById(id: string) {
       },
     },
   });
+
+  if (!doctor) {
+    return null;
+  }
+
+  const ratingStats = await getDoctorRatingStats([doctor.id]);
+
+  return { doctor, ratingStats: ratingStats.get(doctor.id) };
 }
 
 export async function findDoctorForSlots(id: string) {
@@ -177,7 +221,7 @@ export async function findDoctorsBySpecialization(specialization: string) {
       profileCompletedAt: { not: null },
       specialization: { contains: specialization, mode: "insensitive" },
     },
-    take: 10,
+    take: 3,
     orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
   });
 }

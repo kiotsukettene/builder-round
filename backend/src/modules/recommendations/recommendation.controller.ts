@@ -21,7 +21,9 @@ export const getDefaultRecommendation = asyncHandler(
 
     res.status(200).json({
       success: true,
-      message: "AI recommendation generated successfully",
+      message: result.cached
+        ? "AI recommendation retrieved successfully"
+        : "AI recommendation generated successfully",
       data: result,
     });
   },
@@ -30,8 +32,10 @@ export const getDefaultRecommendation = asyncHandler(
 export const getCustomRecommendation = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { symptoms } = customSymptomsSchema.parse(req.body);
-    const result =
-      await recommendationService.getCustomRecommendation(symptoms);
+    const result = await recommendationService.getCustomRecommendation(
+      getUserId(req),
+      symptoms,
+    );
 
     res.status(200).json({
       success: true,

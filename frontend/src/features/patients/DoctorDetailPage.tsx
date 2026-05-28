@@ -18,7 +18,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AppLayout } from "@/components/common/AppLayout"
+import { StarRating } from "@/components/common/StarRating"
 import { useDoctorDetail, useDoctorSlots } from "@/hooks/use-discovery"
+import { useDoctorReviews } from "@/hooks/use-rating"
 import type { DoctorAvailability } from "@/types/doctor"
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
@@ -180,6 +182,7 @@ export function DoctorDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { data: doctor, isLoading, isError } = useDoctorDetail(id)
+  const { data: reviewsData, isLoading: isReviewsLoading } = useDoctorReviews(id)
 
   if (isLoading) {
     return (
@@ -230,7 +233,6 @@ export function DoctorDetailPage() {
     )
   }
 
-  const initials = `${doctor.firstName[0]}${doctor.lastName[0]}`.toUpperCase()
   const availableDays = doctor.availabilities
     .map((a) => DAY_NAMES_FULL[a.dayOfWeek])
     .filter(Boolean)
@@ -271,6 +273,13 @@ export function DoctorDetailPage() {
                 <Badge variant="outline" className="mt-1">
                   {doctor.specialization}
                 </Badge>
+                <div className="mt-2 flex justify-center sm:justify-start">
+                  <StarRating
+                    rating={doctor.averageRating}
+                    totalReviews={doctor.totalReviews}
+                    size="md"
+                  />
+                </div>
               </div>
 
               <div className="flex flex-wrap justify-center gap-4 sm:justify-start">
@@ -308,6 +317,52 @@ export function DoctorDetailPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Patient reviews */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Patient Reviews</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {isReviewsLoading ? (
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-16 w-full" />
+              </div>
+            ) : reviewsData && reviewsData.reviews.length > 0 ? (
+              <>
+                <StarRating
+                  rating={reviewsData.averageRating}
+                  totalReviews={reviewsData.totalReviews}
+                  size="md"
+                />
+                <div className="space-y-3">
+                  {reviewsData.reviews.map((review) => (
+                    <div key={review.id} className="rounded-lg border p-4">
+                      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-sm font-medium">{review.patientName}</p>
+                        <StarRating rating={review.rating} showCount={false} />
+                      </div>
+                      {review.comment && (
+                        <p className="text-sm leading-relaxed text-muted-foreground">
+                          {review.comment}
+                        </p>
+                      )}
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        {new Date(review.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No patient reviews yet. Be the first to share your experience after a consultation.
+              </p>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Weekly availability */}
         <Card>

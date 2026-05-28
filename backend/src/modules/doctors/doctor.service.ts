@@ -110,10 +110,12 @@ export async function uploadProfilePicture(
 
 export async function listDoctors(query: ListDoctorsQueryInput) {
   const { page, limit } = query;
-  const { doctors, total } = await doctorRepository.findDoctors(query);
+  const { doctors, total, ratingStats } = await doctorRepository.findDoctors(query);
 
   return {
-    data: doctors.map(toPublicDoctorDto),
+    data: doctors.map((doctor) =>
+      toPublicDoctorDto(doctor, ratingStats.get(doctor.id)),
+    ),
     meta: {
       page,
       limit,
@@ -124,12 +126,15 @@ export async function listDoctors(query: ListDoctorsQueryInput) {
 }
 
 export async function getDoctorById(id: string) {
-  const doctor = await doctorRepository.findDoctorById(id);
-  if (!doctor) {
+  const result = await doctorRepository.findDoctorById(id);
+  if (!result) {
     throw new AppError("Doctor not found", 404);
   }
 
-  return toPublicDoctorWithAvailabilityDto(doctor);
+  return toPublicDoctorWithAvailabilityDto(
+    result.doctor,
+    result.ratingStats,
+  );
 }
 
 export async function getAvailableSlots(doctorId: string, dateStr: string) {

@@ -51,12 +51,12 @@ async function getPatientOrThrow(userId: string) {
 }
 
 async function getDoctorWithAvailabilityOrThrow(doctorId: string) {
-  const doctor = await doctorRepository.findDoctorById(doctorId);
-  if (!doctor) {
+  const result = await doctorRepository.findDoctorById(doctorId);
+  if (!result) {
     throw new AppError("Doctor not found", 404);
   }
 
-  return doctor;
+  return result.doctor;
 }
 
 async function getAppointmentOrThrow(id: string) {

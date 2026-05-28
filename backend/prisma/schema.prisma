@@ -28,6 +28,11 @@ enum NotificationType {
   SCHEDULE_UPDATED
 }
 
+enum RecommendationSource {
+  HISTORY
+  SYMPTOMS
+}
+
 // ── Auth ──
 
 model User {
@@ -68,8 +73,10 @@ model Patient {
   profilePicture     String?
   profileCompletedAt DateTime?
 
-  user         User          @relation(fields: [userId], references: [id])
-  appointments Appointment[]
+  user            User             @relation(fields: [userId], references: [id])
+  appointments    Appointment[]
+  recommendations Recommendation[]
+  reviews         DoctorReview[]
 }
 
 model Doctor {
@@ -88,6 +95,7 @@ model Doctor {
   appointments   Appointment[]
   availabilities DoctorAvailability[]
   blockedDates   BlockedDate[]
+  reviews        DoctorReview[]
 }
 
 // ── Scheduling ──
@@ -131,6 +139,7 @@ model Appointment {
   doctor           Doctor            @relation(fields: [doctorId], references: [id])
   consultationNote ConsultationNote?
   prescriptions    Prescription[]
+  review           DoctorReview?
 }
 
 // ── Post-Consultation ──
@@ -158,6 +167,41 @@ model Prescription {
   createdAt     DateTime @default(now())
 
   appointment Appointment @relation(fields: [appointmentId], references: [id])
+}
+
+// ── AI Recommendations ──
+
+model Recommendation {
+  id             String               @id @default(cuid())
+  patientId      String
+  source         RecommendationSource
+  input          String
+  specialization String
+  explanation    String
+  doctorIds      String[]
+  createdAt      DateTime             @default(now())
+
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@index([patientId, source, createdAt])
+}
+
+// ── Doctor Reviews ──
+
+model DoctorReview {
+  id            String   @id @default(cuid())
+  appointmentId String   @unique
+  patientId     String
+  doctorId      String
+  rating        Int
+  comment       String?
+  createdAt     DateTime @default(now())
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+  patient     Patient     @relation(fields: [patientId], references: [id])
+  doctor      Doctor      @relation(fields: [doctorId], references: [id])
+
+  @@index([doctorId])
 }
 
 // ── Notifications ──

@@ -6,6 +6,7 @@ import { joinConsultation, endConsultation } from "@/services/consultation.servi
 import { useAuthStore } from "@/store/auth.store";
 import { NotesPanel } from "./components/NotesPanel";
 import { PrescriptionsPanel } from "./components/PrescriptionsPanel";
+import { ReviewConsultationDialog } from "@/features/patients/components/ReviewConsultationDialog";
 import { Button } from "@/components/ui/button";
 import { Loader2, FileText, Pill, PhoneOff } from "lucide-react";
 
@@ -23,6 +24,7 @@ export function ConsultationRoom() {
   const [activeTab, setActiveTab] = useState<PanelTab>("notes");
   const [isPanelOpen, setIsPanelOpen] = useState(true);
   const [joinError, setJoinError] = useState<string | null>(null);
+  const [showReviewDialog, setShowReviewDialog] = useState(false);
 
   const {
     data: credentials,
@@ -83,7 +85,7 @@ export function ConsultationRoom() {
         if (isDoctor) {
           end();
         } else {
-          navigate(-1);
+          setShowReviewDialog(true);
         }
       },
     });
@@ -187,6 +189,15 @@ export function ConsultationRoom() {
         {/* ZegoCloud video container */}
         <div ref={videoContainerRef} className="flex-1 w-full" />
       </div>
+
+      {!isDoctor && appointmentId && (
+        <ReviewConsultationDialog
+          appointmentId={appointmentId}
+          open={showReviewDialog}
+          onOpenChange={setShowReviewDialog}
+          onComplete={() => navigate(-1)}
+        />
+      )}
 
       {/* Doctor side panel */}
       {isDoctor && isPanelOpen && (
