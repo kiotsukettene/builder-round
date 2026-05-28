@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { StarRating } from "@/components/common/StarRating"
 import type { PublicDoctor } from "@/types/recommendation"
 
 interface DoctorCardProps {
@@ -13,7 +14,6 @@ interface DoctorCardProps {
 
 export function DoctorCard({ doctor, isRecommended = false }: DoctorCardProps) {
   const navigate = useNavigate()
-  const initials = `${doctor.firstName[0]}${doctor.lastName[0]}`.toUpperCase()
 
   return (
     <Card className="group flex flex-col overflow-hidden transition-shadow hover:shadow-md">
@@ -42,6 +42,12 @@ export function DoctorCard({ doctor, isRecommended = false }: DoctorCardProps) {
             <Badge variant="outline" className="mt-1 text-xs font-normal">
               {doctor.specialization}
             </Badge>
+            <div className="mt-2">
+              <StarRating
+                rating={doctor.averageRating}
+                totalReviews={doctor.totalReviews}
+              />
+            </div>
           </div>
         </div>
 
