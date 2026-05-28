@@ -1,13 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import * as ratingService from "@/services/rating.service"
-import type { SubmitReviewInput } from "@/types/rating"
+import type { SubmitReviewPayload } from "@/services/rating.service"
 
 export function useDoctorReviews(doctorId: string | undefined) {
   return useQuery({
     queryKey: ["doctor-reviews", doctorId],
     queryFn: async () => {
-      const res = await ratingService.getDoctorReviews(doctorId!)
+      const res = await ratingService.listDoctorReviews(doctorId!)
       return res.data
     },
     enabled: !!doctorId,
@@ -15,27 +15,19 @@ export function useDoctorReviews(doctorId: string | undefined) {
   })
 }
 
-export function useSubmitReview() {
+export function useSubmitReview(appointmentId: string) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({
-      appointmentId,
-      data,
-    }: {
-      appointmentId: string
-      data: SubmitReviewInput
-    }) => ratingService.submitReview(appointmentId, data),
+    mutationFn: (payload: SubmitReviewPayload) =>
+      ratingService.submitReview(appointmentId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["doctor-reviews"] })
-      queryClient.invalidateQueries({ queryKey: ["doctors"] })
-      queryClient.invalidateQueries({ queryKey: ["doctor"] })
-      queryClient.invalidateQueries({ queryKey: ["recommendation"] })
-      toast.success("Thank you for your review!")
+      queryClient.invalidateQueries({ queryKey: ["appointments"] })
+      toast.success("Review submitted. Thank you for your feedback!")
     },
     onError: (error: { response?: { data?: { message?: string } } }) => {
-      const message =
-        error?.response?.data?.message ?? "Failed to submit review. Please try again."
+      const message = error?.response?.data?.message ?? "Failed to submit review."
       toast.error(message)
     },
   })

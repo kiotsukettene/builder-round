@@ -1,4 +1,5 @@
 import prisma from "../../lib/prisma.js";
+import { getDayBoundsInTimezone } from "../../utils/schedule-datetime.js";
 import { getCached, setCache, invalidateCache } from "../../lib/cache.js";
 import type { DoctorRatingStats } from "./doctor.utils.js";
 import type {
@@ -179,11 +180,8 @@ export async function findDoctorForSlots(id: string) {
   });
 }
 
-export async function findAppointmentsOnDate(doctorId: string, date: Date) {
-  const start = new Date(date);
-  start.setUTCHours(0, 0, 0, 0);
-  const end = new Date(date);
-  end.setUTCHours(23, 59, 59, 999);
+export async function findAppointmentsOnDate(doctorId: string, dateStr: string) {
+  const { start, end } = getDayBoundsInTimezone(dateStr);
 
   return prisma.appointment.findMany({
     where: {

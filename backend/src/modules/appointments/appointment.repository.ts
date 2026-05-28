@@ -1,20 +1,19 @@
 import prisma from "../../lib/prisma.js";
 import type { AppointmentStatus } from "../../generated/prisma/client.js";
 import type { ListAppointmentsQueryInput } from "./appointment.validation.js";
+import { getDayBoundsInTimezone, getWallClockParts } from "../../utils/schedule-datetime.js";
 
 export async function isDateBlockedForDoctor(
   doctorId: string,
   date: Date,
 ): Promise<boolean> {
-  const dayStart = new Date(date);
-  dayStart.setUTCHours(0, 0, 0, 0);
-  const dayEnd = new Date(date);
-  dayEnd.setUTCHours(23, 59, 59, 999);
+  const { dateStr } = getWallClockParts(date);
+  const { start, end } = getDayBoundsInTimezone(dateStr);
 
   const blocked = await prisma.blockedDate.findFirst({
     where: {
       doctorId,
-      date: { gte: dayStart, lte: dayEnd },
+      date: { gte: start, lte: end },
     },
   });
 

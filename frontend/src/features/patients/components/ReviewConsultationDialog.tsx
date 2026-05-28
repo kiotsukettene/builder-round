@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { toast } from "sonner"
+import { Star } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -11,96 +11,113 @@ import {
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { InteractiveStarRating } from "@/components/common/StarRating"
+import { cn } from "@/lib/utils"
 import { useSubmitReview } from "@/hooks/use-rating"
 
 interface ReviewConsultationDialogProps {
-  appointmentId: string
-  doctorName?: string
   open: boolean
   onOpenChange: (open: boolean) => void
-  onComplete?: () => void
+  appointmentId: string
+  doctorName: string
 }
 
 export function ReviewConsultationDialog({
-  appointmentId,
-  doctorName,
   open,
   onOpenChange,
-  onComplete,
+  appointmentId,
+  doctorName,
 }: ReviewConsultationDialogProps) {
   const [rating, setRating] = useState(0)
+  const [hovered, setHovered] = useState(0)
   const [comment, setComment] = useState("")
-  const { mutateAsync: submitReview, isPending } = useSubmitReview()
+  const { mutate: submitReview, isPending } = useSubmitReview(appointmentId)
 
-  async function handleSubmit() {
-    if (rating === 0) {
-      toast.error("Please select a star rating.")
-      return
-    }
-
-    try {
-      await submitReview({
-        appointmentId,
-        data: {
-          rating,
-          ...(comment.trim() ? { comment: comment.trim() } : {}),
+  function handleSubmit() {
+    if (rating === 0) return
+    submitReview(
+      { rating, comment: comment.trim() || undefined },
+      {
+        onSuccess: () => {
+          setRating(0)
+          setComment("")
+          onOpenChange(false)
         },
-      })
-      onOpenChange(false)
-      onComplete?.()
-    } catch {
-      // Error toast handled in hook
-    }
+      }
+    )
   }
 
-  function handleSkip() {
-    onOpenChange(false)
-    onComplete?.()
-  }
+  const displayRating = hovered || rating
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Rate your consultation</DialogTitle>
+          <DialogTitle>Rate Your Consultation</DialogTitle>
           <DialogDescription>
-            {doctorName
-              ? `How was your consultation with Dr. ${doctorName}?`
-              : "Share your experience to help other patients find the right doctor."}
+            How was your experience with Dr. {doctorName}?
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-2">
-          <div className="space-y-2">
-            <Label>Your rating</Label>
-            <InteractiveStarRating value={rating} onChange={setRating} disabled={isPending} />
+        <div className="space-y-5 py-2">
+          {/* Star selector */}
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex items-center gap-1">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  className="rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  onMouseEnter={() => setHovered(i + 1)}
+                  onMouseLeave={() => setHovered(0)}
+                  onClick={() => setRating(i + 1)}
+                >
+                  <Star
+                    className={cn(
+                      "size-9 transition-colors",
+                      i < displayRating
+                        ? "fill-amber-400 text-amber-400"
+                        : "text-muted-foreground/30 hover:text-amber-300"
+                    )}
+                  />
+                </button>
+              ))}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {displayRating === 0 && "Select a rating"}
+              {displayRating === 1 && "Poor"}
+              {displayRating === 2 && "Fair"}
+              {displayRating === 3 && "Good"}
+              {displayRating === 4 && "Very Good"}
+              {displayRating === 5 && "Excellent"}
+            </p>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="review-comment">Comment (optional)</Label>
+          {/* Comment */}
+          <div className="space-y-1.5">
+            <Label htmlFor="review-comment" className="text-sm">
+              Comment <span className="text-muted-foreground">(optional)</span>
+            </Label>
             <Textarea
               id="review-comment"
-              placeholder="Tell others about your experience..."
+              placeholder="Share your experience..."
               value={comment}
               onChange={(e) => setComment(e.target.value)}
+              rows={3}
               maxLength={1000}
-              rows={4}
-              disabled={isPending}
+              className="resize-none text-sm"
             />
+            <p className="text-right text-xs text-muted-foreground">
+              {comment.length}/1000
+            </p>
           </div>
-
-          <p className="text-xs text-muted-foreground">
-            You can submit a review once the doctor has ended the consultation.
-          </p>
         </div>
 
         <DialogFooter className="gap-2 sm:gap-0">
-          <Button variant="ghost" onClick={handleSkip} disabled={isPending}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
             Skip
           </Button>
           <Button onClick={handleSubmit} disabled={isPending || rating === 0}>
-            Submit Review
+            {isPending ? "Submitting..." : "Submit Review"}
           </Button>
         </DialogFooter>
       </DialogContent>

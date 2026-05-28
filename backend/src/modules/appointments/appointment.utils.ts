@@ -25,6 +25,11 @@ export function toAppointmentDto(appointment: AppointmentWithRelations) {
       firstName: appointment.patient.firstName,
       lastName: appointment.patient.lastName,
       profilePicture: appointment.patient.profilePicture,
+      birthday: appointment.patient.birthday,
+      weight: appointment.patient.weight,
+      height: appointment.patient.height,
+      phone: appointment.patient.phone,
+      history: appointment.patient.history,
     },
     doctor: {
       id: appointment.doctor.id,

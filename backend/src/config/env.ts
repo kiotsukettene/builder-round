@@ -24,6 +24,7 @@ const envSchema = z.object({
   GEMINI_API_KEY: z.string().min(1),
   ZEGOCLOUD_APP_ID: z.coerce.number().int().positive(),
   ZEGOCLOUD_SERVER_SECRET: z.string().min(1),
+  APP_TIMEZONE: z.string().default("Asia/Manila"),
 });
 
 const parsed = envSchema.parse(process.env);

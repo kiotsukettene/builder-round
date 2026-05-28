@@ -4,13 +4,19 @@ export const bookAppointmentSchema = z.object({
   doctorId: z.string().min(1, "Doctor ID is required"),
   scheduledAt: z
     .string()
-    .datetime({ message: "scheduledAt must be a valid ISO 8601 datetime" }),
+    .datetime({
+      offset: true,
+      message: "scheduledAt must be a valid ISO 8601 datetime",
+    }),
 });
 
 export const rescheduleAppointmentSchema = z.object({
   scheduledAt: z
     .string()
-    .datetime({ message: "scheduledAt must be a valid ISO 8601 datetime" }),
+    .datetime({
+      offset: true,
+      message: "scheduledAt must be a valid ISO 8601 datetime",
+    }),
 });
 
 export const listAppointmentsQuerySchema = z.object({

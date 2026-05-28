@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getTodayDateStr } from "../../utils/schedule-datetime.js";
 
 const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
@@ -32,12 +33,7 @@ export const blockDateSchema = z.object({
   date: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "date must be in YYYY-MM-DD format")
-    .refine((d) => {
-      const parsed = new Date(d);
-      const today = new Date();
-      today.setUTCHours(0, 0, 0, 0);
-      return parsed >= today;
-    }, "Blocked date must be today or in the future"),
+    .refine((d) => d >= getTodayDateStr(), "Blocked date must be today or in the future"),
   reason: z.string().max(500).optional(),
 });
 
