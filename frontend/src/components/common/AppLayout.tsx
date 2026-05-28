@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom"
-import { User, LogOut, Menu } from "lucide-react"
+import { User, LogOut, Menu, Stethoscope, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -41,6 +41,24 @@ export function AppLayout({ children }: AppLayoutProps) {
           </Link>
 
           <nav className="flex items-center gap-2">
+            {user?.role === "PATIENT" && (
+              <>
+                <Link
+                  to="/recommendations"
+                  className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground sm:flex"
+                >
+                  <Sparkles className="size-3.5" />
+                  AI Match
+                </Link>
+                <Link
+                  to="/doctors"
+                  className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground sm:flex"
+                >
+                  <Stethoscope className="size-3.5" />
+                  Find Doctors
+                </Link>
+              </>
+            )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2 px-2">
@@ -62,6 +80,18 @@ export function AppLayout({ children }: AppLayoutProps) {
                   <User className="size-4" />
                   Profile
                 </DropdownMenuItem>
+                {user?.role === "PATIENT" && (
+                  <>
+                    <DropdownMenuItem onClick={() => navigate("/recommendations")}>
+                      <Sparkles className="size-4" />
+                      AI Match
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/doctors")}>
+                      <Stethoscope className="size-4" />
+                      Find Doctors
+                    </DropdownMenuItem>
+                  </>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => logout()}

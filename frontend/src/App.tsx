@@ -41,6 +41,21 @@ const DoctorProfilePage = lazy(() =>
     default: m.DoctorProfilePage,
   }))
 )
+const RecommendationPage = lazy(() =>
+  import("@/features/patients/RecommendationPage").then((m) => ({
+    default: m.RecommendationPage,
+  }))
+)
+const DoctorDiscoveryPage = lazy(() =>
+  import("@/features/patients/DoctorDiscoveryPage").then((m) => ({
+    default: m.DoctorDiscoveryPage,
+  }))
+)
+const DoctorDetailPage = lazy(() =>
+  import("@/features/patients/DoctorDetailPage").then((m) => ({
+    default: m.DoctorDetailPage,
+  }))
+)
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -110,6 +125,9 @@ function App() {
               }
             >
               <Route path="/profile" element={<PatientProfilePage />} />
+              <Route path="/recommendations" element={<RecommendationPage />} />
+              <Route path="/doctors" element={<DoctorDiscoveryPage />} />
+              <Route path="/doctors/:id" element={<DoctorDetailPage />} />
             </Route>
 
             {/* Doctor protected routes — needs complete profile */}
