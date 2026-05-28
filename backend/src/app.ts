@@ -11,6 +11,7 @@ import appointmentRoutes from "./modules/appointments/appointment.routes.js";
 import notificationRoutes from "./modules/notifications/notification.routes.js";
 import scheduleRoutes from "./modules/schedules/schedule.routes.js";
 import consultationRoutes from "./modules/consultations/consultation.routes.js";
+import medicalRecordRoutes from "./modules/medical-records/medical-record.routes.js";
 import { globalLimiter } from "./middleware/rate-limiter.js";
 import { errorHandler } from "./middleware/error-handler.js";
 import { env } from "./config/env.js";
@@ -48,6 +49,7 @@ app.use("/api/v1/appointments", appointmentRoutes);
 app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/schedules", scheduleRoutes);
 app.use("/api/v1/consultations", consultationRoutes);
+app.use("/api/v1/medical-records", medicalRecordRoutes);
 
 app.use(errorHandler);
 
