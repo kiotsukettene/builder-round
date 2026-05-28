@@ -34,7 +34,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useMyAppointments, useCancelAppointment } from "@/hooks/use-appointments"
+import { MedicalRecordDialog } from "@/features/patients/components/MedicalRecordDialog"
 import type { Appointment, AppointmentPatient, AppointmentStatus } from "@/types/appointment"
+import {
+  getRelativeTimeLabel,
+  isWithinJoinWindow,
+} from "@/utils/appointment-datetime"
 
 type TabValue = "upcoming" | "completed" | "cancelled" | "all"
 
@@ -52,13 +57,7 @@ const STATUS_CONFIG = {
   CANCELLED: { label: "Cancelled", className: "bg-red-50 text-red-600 border-red-200" },
 }
 
-function isJoinable(scheduledAt: string): boolean {
-  const scheduled = new Date(scheduledAt)
-  const now = new Date()
-  const windowStart = new Date(scheduled.getTime() - 10 * 60 * 1000)
-  const windowEnd = new Date(scheduled.getTime() + 60 * 60 * 1000)
-  return now >= windowStart && now <= windowEnd
-}
+const CONSULTATION_DURATION_MIN = 30
 
 function getAge(birthday: string): number {
   const birth = new Date(birthday)
@@ -149,11 +148,21 @@ function PatientDetails({ patient }: { patient: AppointmentPatient }) {
 function DoctorAppointmentCard({ appointment }: { appointment: Appointment }) {
   const navigate = useNavigate()
   const { mutate: cancelAppointment, isPending: isCancelling } = useCancelAppointment()
+  const [recordsOpen, setRecordsOpen] = useState(false)
 
   const statusConfig = STATUS_CONFIG[appointment.status]
   const canCancel = appointment.status === "PENDING" || appointment.status === "CONFIRMED"
-  const canJoin = (appointment.status === "PENDING" || appointment.status === "CONFIRMED") &&
-    isJoinable(appointment.scheduledAt)
+  const isActive = appointment.status === "PENDING" || appointment.status === "CONFIRMED"
+  const isCompleted = appointment.status === "COMPLETED"
+  const isWithinWindow = isWithinJoinWindow(
+    appointment.scheduledAt,
+    CONSULTATION_DURATION_MIN,
+  )
+  const timeLabel = getRelativeTimeLabel(
+    appointment.scheduledAt,
+    CONSULTATION_DURATION_MIN,
+  )
+  const patientName = `${appointment.patient.firstName} ${appointment.patient.lastName}`
 
   const scheduledDate = new Date(appointment.scheduledAt)
   const dateStr = scheduledDate.toLocaleDateString("en-US", {
@@ -169,8 +178,9 @@ function DoctorAppointmentCard({ appointment }: { appointment: Appointment }) {
   })
 
   return (
-    <Card className="overflow-hidden">
-      <CardContent className="p-0">
+    <>
+      <Card className="overflow-hidden">
+        <CardContent className="p-0">
         <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:gap-5">
           {/* Patient info */}
           <div className="flex min-w-0 flex-1 items-start gap-3">
@@ -214,16 +224,32 @@ function DoctorAppointmentCard({ appointment }: { appointment: Appointment }) {
         </div>
 
         {/* Actions */}
-        {(canJoin || canCancel) && (
+        {(isActive || canCancel || isCompleted) && (
           <div className="flex flex-wrap items-center gap-2 border-t bg-muted/20 px-4 py-2.5">
-            {canJoin && (
+            {isActive && (
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  size="sm"
+                  variant={isWithinWindow ? "default" : "outline"}
+                  className="gap-1.5"
+                  onClick={() => navigate(`/consultation/${appointment.id}`)}
+                >
+                  <Video className="size-3.5" />
+                  {isWithinWindow ? "Join Now" : "Join Session"}
+                </Button>
+                <span className="text-xs text-muted-foreground">{timeLabel}</span>
+              </div>
+            )}
+
+            {isCompleted && (
               <Button
+                variant="outline"
                 size="sm"
                 className="gap-1.5"
-                onClick={() => navigate(`/consultation/${appointment.id}`)}
+                onClick={() => setRecordsOpen(true)}
               >
-                <Video className="size-3.5" />
-                Join Session
+                <FileText className="size-3.5" />
+                View Records
               </Button>
             )}
 
@@ -264,6 +290,16 @@ function DoctorAppointmentCard({ appointment }: { appointment: Appointment }) {
         )}
       </CardContent>
     </Card>
+
+      {isCompleted && (
+        <MedicalRecordDialog
+          open={recordsOpen}
+          onOpenChange={setRecordsOpen}
+          appointmentId={appointment.id}
+          counterpartName={patientName}
+        />
+      )}
+    </>
   )
 }
 

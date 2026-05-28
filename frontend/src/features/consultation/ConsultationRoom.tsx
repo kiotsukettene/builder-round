@@ -4,6 +4,7 @@ import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { joinConsultation, endConsultation } from "@/services/consultation.service";
 import { useAuthStore } from "@/store/auth.store";
+import { useAppointmentById } from "@/hooks/use-appointments";
 import { NotesPanel } from "./components/NotesPanel";
 import { PrescriptionsPanel } from "./components/PrescriptionsPanel";
 import { ReviewConsultationDialog } from "@/features/patients/components/ReviewConsultationDialog";
@@ -25,6 +26,12 @@ export function ConsultationRoom() {
   const [isPanelOpen, setIsPanelOpen] = useState(true);
   const [joinError, setJoinError] = useState<string | null>(null);
   const [showReviewDialog, setShowReviewDialog] = useState(false);
+
+  const { data: appointment } = useAppointmentById(appointmentId);
+
+  const doctorName = appointment
+    ? `${appointment.doctor.firstName} ${appointment.doctor.lastName}`
+    : undefined;
 
   const {
     data: credentials,
@@ -193,6 +200,7 @@ export function ConsultationRoom() {
       {!isDoctor && appointmentId && (
         <ReviewConsultationDialog
           appointmentId={appointmentId}
+          doctorName={doctorName}
           open={showReviewDialog}
           onOpenChange={setShowReviewDialog}
           onComplete={() => navigate(-1)}

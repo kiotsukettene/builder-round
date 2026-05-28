@@ -17,8 +17,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { RescheduleDialog } from "@/features/patients/components/RescheduleDialog"
+import { MedicalRecordDialog } from "@/features/patients/components/MedicalRecordDialog"
 import { useCancelAppointment } from "@/hooks/use-appointments"
 import type { Appointment } from "@/types/appointment"
+import {
+  getRelativeTimeLabel,
+  isWithinJoinWindow,
+} from "@/utils/appointment-datetime"
 
 const STATUS_CONFIG = {
   PENDING: { label: "Pending", className: "bg-amber-100 text-amber-700 border-amber-200" },
@@ -27,13 +32,7 @@ const STATUS_CONFIG = {
   CANCELLED: { label: "Cancelled", className: "bg-red-50 text-red-600 border-red-200" },
 }
 
-function isJoinable(scheduledAt: string, durationMin: number): boolean {
-  const scheduled = new Date(scheduledAt)
-  const now = new Date()
-  const windowStart = new Date(scheduled.getTime() - 10 * 60 * 1000)
-  const windowEnd = new Date(scheduled.getTime() + durationMin * 60 * 1000)
-  return now >= windowStart && now <= windowEnd
-}
+const CONSULTATION_DURATION_MIN = 30
 
 interface AppointmentCardProps {
   appointment: Appointment
@@ -44,6 +43,7 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
   const navigate = useNavigate()
   const { mutate: cancelAppointment, isPending: isCancelling } = useCancelAppointment()
   const [rescheduleOpen, setRescheduleOpen] = useState(false)
+  const [recordsOpen, setRecordsOpen] = useState(false)
 
   const isPatient = role === "PATIENT"
   const counterpart = isPatient ? appointment.doctor : appointment.patient
@@ -55,8 +55,15 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
   const statusConfig = STATUS_CONFIG[appointment.status]
   const canCancel = appointment.status === "PENDING" || appointment.status === "CONFIRMED"
   const canReschedule = isPatient && (appointment.status === "PENDING" || appointment.status === "CONFIRMED")
-  const canJoin = (appointment.status === "PENDING" || appointment.status === "CONFIRMED") &&
-    isJoinable(appointment.scheduledAt, 30)
+  const isActive = appointment.status === "PENDING" || appointment.status === "CONFIRMED"
+  const isWithinWindow = isWithinJoinWindow(
+    appointment.scheduledAt,
+    CONSULTATION_DURATION_MIN,
+  )
+  const timeLabel = getRelativeTimeLabel(
+    appointment.scheduledAt,
+    CONSULTATION_DURATION_MIN,
+  )
   const isCompleted = appointment.status === "COMPLETED"
 
   const scheduledDate = new Date(appointment.scheduledAt)
@@ -79,19 +86,45 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
           <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:gap-5">
             {/* Doctor/Patient info */}
             <div className="flex flex-1 items-start gap-3">
-              <Avatar className="size-11 shrink-0">
-                <AvatarImage
-                  src={counterpart.profilePicture ?? undefined}
-                  alt={counterpartName}
-                />
-                <AvatarFallback>
-                  <User className="size-5" />
-                </AvatarFallback>
-              </Avatar>
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold">{counterpartName}</p>
-                <p className="text-xs text-muted-foreground">{counterpartSub}</p>
-              </div>
+              {isPatient ? (
+                <button
+                  type="button"
+                  onClick={() => navigate(`/doctors/${appointment.doctor.id}`)}
+                  className="flex min-w-0 flex-1 items-start gap-3 rounded-md text-left transition-colors hover:bg-muted/40 -m-1 p-1"
+                >
+                  <Avatar className="size-11 shrink-0">
+                    <AvatarImage
+                      src={counterpart.profilePicture ?? undefined}
+                      alt={counterpartName}
+                    />
+                    <AvatarFallback>
+                      <User className="size-5" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold hover:underline">
+                      {counterpartName}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{counterpartSub}</p>
+                  </div>
+                </button>
+              ) : (
+                <>
+                  <Avatar className="size-11 shrink-0">
+                    <AvatarImage
+                      src={counterpart.profilePicture ?? undefined}
+                      alt={counterpartName}
+                    />
+                    <AvatarFallback>
+                      <User className="size-5" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold">{counterpartName}</p>
+                    <p className="text-xs text-muted-foreground">{counterpartSub}</p>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Date + status */}
@@ -114,17 +147,21 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
           </div>
 
           {/* Actions footer */}
-          {(canCancel || canReschedule || canJoin || isCompleted) && (
+          {(canCancel || canReschedule || isActive || isCompleted) && (
             <div className="flex flex-wrap items-center gap-2 border-t bg-muted/20 px-4 py-2.5">
-              {canJoin && (
-                <Button
-                  size="sm"
-                  className="gap-1.5"
-                  onClick={() => navigate(`/consultation/${appointment.id}`)}
-                >
-                  <Video className="size-3.5" />
-                  Join Now
-                </Button>
+              {isActive && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant={isWithinWindow ? "default" : "outline"}
+                    className="gap-1.5"
+                    onClick={() => navigate(`/consultation/${appointment.id}`)}
+                  >
+                    <Video className="size-3.5" />
+                    {isWithinWindow ? "Join Now" : "Join Session"}
+                  </Button>
+                  <span className="text-xs text-muted-foreground">{timeLabel}</span>
+                </div>
               )}
 
               {isCompleted && (
@@ -132,7 +169,7 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
                   variant="outline"
                   size="sm"
                   className="gap-1.5"
-                  onClick={() => navigate(`/consultation/${appointment.id}`)}
+                  onClick={() => setRecordsOpen(true)}
                 >
                   <FileText className="size-3.5" />
                   View Records
@@ -194,6 +231,15 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
           open={rescheduleOpen}
           onOpenChange={setRescheduleOpen}
           appointment={appointment}
+        />
+      )}
+
+      {isCompleted && (
+        <MedicalRecordDialog
+          open={recordsOpen}
+          onOpenChange={setRecordsOpen}
+          appointmentId={appointment.id}
+          counterpartName={counterpartName}
         />
       )}
     </>

@@ -18,19 +18,26 @@ interface ReviewConsultationDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   appointmentId: string
-  doctorName: string
+  doctorName?: string
+  onComplete?: () => void
 }
 
 export function ReviewConsultationDialog({
   open,
   onOpenChange,
   appointmentId,
-  doctorName,
+  doctorName = "your doctor",
+  onComplete,
 }: ReviewConsultationDialogProps) {
   const [rating, setRating] = useState(0)
   const [hovered, setHovered] = useState(0)
   const [comment, setComment] = useState("")
   const { mutate: submitReview, isPending } = useSubmitReview(appointmentId)
+
+  function handleClose() {
+    onOpenChange(false)
+    onComplete?.()
+  }
 
   function handleSubmit() {
     if (rating === 0) return
@@ -40,7 +47,7 @@ export function ReviewConsultationDialog({
         onSuccess: () => {
           setRating(0)
           setComment("")
-          onOpenChange(false)
+          handleClose()
         },
       }
     )
@@ -113,7 +120,7 @@ export function ReviewConsultationDialog({
         </div>
 
         <DialogFooter className="gap-2 sm:gap-0">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
+          <Button variant="outline" onClick={handleClose} disabled={isPending}>
             Skip
           </Button>
           <Button onClick={handleSubmit} disabled={isPending || rating === 0}>
