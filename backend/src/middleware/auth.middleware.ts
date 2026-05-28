@@ -4,6 +4,11 @@ import { AppError } from "../errors/app-error.js";
 import * as authRepository from "../modules/auth/auth.repository.js";
 import * as patientRepository from "../modules/patients/patient.repository.js";
 import { isPatientProfileComplete } from "../modules/patients/patient.utils.js";
+import { getCached, setCache } from "../lib/cache.js";
+
+// Email verified status never reverts — cache for 10 minutes to cut one DB
+// round-trip on every protected request.
+const EMAIL_VERIFIED_TTL_MS = 10 * 60 * 1000;
 
 export function authenticate(
   req: Request,
@@ -53,16 +58,23 @@ export async function requireVerifiedEmail(
     throw new AppError("Authentication required", 401);
   }
 
-  const user = await authRepository.findUserById(req.user.userId);
-  if (!user) {
-    throw new AppError("User not found", 404);
-  }
+  const cacheKey = `auth:verified:${req.user.userId}`;
+  const cachedVerified = getCached<boolean>(cacheKey);
 
-  if (!user.emailVerified) {
-    throw new AppError(
-      "Please verify your email to access this resource",
-      403,
-    );
+  if (cachedVerified === null) {
+    const user = await authRepository.findUserById(req.user.userId);
+    if (!user) {
+      throw new AppError("User not found", 404);
+    }
+
+    if (!user.emailVerified) {
+      throw new AppError(
+        "Please verify your email to access this resource",
+        403,
+      );
+    }
+
+    setCache(cacheKey, true, EMAIL_VERIFIED_TTL_MS);
   }
 
   next();

@@ -53,6 +53,7 @@ export async function completeProfile(
     data,
   );
 
+  doctorRepository.invalidateSpecializationsCache();
   return toDoctorDto(updatedDoctor);
 }
 
@@ -68,6 +69,9 @@ export async function updateProfile(userId: string, data: UpdateProfileInput) {
     data,
   );
 
+  if (data.specialization !== undefined) {
+    doctorRepository.invalidateSpecializationsCache();
+  }
   return toDoctorDto(updatedDoctor);
 }
 

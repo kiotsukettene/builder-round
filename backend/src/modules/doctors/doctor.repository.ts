@@ -1,9 +1,13 @@
 import prisma from "../../lib/prisma.js";
+import { getCached, setCache, invalidateCache } from "../../lib/cache.js";
 import type {
   CompleteProfileInput,
   ListDoctorsQueryInput,
   UpdateProfileInput,
 } from "./doctor.validation.js";
+
+const SPECIALIZATIONS_CACHE_KEY = "doctor:specializations";
+const SPECIALIZATIONS_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 export async function findDoctorByUserId(userId: string) {
   return prisma.doctor.findUnique({
@@ -148,6 +152,9 @@ export async function findAppointmentsOnDate(doctorId: string, date: Date) {
 }
 
 export async function getAllSpecializations(): Promise<string[]> {
+  const cached = getCached<string[]>(SPECIALIZATIONS_CACHE_KEY);
+  if (cached) return cached;
+
   const rows = await prisma.doctor.findMany({
     where: { profileCompletedAt: { not: null } },
     select: { specialization: true },
@@ -155,7 +162,13 @@ export async function getAllSpecializations(): Promise<string[]> {
     orderBy: { specialization: "asc" },
   });
 
-  return rows.map((r) => r.specialization);
+  const specializations = rows.map((r) => r.specialization);
+  setCache(SPECIALIZATIONS_CACHE_KEY, specializations, SPECIALIZATIONS_TTL_MS);
+  return specializations;
+}
+
+export function invalidateSpecializationsCache(): void {
+  invalidateCache(SPECIALIZATIONS_CACHE_KEY);
 }
 
 export async function findDoctorsBySpecialization(specialization: string) {

@@ -3,6 +3,7 @@ import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { sendVerificationEmail } from "../../lib/email/index.js";
 import { AppError } from "../../errors/app-error.js";
+import { invalidateCache } from "../../lib/cache.js";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -123,6 +124,7 @@ export async function verifyEmail(token: string): Promise<void> {
   }
 
   await authRepository.markEmailVerified(user.id);
+  invalidateCache(`auth:verified:${user.id}`);
 }
 
 export async function resendVerification(
