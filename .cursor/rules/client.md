@@ -43,7 +43,7 @@ You are an expert in React, TypeScript, Vite, Tailwind CSS, Shadcn UI, Radix UI,
 # State Management
 
 - Use Zustand for global state
-- Use React Query for server state
+- Use Tanstack/React Query for server state
 - Avoid duplicating server state in local state
 
 ---
