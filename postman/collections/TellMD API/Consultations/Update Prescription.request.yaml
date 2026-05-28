@@ -1,0 +1,16 @@
+$kind: http-request
+name: Update Prescription
+method: PATCH
+url: "{{baseUrl}}/api/v1/consultations/APPOINTMENT_ID_HERE/prescriptions/PRESCRIPTION_ID_HERE"
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"
+body:
+  type: json
+  content: |-
+    {
+      "dosage": "250mg",
+      "frequency": "Twice daily"
+    }
+order: 7000
