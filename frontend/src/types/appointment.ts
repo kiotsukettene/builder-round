@@ -1,4 +1,4 @@
-export type AppointmentStatus = "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED"
+export type AppointmentStatus = "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED" | "MISSED"
 
 export interface AppointmentPatient {
   id: string
@@ -21,6 +21,7 @@ export interface AppointmentDoctor {
   specialization: string
   fee: number | null
   profilePicture: string | null
+  consultationDuration: number
 }
 
 export interface Appointment {

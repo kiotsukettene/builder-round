@@ -16,8 +16,8 @@ import type {
   RescheduleAppointmentInput,
 } from "./appointment.validation.js";
 
-const CANCELLABLE_STATUSES = ["PENDING", "CONFIRMED"] as const;
-const RESCHEDULABLE_STATUSES = ["PENDING", "CONFIRMED"] as const;
+const CANCELLABLE_STATUSES = ["PENDING", "CONFIRMED", "MISSED"] as const;
+const RESCHEDULABLE_STATUSES = ["PENDING", "CONFIRMED", "MISSED"] as const;
 
 function requireFutureDate(scheduledAt: Date): void {
   if (scheduledAt <= new Date()) {

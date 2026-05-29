@@ -27,6 +27,7 @@ const TYPE_LABELS: Record<NotificationType, string> = {
   APPOINTMENT_CANCELLED: "Cancellation",
   APPOINTMENT_REMINDER: "Reminder",
   SCHEDULE_UPDATED: "Schedule Update",
+  SESSION_WINDOW_PASSED: "Session Ended",
 }
 
 function timeAgo(dateStr: string): string {

@@ -8,7 +8,7 @@ export function DoctorMedicalRecordsPage() {
   const [page, setPage] = useState(1);
   const [searchParams] = useSearchParams();
   const initialAppointmentId = searchParams.get("appointment");
-  const { data, isLoading, isError } = useMedicalRecords({ page, limit: 10 });
+  const { data, isContentLoading, isError } = useMedicalRecords({ page, limit: 10 });
 
   return (
     <AppLayout>
@@ -25,7 +25,7 @@ export function DoctorMedicalRecordsPage() {
           role="DOCTOR"
           records={data?.data ?? []}
           meta={data?.meta}
-          isLoading={isLoading}
+          isLoading={isContentLoading}
           isError={isError}
           page={page}
           onPageChange={setPage}

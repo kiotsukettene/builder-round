@@ -1433,6 +1433,7 @@ export const AppointmentScalarFieldEnum = {
   cancellationReason: 'cancellationReason',
   reminderOneHourSentAt: 'reminderOneHourSentAt',
   reminderTenMinSentAt: 'reminderTenMinSentAt',
+  sessionWindowPassedNotifiedAt: 'sessionWindowPassedNotifiedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
