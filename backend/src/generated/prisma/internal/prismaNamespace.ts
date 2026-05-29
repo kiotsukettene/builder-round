@@ -391,6 +391,7 @@ export const ModelName = {
   DoctorAvailability: 'DoctorAvailability',
   BlockedDate: 'BlockedDate',
   Appointment: 'Appointment',
+  AppointmentMessage: 'AppointmentMessage',
   ConsultationNote: 'ConsultationNote',
   Prescription: 'Prescription',
   Recommendation: 'Recommendation',
@@ -411,7 +412,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "revokedRefreshToken" | "patient" | "doctor" | "doctorAvailability" | "blockedDate" | "appointment" | "consultationNote" | "prescription" | "recommendation" | "doctorReview" | "notification"
+    modelProps: "user" | "revokedRefreshToken" | "patient" | "doctor" | "doctorAvailability" | "blockedDate" | "appointment" | "appointmentMessage" | "consultationNote" | "prescription" | "recommendation" | "doctorReview" | "notification"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -933,6 +934,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AppointmentMessage: {
+      payload: Prisma.$AppointmentMessagePayload<ExtArgs>
+      fields: Prisma.AppointmentMessageFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AppointmentMessageFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentMessagePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AppointmentMessageFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentMessagePayload>
+        }
+        findFirst: {
+          args: Prisma.AppointmentMessageFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentMessagePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AppointmentMessageFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentMessagePayload>
+        }
+        findMany: {
+          args: Prisma.AppointmentMessageFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentMessagePayload>[]
+        }
+        create: {
+          args: Prisma.AppointmentMessageCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentMessagePayload>
+        }
+        createMany: {
+          args: Prisma.AppointmentMessageCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AppointmentMessageCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentMessagePayload>[]
+        }
+        delete: {
+          args: Prisma.AppointmentMessageDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentMessagePayload>
+        }
+        update: {
+          args: Prisma.AppointmentMessageUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentMessagePayload>
+        }
+        deleteMany: {
+          args: Prisma.AppointmentMessageDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AppointmentMessageUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AppointmentMessageUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentMessagePayload>[]
+        }
+        upsert: {
+          args: Prisma.AppointmentMessageUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentMessagePayload>
+        }
+        aggregate: {
+          args: Prisma.AppointmentMessageAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAppointmentMessage>
+        }
+        groupBy: {
+          args: Prisma.AppointmentMessageGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AppointmentMessageGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AppointmentMessageCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AppointmentMessageCountAggregateOutputType> | number
+        }
+      }
+    }
     ConsultationNote: {
       payload: Prisma.$ConsultationNotePayload<ExtArgs>
       fields: Prisma.ConsultationNoteFieldRefs
@@ -1441,6 +1516,18 @@ export const AppointmentScalarFieldEnum = {
 export type AppointmentScalarFieldEnum = (typeof AppointmentScalarFieldEnum)[keyof typeof AppointmentScalarFieldEnum]
 
 
+export const AppointmentMessageScalarFieldEnum = {
+  id: 'id',
+  appointmentId: 'appointmentId',
+  authorRole: 'authorRole',
+  authorUserId: 'authorUserId',
+  body: 'body',
+  createdAt: 'createdAt'
+} as const
+
+export type AppointmentMessageScalarFieldEnum = (typeof AppointmentMessageScalarFieldEnum)[keyof typeof AppointmentMessageScalarFieldEnum]
+
+
 export const ConsultationNoteScalarFieldEnum = {
   id: 'id',
   appointmentId: 'appointmentId',
@@ -1631,6 +1718,20 @@ export type ListEnumAppointmentStatusFieldRefInput<$PrismaModel> = FieldRefInput
 
 
 /**
+ * Reference to a field of type 'MessageAuthorRole'
+ */
+export type EnumMessageAuthorRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MessageAuthorRole'>
+    
+
+
+/**
+ * Reference to a field of type 'MessageAuthorRole[]'
+ */
+export type ListEnumMessageAuthorRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MessageAuthorRole[]'>
+    
+
+
+/**
  * Reference to a field of type 'RecommendationSource'
  */
 export type EnumRecommendationSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RecommendationSource'>
@@ -1774,6 +1875,7 @@ export type GlobalOmitConfig = {
   doctorAvailability?: Prisma.DoctorAvailabilityOmit
   blockedDate?: Prisma.BlockedDateOmit
   appointment?: Prisma.AppointmentOmit
+  appointmentMessage?: Prisma.AppointmentMessageOmit
   consultationNote?: Prisma.ConsultationNoteOmit
   prescription?: Prisma.PrescriptionOmit
   recommendation?: Prisma.RecommendationOmit

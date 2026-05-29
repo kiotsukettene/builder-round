@@ -33,11 +33,20 @@ export const NotificationType = {
   APPOINTMENT_CONFIRMED: 'APPOINTMENT_CONFIRMED',
   APPOINTMENT_CANCELLED: 'APPOINTMENT_CANCELLED',
   APPOINTMENT_REMINDER: 'APPOINTMENT_REMINDER',
+  APPOINTMENT_MESSAGE: 'APPOINTMENT_MESSAGE',
   SCHEDULE_UPDATED: 'SCHEDULE_UPDATED',
   SESSION_WINDOW_PASSED: 'SESSION_WINDOW_PASSED'
 } as const
 
 export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]
+
+
+export const MessageAuthorRole = {
+  PATIENT: 'PATIENT',
+  DOCTOR: 'DOCTOR'
+} as const
+
+export type MessageAuthorRole = (typeof MessageAuthorRole)[keyof typeof MessageAuthorRole]
 
 
 export const RecommendationSource = {
