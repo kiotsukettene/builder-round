@@ -10,12 +10,22 @@ export function formatDateQueryParam(date: Date): string {
   return `${year}-${month}-${day}`
 }
 
-/** Build ISO datetime with the user's local timezone offset (e.g. 2026-05-29T09:00:00+08:00). */
-export function buildScheduledAtIso(date: Date, slotTime: string): string {
-  const datePart = formatDateQueryParam(date)
+function buildLocalSlotDateTime(date: Date, slotTime: string): Date {
   const [hours, minutes] = slotTime.split(":").map(Number)
   const local = new Date(date)
   local.setHours(hours, minutes, 0, 0)
+  return local
+}
+
+/** Whether a slot start time is in the past (matches backend requireFutureDate). */
+export function isSlotInPast(date: Date, slotTime: string, now = new Date()): boolean {
+  return buildLocalSlotDateTime(date, slotTime) <= now
+}
+
+/** Build ISO datetime with the user's local timezone offset (e.g. 2026-05-29T09:00:00+08:00). */
+export function buildScheduledAtIso(date: Date, slotTime: string): string {
+  const datePart = formatDateQueryParam(date)
+  const local = buildLocalSlotDateTime(date, slotTime)
 
   const offsetMinutes = -local.getTimezoneOffset()
   const sign = offsetMinutes >= 0 ? "+" : "-"
@@ -102,4 +112,14 @@ export function getRelativeTimeLabel(
   }
 
   return "Session window passed"
+}
+
+/** Whether the session join window has fully ended. */
+export function isSessionWindowPassed(
+  scheduledAt: string,
+  durationMin = 30,
+): boolean {
+  const scheduled = new Date(scheduledAt)
+  const windowEnd = new Date(scheduled.getTime() + durationMin * 60 * 1000)
+  return Date.now() > windowEnd.getTime()
 }

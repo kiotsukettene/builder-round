@@ -4,6 +4,7 @@ export type NotificationType =
   | "APPOINTMENT_CANCELLED"
   | "APPOINTMENT_REMINDER"
   | "SCHEDULE_UPDATED"
+  | "SESSION_WINDOW_PASSED"
 
 export interface Notification {
   id: string
