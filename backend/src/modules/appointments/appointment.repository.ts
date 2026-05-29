@@ -230,6 +230,7 @@ export async function updateAppointmentScheduleSafe(
           status: "PENDING",
           reminderOneHourSentAt: null,
           reminderTenMinSentAt: null,
+          sessionWindowPassedNotifiedAt: null,
         },
         include: appointmentWithRelations,
       });
