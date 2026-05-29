@@ -8,6 +8,8 @@ import {
   listAppointmentsQuerySchema,
   rescheduleAppointmentSchema,
 } from "./appointment.validation.js";
+import { sendAppointmentMessageSchema } from "./appointment-message.validation.js";
+import * as appointmentMessageService from "./appointment-message.service.js";
 
 function getAuthUser(req: Request): { userId: string; role: string } {
   const userId = req.user?.userId;
@@ -129,6 +131,42 @@ export const getAppointmentById = asyncHandler(
       success: true,
       message: "Appointment retrieved successfully",
       data: appointment,
+    });
+  },
+);
+
+export const getAppointmentMessages = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const { userId, role } = getAuthUser(req);
+    const messages = await appointmentMessageService.listAppointmentMessages(
+      userId,
+      role,
+      getAppointmentId(req),
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Appointment messages retrieved successfully",
+      data: messages,
+    });
+  },
+);
+
+export const sendAppointmentMessage = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const { userId, role } = getAuthUser(req);
+    const data = sendAppointmentMessageSchema.parse(req.body);
+    const message = await appointmentMessageService.sendAppointmentMessage(
+      userId,
+      role,
+      getAppointmentId(req),
+      data,
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "Message sent successfully",
+      data: message,
     });
   },
 );

@@ -1,9 +1,11 @@
 import { AppError } from "../../errors/app-error.js";
+import { emitAppointmentMessage } from "../../lib/appointment-message.js";
 import { sendNotification } from "../../lib/notification.js";
 import * as appointmentRepository from "./appointment.repository.js";
 import * as patientRepository from "../patients/patient.repository.js";
 import * as doctorRepository from "../doctors/doctor.repository.js";
 import { toAppointmentDto } from "./appointment.utils.js";
+import { toAppointmentMessageDto } from "./appointment-message.utils.js";
 import {
   addMinutesToTimeStr,
   formatAppointmentDateTime,
@@ -96,7 +98,12 @@ export async function bookAppointment(
     doctorId: doctor.id,
     scheduledAt,
     durationMinutes: doctor.consultationDuration,
-    ...(input.notes && { notes: input.notes }),
+    ...(input.notes && {
+      initialMessage: {
+        authorUserId: patient.userId,
+        body: input.notes,
+      },
+    }),
   });
 
   if (result.conflict) {
@@ -106,7 +113,7 @@ export async function bookAppointment(
     );
   }
 
-  const { appointment } = result;
+  const { appointment, initialMessage } = result;
 
   await sendNotification({
     userId: appointment.doctor.user.id,
@@ -115,6 +122,14 @@ export async function bookAppointment(
     message: `${patient.firstName} ${patient.lastName} has booked an appointment on ${formatAppointmentDateTime(scheduledAt)}.`,
     relatedId: appointment.id,
   });
+
+  if (initialMessage) {
+    emitAppointmentMessage(
+      appointment.patient.user.id,
+      appointment.doctor.user.id,
+      toAppointmentMessageDto(initialMessage),
+    );
+  }
 
   return toAppointmentDto(appointment);
 }

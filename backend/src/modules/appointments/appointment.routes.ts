@@ -27,6 +27,22 @@ router.get(
 );
 
 router.get(
+  "/:id/messages",
+  authenticate,
+  authorize("PATIENT", "DOCTOR"),
+  requireVerifiedEmail,
+  appointmentController.getAppointmentMessages,
+);
+
+router.post(
+  "/:id/messages",
+  authenticate,
+  authorize("PATIENT", "DOCTOR"),
+  requireVerifiedEmail,
+  appointmentController.sendAppointmentMessage,
+);
+
+router.get(
   "/:id",
   authenticate,
   authorize("PATIENT", "DOCTOR"),
