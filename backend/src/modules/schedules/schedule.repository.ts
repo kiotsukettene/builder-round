@@ -1,4 +1,5 @@
 import prisma from "../../lib/prisma.js";
+import type { BlockedDate } from "../../generated/prisma/client.js";
 
 export async function findDoctorAvailability(doctorId: string) {
   return prisma.doctorAvailability.findMany({
@@ -45,7 +46,7 @@ export async function createBlockedDate(
   });
 }
 
-export async function findBlockedDates(doctorId: string) {
+export async function findBlockedDates(doctorId: string): Promise<BlockedDate[]> {
   return prisma.blockedDate.findMany({
     where: { doctorId },
     orderBy: { date: "asc" },
