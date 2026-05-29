@@ -1,23 +1,10 @@
 import { useEffect } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { io, type Socket } from "socket.io-client"
+import { getSocket } from "@/lib/socket"
 import * as notificationService from "@/services/notification.service"
 import { useAuthStore } from "@/store/auth.store"
 import type { Notification } from "@/types/notification"
-
-let socket: Socket | null = null
-
-function getSocket(token: string): Socket {
-  if (!socket || !socket.connected) {
-    socket = io(import.meta.env.VITE_API_URL ?? "", {
-      auth: { token },
-      transports: ["websocket"],
-      autoConnect: true,
-    })
-  }
-  return socket
-}
 
 export function useNotifications(page = 1, limit = 20) {
   return useQuery({
@@ -79,10 +66,12 @@ export function useNotificationSocket() {
       queryClient.invalidateQueries({ queryKey: ["notifications-unread"] })
       queryClient.invalidateQueries({ queryKey: ["appointments"] })
 
-      toast(notification.title, {
-        description: notification.message,
-        duration: 5000,
-      })
+      if (notification.type !== "APPOINTMENT_MESSAGE") {
+        toast(notification.title, {
+          description: notification.message,
+          duration: 5000,
+        })
+      }
     }
 
     sock.on("notification:new", handleNewNotification)
