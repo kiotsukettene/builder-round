@@ -1,6 +1,7 @@
 import { AppError } from "../../errors/app-error.js";
 import { env } from "../../config/env.js";
 import { generateZegoToken, makeRoomId } from "../../lib/zegocloud.js";
+import { emitConsultationEnded } from "../../lib/consultation-events.js";
 import * as consultationRepository from "./consultation.repository.js";
 import type {
   ConsultationNoteInput,
@@ -9,6 +10,28 @@ import type {
 } from "./consultation.validation.js";
 
 const JOINABLE_STATUSES = ["CONFIRMED"] as const;
+const JOIN_WINDOW_BEFORE_MIN = 10;
+
+function assertWithinJoinWindow(
+  scheduledAt: Date,
+  durationMin: number,
+): void {
+  const now = Date.now();
+  const windowStart =
+    scheduledAt.getTime() - JOIN_WINDOW_BEFORE_MIN * 60 * 1000;
+  const windowEnd = scheduledAt.getTime() + durationMin * 60 * 1000;
+
+  if (now < windowStart) {
+    throw new AppError(
+      "Consultation room is not open yet. You can join 10 minutes before the scheduled start.",
+      400,
+    );
+  }
+
+  if (now > windowEnd) {
+    throw new AppError("The consultation session window has ended.", 400);
+  }
+}
 
 async function getAppointmentOrThrow(appointmentId: string) {
   const appointment =
@@ -59,6 +82,11 @@ export async function joinConsultation(
     );
   }
 
+  assertWithinJoinWindow(
+    appointment.scheduledAt,
+    appointment.doctor.consultationDuration,
+  );
+
   const roomId = makeRoomId(appointmentId);
   const token = generateZegoToken(userId, roomId);
 
@@ -90,6 +118,12 @@ export async function endConsultation(userId: string, appointmentId: string) {
   const updated = await consultationRepository.updateAppointmentStatus(
     appointmentId,
     "COMPLETED",
+  );
+
+  emitConsultationEnded(
+    appointment.patient.user.id,
+    appointment.doctor.user.id,
+    { appointmentId, status: "COMPLETED" },
   );
 
   return {
