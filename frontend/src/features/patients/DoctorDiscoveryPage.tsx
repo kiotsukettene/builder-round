@@ -66,7 +66,7 @@ export function DoctorDiscoveryPage() {
   // Collect all unique specializations seen across pages
   const [knownSpecializations, setKnownSpecializations] = useState<string[]>([])
 
-  const { data, isLoading, isFetching } = useDoctorList({
+  const { data, isContentLoading, isFetching } = useDoctorList({
     search: debouncedSearch || undefined,
     specialization: specialization || undefined,
     page,
@@ -189,7 +189,7 @@ export function DoctorDiscoveryPage() {
         </div>
 
         {/* Doctor grid */}
-        {(isLoading || isFetching) && doctors.length === 0 ? (
+        {isContentLoading ? (
           <DoctorGridSkeleton />
         ) : doctors.length > 0 ? (
           <>
@@ -203,7 +203,7 @@ export function DoctorDiscoveryPage() {
             </div>
           </>
         ) : (
-          !isLoading && (
+          !isContentLoading && (
             <div className="flex flex-col items-center gap-3 py-16 text-center">
               <Stethoscope className="size-10 text-muted-foreground/40" />
               <div className="space-y-1">

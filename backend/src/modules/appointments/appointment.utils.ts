@@ -40,6 +40,7 @@ export function toAppointmentDto(appointment: AppointmentWithRelations) {
       specialization: appointment.doctor.specialization,
       fee: appointment.doctor.fee,
       profilePicture: appointment.doctor.profilePicture,
+      consultationDuration: appointment.doctor.consultationDuration,
     },
   };
 }

@@ -12,7 +12,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuthStore } from "@/store/auth.store"
 import { useLogout } from "@/hooks/use-auth"
+import { NavigationProgress } from "@/components/common/NavigationProgress"
 import { NotificationBell } from "@/components/common/NotificationBell"
+import { useAppointmentMessagesSocket } from "@/hooks/use-appointment-messages"
 import { cn } from "@/lib/utils"
 
 interface AppLayoutProps {
@@ -54,6 +56,8 @@ export function AppLayout({ children }: AppLayoutProps) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
 
+  useAppointmentMessagesSocket()
+
   const profile = user?.role === "PATIENT" ? user.patient : user?.doctor
   const displayName = profile
     ? `${profile.firstName} ${profile.lastName}`
@@ -66,6 +70,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <div className="min-h-screen bg-background">
+      <NavigationProgress />
       <header className="border-b">
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
           <Link to={profilePath} className="flex items-center gap-2">

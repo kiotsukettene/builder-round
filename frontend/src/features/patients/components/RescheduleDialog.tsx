@@ -18,6 +18,7 @@ import {
   buildScheduledAtIso,
   formatDateQueryParam,
   formatSlotTime,
+  isSlotInPast,
 } from "@/utils/appointment-datetime"
 
 interface RescheduleDialogProps {
@@ -120,20 +121,39 @@ export function RescheduleDialog({ open, onOpenChange, appointment }: Reschedule
             </div>
           ) : slotsData && slotsData.slots.length > 0 ? (
             <div className="flex flex-wrap gap-2">
-              {slotsData.slots.map((slot) => (
+              {slotsData.slots.map((slot) => {
+                const isPast = isSlotInPast(selectedDate, slot.startTime)
+                const isDisabled = !slot.available || isPast
+                const disabledTitle = !slot.available
+                  ? "This slot is already booked"
+                  : isPast
+                    ? "This time has passed"
+                    : undefined
+
+                return (
                 <Button
                   key={slot.startTime}
                   variant={selectedSlot === slot.startTime ? "default" : "outline"}
                   size="sm"
-                  disabled={!slot.available}
-                  className={!slot.available ? "line-through opacity-40" : ""}
-                  onClick={() => slot.available && setSelectedSlot(
-                    selectedSlot === slot.startTime ? null : slot.startTime
-                  )}
+                  disabled={isDisabled}
+                  className={
+                    !slot.available
+                      ? "line-through opacity-40"
+                      : isPast
+                        ? "opacity-40"
+                        : ""
+                  }
+                  title={disabledTitle}
+                  onClick={() =>
+                    slot.available &&
+                    !isPast &&
+                    setSelectedSlot(selectedSlot === slot.startTime ? null : slot.startTime)
+                  }
                 >
                   {formatSlotTime(slot.startTime)}
                 </Button>
-              ))}
+                )
+              })}
             </div>
           ) : (
             <div className="flex items-center gap-2 rounded-md border border-dashed p-4 text-sm text-muted-foreground">
