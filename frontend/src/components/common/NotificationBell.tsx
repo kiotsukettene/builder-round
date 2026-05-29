@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { Bell, Check, BellOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -18,6 +19,7 @@ import {
   useMarkAllAsRead,
   useNotificationSocket,
 } from "@/hooks/use-notifications"
+import { useAuthStore } from "@/store/auth.store"
 import type { NotificationType } from "@/types/notification"
 import { cn } from "@/lib/utils"
 
@@ -26,6 +28,7 @@ const TYPE_LABELS: Record<NotificationType, string> = {
   APPOINTMENT_CONFIRMED: "Confirmed",
   APPOINTMENT_CANCELLED: "Cancellation",
   APPOINTMENT_REMINDER: "Reminder",
+  APPOINTMENT_MESSAGE: "Message",
   SCHEDULE_UPDATED: "Schedule Update",
   SESSION_WINDOW_PASSED: "Session Ended",
 }
@@ -43,6 +46,8 @@ function timeAgo(dateStr: string): string {
 
 export function NotificationBell() {
   const [open, setOpen] = useState(false)
+  const navigate = useNavigate()
+  const role = useAuthStore((s) => s.user?.role)
 
   useNotificationSocket()
 
@@ -59,6 +64,13 @@ export function NotificationBell() {
 
   function handleMarkAsRead(id: string) {
     markAsRead(id)
+  }
+
+  function handleNotificationClick(type: NotificationType) {
+    if (type === "APPOINTMENT_MESSAGE") {
+      navigate(role === "DOCTOR" ? "/doctor/appointments" : "/appointments")
+      setOpen(false)
+    }
   }
 
   return (
@@ -115,6 +127,7 @@ export function NotificationBell() {
                   if (!notification.isRead) {
                     handleMarkAsRead(notification.id)
                   }
+                  handleNotificationClick(notification.type)
                 }}
               >
                 <div className="flex w-full items-start justify-between gap-2">

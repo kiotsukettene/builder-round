@@ -16,6 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { JoinSessionButton } from "@/components/common/JoinSessionButton"
+import { AppointmentMessageThread } from "@/components/common/AppointmentMessageThread"
 import { RescheduleDialog } from "@/features/patients/components/RescheduleDialog"
 import { useCancelAppointment } from "@/hooks/use-appointments"
 import { isSessionWindowPassed } from "@/utils/appointment-datetime"
@@ -170,6 +171,16 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
               This session window has passed. Reschedule if you still need a consultation.
             </div>
           )}
+
+          <div className="border-t px-4 py-3">
+            <AppointmentMessageThread
+              appointmentId={appointment.id}
+              status={appointment.status}
+              role={role}
+              counterpartName={counterpartName}
+              counterpartAvatar={counterpart.profilePicture}
+            />
+          </div>
 
           {/* Actions footer */}
           {(canCancel || canReschedule || isConfirmed || isCompleted) && (
