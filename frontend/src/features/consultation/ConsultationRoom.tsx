@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { joinConsultation, endConsultation } from "@/services/consultation.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useAppointmentById } from "@/hooks/use-appointments";
@@ -23,6 +23,7 @@ type PanelTab = "notes" | "prescriptions";
 export function ConsultationRoom() {
   const { appointmentId } = useParams<{ appointmentId: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const user = useAuthStore((s) => s.user);
   const isDoctor = user?.role === "DOCTOR";
 
@@ -38,7 +39,9 @@ export function ConsultationRoom() {
   const [joinError, setJoinError] = useState<string | null>(null);
   const [showReviewDialog, setShowReviewDialog] = useState(false);
   const [patientSessionEnded, setPatientSessionEnded] = useState(false);
+  const [patientLeftRoom, setPatientLeftRoom] = useState(false);
   const [sessionLive, setSessionLive] = useState(false);
+  const [joinAttempt, setJoinAttempt] = useState(0);
 
   const { data: appointment, refetch: refetchAppointment } = useAppointmentById(appointmentId);
 
@@ -75,6 +78,11 @@ export function ConsultationRoom() {
 
   const { mutate: end } = useMutation({
     mutationFn: () => endConsultation(appointmentId!),
+    onSuccess: () => {
+      // Ensure appointments pages update immediately when returning.
+      queryClient.invalidateQueries({ queryKey: ["appointments"] });
+      queryClient.invalidateQueries({ queryKey: ["appointment", appointmentId] });
+    },
     onError: () => {
       // Still leave the room even if the API fails
     },
@@ -83,6 +91,7 @@ export function ConsultationRoom() {
   const openPatientReview = useCallback(() => {
     setPatientSessionEnded(true);
     setShowReviewDialog(true);
+    setPatientLeftRoom(false);
   }, []);
 
   const handleDoctorLeave = useCallback(() => {
@@ -93,11 +102,39 @@ export function ConsultationRoom() {
   }, [end, navigate]);
 
   const handlePatientLeave = useCallback(() => {
+    // If doctor hasn't ended yet (appointment still CONFIRMED), let patient rejoin later.
+    if (!hasEndedRef.current && appointment?.status === "CONFIRMED") {
+      const isStillInJoinWindow = isWithinJoinWindow(
+        appointment.scheduledAt,
+        durationMin,
+      );
+
+      if (isStillInJoinWindow) {
+        hasEndedRef.current = false;
+        setPatientLeftRoom(true);
+        setShowReviewDialog(false);
+        // Allow re-join without remounting.
+        zegoJoinedRef.current = false;
+        teardownZego();
+        return;
+      }
+    }
+
+    // Otherwise, this is terminal: show review.
     if (hasEndedRef.current) return;
     hasEndedRef.current = true;
     teardownZego();
     openPatientReview();
-  }, [teardownZego, openPatientReview]);
+  }, [appointment?.scheduledAt, appointment?.status, durationMin, isWithinJoinWindow, openPatientReview, teardownZego]);
+
+  const handleRejoin = useCallback(() => {
+    if (hasEndedRef.current) return;
+    setPatientLeftRoom(false);
+    setShowReviewDialog(false);
+    // Allow join effect to run again.
+    zegoJoinedRef.current = false;
+    setJoinAttempt((x) => x + 1);
+  }, []);
 
   const handleRemoteEnd = useCallback(() => {
     if (hasEndedRef.current) return;
@@ -173,7 +210,8 @@ export function ConsultationRoom() {
       !videoContainerRef.current ||
       !user ||
       !sessionLive ||
-      zegoJoinedRef.current
+      zegoJoinedRef.current ||
+      patientLeftRoom
     ) {
       return;
     }
@@ -227,7 +265,16 @@ export function ConsultationRoom() {
       zegoJoinedRef.current = false;
       teardownZego();
     };
-  }, [joinToken, joinRoomId, joinAppId, user?.id, sessionLive, teardownZego]);
+  }, [
+    joinToken,
+    joinRoomId,
+    joinAppId,
+    user?.id,
+    sessionLive,
+    teardownZego,
+    patientLeftRoom,
+    joinAttempt,
+  ]);
 
   useEffect(() => {
     if (isError) {
@@ -292,6 +339,22 @@ export function ConsultationRoom() {
         <p className="text-destructive text-sm">{joinError}</p>
         <Button variant="outline" onClick={() => navigate(-1)}>
           Go Back
+        </Button>
+      </div>
+    );
+  }
+
+  if (!isDoctor && patientLeftRoom && appointment) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen gap-4 bg-background px-4">
+        <p className="text-sm text-muted-foreground">
+          You left the room. You can rejoin while the doctor hasn’t ended the consultation.
+        </p>
+        <Button
+          onClick={handleRejoin}
+          disabled={appointment.status !== "CONFIRMED"}
+        >
+          Join Room
         </Button>
       </div>
     );
