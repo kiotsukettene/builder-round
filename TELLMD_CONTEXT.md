@@ -164,3 +164,10 @@ Patients and doctors receive updates for:
 - Upcoming schedules
 - Schedule changes
 - Consultation reminders
+
+## Real-Time Push Notifications
+Patients and doctors receive updates for:
+- Booked appointments
+- Upcoming schedules
+- Schedule changes
+- Consultation reminders

@@ -1,5 +1,6 @@
 import prisma from "./prisma.js";
 import { getIO } from "./socket.js";
+import { publishNotificationToUser } from "./pusher-beams.js";
 import type { NotificationType } from "../generated/prisma/client.js";
 
 interface SendNotificationParams {
@@ -38,5 +39,26 @@ export async function sendNotification(
     });
   } catch {
     // Socket.IO not available (e.g., tests); notification was still persisted
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    if (user) {
+      await publishNotificationToUser(userId, {
+        id: notification.id,
+        type: notification.type,
+        title: notification.title,
+        message: notification.message,
+        relatedId: notification.relatedId,
+        createdAt: notification.createdAt,
+        role: user.role,
+      });
+    }
+  } catch {
+    // Beams not configured or publish failed; in-app notification still delivered
   }
 }

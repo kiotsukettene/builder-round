@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import * as authService from "@/services/auth.service"
+import { cleanupPushOnLogout } from "@/hooks/use-push-notifications"
+import { disconnectSocket } from "@/lib/socket"
 import { useAuthStore } from "@/store/auth.store"
 import type { LoginPayload, RegisterPayload } from "@/types/auth"
 
@@ -99,7 +101,9 @@ export function useLogout() {
         await authService.logout(refreshToken)
       }
     },
-    onSettled: () => {
+    onSettled: async () => {
+      await cleanupPushOnLogout()
+      disconnectSocket()
       logout()
       queryClient.clear()
       navigate("/login")

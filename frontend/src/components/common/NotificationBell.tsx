@@ -19,6 +19,7 @@ import {
   useMarkAllAsRead,
   useNotificationSocket,
 } from "@/hooks/use-notifications"
+import { usePushNotificationControls } from "@/hooks/use-push-notifications"
 import { useAuthStore } from "@/store/auth.store"
 import type { NotificationType } from "@/types/notification"
 import { cn } from "@/lib/utils"
@@ -51,6 +52,16 @@ export function NotificationBell() {
 
   useNotificationSocket()
 
+  const {
+    isBeamsConfigured,
+    permission: pushPermission,
+    isEnabling: isEnablingPush,
+    isPushEnabled,
+    needsSetupRetry,
+    enableBrowserNotifications,
+    refreshState: refreshPushState,
+  } = usePushNotificationControls()
+
   const { data: unreadCount = 0 } = useUnreadCount()
   const { data: notificationsData } = useNotifications(1, 10)
   const { mutate: markAsRead } = useMarkAsRead()
@@ -60,6 +71,9 @@ export function NotificationBell() {
 
   function handleOpen(isOpen: boolean) {
     setOpen(isOpen)
+    if (isOpen && isBeamsConfigured) {
+      refreshPushState()
+    }
   }
 
   function handleMarkAsRead(id: string) {
@@ -106,6 +120,52 @@ export function NotificationBell() {
             </Button>
           )}
         </DropdownMenuLabel>
+
+        {isBeamsConfigured && (
+          <>
+            <DropdownMenuSeparator />
+            <div className="px-4 py-2">
+              {pushPermission === "granted" && isPushEnabled ? (
+                <p className="text-xs text-muted-foreground">Browser notifications on</p>
+              ) : pushPermission === "denied" ? (
+                <p className="text-xs text-muted-foreground">
+                  Browser notifications blocked. Enable them in your browser settings.
+                </p>
+              ) : needsSetupRetry ? (
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground">
+                    Permission granted. Finish setup to receive alerts when this tab is closed.
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-full text-xs"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      void enableBrowserNotifications()
+                    }}
+                    disabled={isEnablingPush}
+                  >
+                    {isEnablingPush ? "Setting up…" : "Complete setup"}
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 w-full text-xs"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    void enableBrowserNotifications()
+                  }}
+                  disabled={isEnablingPush}
+                >
+                  {isEnablingPush ? "Setting up…" : "Enable browser notifications"}
+                </Button>
+              )}
+            </div>
+          </>
+        )}
 
         <DropdownMenuSeparator className="mb-0" />
 
