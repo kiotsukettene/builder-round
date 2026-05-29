@@ -19,6 +19,7 @@ enum AppointmentStatus {
   CONFIRMED
   CANCELLED
   COMPLETED
+  MISSED
 }
 
 enum NotificationType {
@@ -27,6 +28,7 @@ enum NotificationType {
   APPOINTMENT_CANCELLED
   APPOINTMENT_REMINDER
   SCHEDULE_UPDATED
+  SESSION_WINDOW_PASSED
 }
 
 enum RecommendationSource {
@@ -136,6 +138,7 @@ model Appointment {
   cancellationReason  String?
   reminderOneHourSentAt DateTime?
   reminderTenMinSentAt  DateTime?
+  sessionWindowPassedNotifiedAt DateTime?
   createdAt           DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 

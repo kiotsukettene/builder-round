@@ -21,7 +21,8 @@ export const AppointmentStatus = {
   PENDING: 'PENDING',
   CONFIRMED: 'CONFIRMED',
   CANCELLED: 'CANCELLED',
-  COMPLETED: 'COMPLETED'
+  COMPLETED: 'COMPLETED',
+  MISSED: 'MISSED'
 } as const
 
 export type AppointmentStatus = (typeof AppointmentStatus)[keyof typeof AppointmentStatus]
@@ -32,7 +33,8 @@ export const NotificationType = {
   APPOINTMENT_CONFIRMED: 'APPOINTMENT_CONFIRMED',
   APPOINTMENT_CANCELLED: 'APPOINTMENT_CANCELLED',
   APPOINTMENT_REMINDER: 'APPOINTMENT_REMINDER',
-  SCHEDULE_UPDATED: 'SCHEDULE_UPDATED'
+  SCHEDULE_UPDATED: 'SCHEDULE_UPDATED',
+  SESSION_WINDOW_PASSED: 'SESSION_WINDOW_PASSED'
 } as const
 
 export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]
