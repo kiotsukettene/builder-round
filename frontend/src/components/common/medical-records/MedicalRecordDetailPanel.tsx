@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FileText, Pill, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PatientDetails } from "@/components/common/PatientDetails";
+import { AppointmentMessageThread } from "@/components/common/AppointmentMessageThread";
 import { PrescriptionBadge } from "@/components/common/medical-records/PrescriptionBadge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -58,7 +59,6 @@ export function MedicalRecordDetailPanel({
   const { data: appointment, isLoading: isLoadingAppointment } = useQuery({
     queryKey: ["appointment", record.id],
     queryFn: () => getAppointmentById(record.id),
-    enabled: !isPatient,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -124,10 +124,7 @@ export function MedicalRecordDetailPanel({
                 {isLoadingAppointment ? (
                   <PatientDetailsSkeleton />
                 ) : appointment?.patient ? (
-                  <PatientDetails
-                    patient={appointment.patient}
-                    appointmentNotes={appointment.notes}
-                  />
+                  <PatientDetails patient={appointment.patient} />
                 ) : null}
               </div>
             </>
@@ -137,6 +134,19 @@ export function MedicalRecordDetailPanel({
         <div className="flex flex-wrap items-center gap-2">
           <PrescriptionBadge count={prescriptions.length} />
         </div>
+
+        {isLoadingAppointment ? (
+          <Skeleton className="h-24 w-full" />
+        ) : appointment ? (
+          <AppointmentMessageThread
+            appointmentId={record.id}
+            status={appointment.status}
+            role={role}
+            counterpartName={counterpartName}
+            counterpartAvatar={counterpart.profilePicture}
+            defaultExpanded={false}
+          />
+        ) : null}
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 sm:p-5">

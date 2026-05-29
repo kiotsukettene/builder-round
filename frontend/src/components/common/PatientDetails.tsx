@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Cake, ChevronRight, FileText, MessageSquare, Phone, Ruler, Weight } from "lucide-react"
+import { Cake, ChevronRight, FileText, Phone, Ruler, Weight } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -66,10 +66,9 @@ function DetailModalRow({ icon, label, preview, onClick }: DetailModalRowProps) 
 
 interface PatientDetailsProps {
   patient: AppointmentPatient
-  appointmentNotes?: string | null
 }
 
-export function PatientDetails({ patient, appointmentNotes }: PatientDetailsProps) {
+export function PatientDetails({ patient }: PatientDetailsProps) {
   const [modalOpen, setModalOpen] = useState(false)
   const [modalTitle, setModalTitle] = useState("")
   const [modalContent, setModalContent] = useState("")
@@ -86,7 +85,7 @@ export function PatientDetails({ patient, appointmentNotes }: PatientDetailsProp
           : null
 
   const hasDetails =
-    patient.phone || birthday || hasVitals || patient.history || appointmentNotes
+    patient.phone || birthday || hasVitals || patient.history
 
   function openDetailModal(title: string, content: string) {
     setModalTitle(title)
@@ -138,15 +137,6 @@ export function PatientDetails({ patient, appointmentNotes }: PatientDetailsProp
             label="Medical History"
             preview={truncateText(patient.history)}
             onClick={() => openDetailModal("Medical History", patient.history!)}
-          />
-        )}
-
-        {appointmentNotes && (
-          <DetailModalRow
-            icon={<MessageSquare className="size-3.5" />}
-            label="Note on appointment"
-            preview={truncateText(appointmentNotes)}
-            onClick={() => openDetailModal("Note on appointment", appointmentNotes)}
           />
         )}
       </div>

@@ -45,6 +45,7 @@ import {
   useConfirmAppointment,
 } from "@/hooks/use-appointments"
 import { PatientDetails } from "@/components/common/PatientDetails"
+import { AppointmentMessageThread } from "@/components/common/AppointmentMessageThread"
 import { JoinSessionButton } from "@/components/common/JoinSessionButton"
 import { isSessionWindowPassed } from "@/utils/appointment-datetime"
 import type { Appointment, AppointmentStatus } from "@/types/appointment"
@@ -138,9 +139,13 @@ function DoctorAppointmentCard({ appointment }: { appointment: Appointment }) {
                   </p>
                   <p className="text-xs text-muted-foreground">Patient</p>
                 </div>
-                <PatientDetails
-                  patient={appointment.patient}
-                  appointmentNotes={appointment.notes}
+                <PatientDetails patient={appointment.patient} />
+                <AppointmentMessageThread
+                  appointmentId={appointment.id}
+                  status={appointment.status}
+                  role="DOCTOR"
+                  counterpartName={`${appointment.patient.firstName} ${appointment.patient.lastName}`}
+                  counterpartAvatar={appointment.patient.profilePicture}
                 />
               </div>
             </div>
