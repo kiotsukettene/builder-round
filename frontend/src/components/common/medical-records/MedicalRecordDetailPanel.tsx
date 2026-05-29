@@ -213,6 +213,17 @@ export function MedicalRecordDetailPanel({
                     </div>
                   ))}
                 </div>
+
+                {record.doctor && (
+                  <div className="mt-4 border-t pt-4 text-right">
+                    <p className="text-sm font-medium text-foreground">
+                      Dr. {record.doctor.firstName} {record.doctor.lastName}
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {formatConsultationDate(record.scheduledAt)}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>

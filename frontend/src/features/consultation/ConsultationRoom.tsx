@@ -1,15 +1,22 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { joinConsultation, endConsultation } from "@/services/consultation.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useAppointmentById } from "@/hooks/use-appointments";
+import { useConsultationEnded } from "@/hooks/use-consultation-ended";
 import { NotesPanel } from "./components/NotesPanel";
 import { PrescriptionsPanel } from "./components/PrescriptionsPanel";
+import { ConsultationWaitingLobby } from "./components/ConsultationWaitingLobby";
+import { ConsultationSessionTimer } from "./components/ConsultationSessionTimer";
 import { ReviewConsultationDialog } from "@/features/patients/components/ReviewConsultationDialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, FileText, Pill, PhoneOff } from "lucide-react";
+import { Loader2, FileText, Pill } from "lucide-react";
+import {
+  hasSessionStarted,
+  isWithinJoinWindow,
+} from "@/utils/appointment-datetime";
 
 type PanelTab = "notes" | "prescriptions";
 
@@ -21,17 +28,124 @@ export function ConsultationRoom() {
 
   const videoContainerRef = useRef<HTMLDivElement>(null);
   const zegoRef = useRef<ReturnType<typeof ZegoUIKitPrebuilt.create> | null>(null);
+  const zegoJoinedRef = useRef(false);
+  const hasEndedRef = useRef(false);
+  const isDoctorRef = useRef(isDoctor);
+  isDoctorRef.current = isDoctor;
 
   const [activeTab, setActiveTab] = useState<PanelTab>("notes");
   const [isPanelOpen, setIsPanelOpen] = useState(true);
   const [joinError, setJoinError] = useState<string | null>(null);
   const [showReviewDialog, setShowReviewDialog] = useState(false);
+  const [patientSessionEnded, setPatientSessionEnded] = useState(false);
+  const [sessionLive, setSessionLive] = useState(false);
 
-  const { data: appointment } = useAppointmentById(appointmentId);
+  const { data: appointment, refetch: refetchAppointment } = useAppointmentById(appointmentId);
+
+  const durationMin = appointment?.doctor.consultationDuration ?? 30;
+  const scheduledAt = appointment?.scheduledAt ?? "";
+
+  const counterpartName = appointment
+    ? isDoctor
+      ? `${appointment.patient.firstName} ${appointment.patient.lastName}`
+      : `Dr. ${appointment.doctor.firstName} ${appointment.doctor.lastName}`
+    : "";
 
   const doctorName = appointment
     ? `${appointment.doctor.firstName} ${appointment.doctor.lastName}`
     : undefined;
+
+  useEffect(() => {
+    if (appointment && hasSessionStarted(appointment.scheduledAt)) {
+      setSessionLive(true);
+    }
+  }, [appointment]);
+
+  const teardownZego = useCallback(() => {
+    try {
+      zegoRef.current?.destroy();
+    } catch {
+      // ignore cleanup errors
+    }
+    zegoRef.current = null;
+  }, []);
+
+  const startSession = useCallback(() => setSessionLive(true), []);
+  const appointmentsPath = "/appointments";
+
+  const { mutate: end } = useMutation({
+    mutationFn: () => endConsultation(appointmentId!),
+    onError: () => {
+      // Still leave the room even if the API fails
+    },
+  });
+
+  const openPatientReview = useCallback(() => {
+    setPatientSessionEnded(true);
+    setShowReviewDialog(true);
+  }, []);
+
+  const handleDoctorLeave = useCallback(() => {
+    if (hasEndedRef.current) return;
+    hasEndedRef.current = true;
+    end();
+    navigate(-1);
+  }, [end, navigate]);
+
+  const handlePatientLeave = useCallback(() => {
+    if (hasEndedRef.current) return;
+    hasEndedRef.current = true;
+    teardownZego();
+    openPatientReview();
+  }, [teardownZego, openPatientReview]);
+
+  const handleRemoteEnd = useCallback(() => {
+    if (hasEndedRef.current) return;
+    hasEndedRef.current = true;
+    teardownZego();
+
+    if (isDoctor) {
+      navigate(-1);
+    } else {
+      openPatientReview();
+    }
+  }, [isDoctor, navigate, teardownZego, openPatientReview]);
+
+  const handleSessionExpired = useCallback(() => {
+    if (hasEndedRef.current) return;
+    hasEndedRef.current = true;
+    teardownZego();
+
+    if (isDoctor) {
+      end();
+      navigate(-1);
+    } else {
+      openPatientReview();
+    }
+  }, [end, isDoctor, navigate, teardownZego, openPatientReview]);
+
+  const handleDoctorLeaveRef = useRef(handleDoctorLeave);
+  handleDoctorLeaveRef.current = handleDoctorLeave;
+  const handlePatientLeaveRef = useRef(handlePatientLeave);
+  handlePatientLeaveRef.current = handlePatientLeave;
+
+  useConsultationEnded(appointmentId, handleRemoteEnd);
+
+  useEffect(() => {
+    if (!sessionLive || !appointmentId || patientSessionEnded) return;
+
+    const id = setInterval(() => {
+      void refetchAppointment();
+    }, 30_000);
+
+    return () => clearInterval(id);
+  }, [sessionLive, appointmentId, patientSessionEnded, refetchAppointment]);
+
+  useEffect(() => {
+    if (appointment?.status === "COMPLETED" && sessionLive && !patientSessionEnded) {
+      handleRemoteEnd();
+    }
+  }, [appointment?.status, sessionLive, patientSessionEnded, handleRemoteEnd]);
 
   const {
     data: credentials,
@@ -40,27 +154,39 @@ export function ConsultationRoom() {
   } = useQuery({
     queryKey: ["consultation-join", appointmentId],
     queryFn: () => joinConsultation(appointmentId!),
-    enabled: !!appointmentId,
+    enabled: !!appointmentId && sessionLive,
     retry: false,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
-  const { mutate: end, isPending: isEnding } = useMutation({
-    mutationFn: () => endConsultation(appointmentId!),
-    onSuccess: () => navigate(-1),
-    onError: () => navigate(-1),
-  });
+  const joinToken = credentials?.token;
+  const joinRoomId = credentials?.roomId;
+  const joinAppId = credentials?.appId;
 
   useEffect(() => {
-    if (!credentials || !videoContainerRef.current || !user) return;
+    if (
+      !joinToken ||
+      !joinRoomId ||
+      joinAppId == null ||
+      !videoContainerRef.current ||
+      !user ||
+      !sessionLive ||
+      zegoJoinedRef.current
+    ) {
+      return;
+    }
 
-    const { roomId, token, appId } = credentials;
+    zegoJoinedRef.current = true;
+
     const profile = user.role === "PATIENT" ? user.patient : user.doctor;
     const userName = profile ? `${profile.firstName} ${profile.lastName}` : user.email;
 
     const kitToken = ZegoUIKitPrebuilt.generateKitTokenForProduction(
-      appId,
-      token,
-      roomId,
+      joinAppId,
+      joinToken,
+      joinRoomId,
       user.id,
       userName,
     );
@@ -89,22 +215,19 @@ export function ConsultationRoom() {
       },
       showLeaveRoomConfirmDialog: false,
       onLeaveRoom: () => {
-        if (isDoctor) {
-          end();
+        if (isDoctorRef.current) {
+          handleDoctorLeaveRef.current();
         } else {
-          setShowReviewDialog(true);
+          handlePatientLeaveRef.current();
         }
       },
     });
 
     return () => {
-      try {
-        zp.destroy();
-      } catch {
-        // ignore cleanup errors
-      }
+      zegoJoinedRef.current = false;
+      teardownZego();
     };
-  }, [credentials]);
+  }, [joinToken, joinRoomId, joinAppId, user?.id, sessionLive, teardownZego]);
 
   useEffect(() => {
     if (isError) {
@@ -120,6 +243,49 @@ export function ConsultationRoom() {
     );
   }
 
+  if (!appointment) {
+    return (
+      <div className="flex items-center justify-center h-screen gap-2 text-muted-foreground">
+        <Loader2 className="w-5 h-5 animate-spin" />
+        <span>Loading consultation...</span>
+      </div>
+    );
+  }
+
+  if (!isDoctor && patientSessionEnded) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen gap-4 bg-background">
+        <p className="text-sm text-muted-foreground">Consultation ended</p>
+        <ReviewConsultationDialog
+          appointmentId={appointmentId}
+          doctorName={doctorName}
+          open={showReviewDialog}
+          onOpenChange={(open) => {
+            setShowReviewDialog(open);
+            if (!open) navigate(appointmentsPath);
+          }}
+          onComplete={() => navigate(appointmentsPath)}
+        />
+      </div>
+    );
+  }
+
+  if (
+    appointment.status !== "CONFIRMED" ||
+    !isWithinJoinWindow(appointment.scheduledAt, durationMin)
+  ) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen gap-4">
+        <p className="text-destructive text-sm">
+          This consultation is not available to join right now.
+        </p>
+        <Button variant="outline" onClick={() => navigate(-1)}>
+          Go Back
+        </Button>
+      </div>
+    );
+  }
+
   if (joinError) {
     return (
       <div className="flex flex-col items-center justify-center h-screen gap-4">
@@ -128,6 +294,16 @@ export function ConsultationRoom() {
           Go Back
         </Button>
       </div>
+    );
+  }
+
+  if (!sessionLive) {
+    return (
+      <ConsultationWaitingLobby
+        scheduledAt={appointment.scheduledAt}
+        counterpartName={counterpartName}
+        onSessionStart={startSession}
+      />
     );
   }
 
@@ -142,13 +318,18 @@ export function ConsultationRoom() {
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
-      {/* Video area */}
       <div className={`flex flex-col flex-1 min-w-0 ${isDoctor && isPanelOpen ? "border-r border-border" : ""}`}>
-        {/* Top bar */}
         <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-background shrink-0">
-          <span className="text-sm font-medium text-foreground">
-            TellMD Consultation
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium text-foreground">
+              TellMD Consultation
+            </span>
+            <ConsultationSessionTimer
+              scheduledAt={scheduledAt}
+              durationMin={durationMin}
+              onSessionExpired={handleSessionExpired}
+            />
+          </div>
           <div className="flex items-center gap-2">
             {isDoctor && (
               <>
@@ -174,26 +355,11 @@ export function ConsultationRoom() {
                   <Pill className="w-4 h-4 mr-1.5" />
                   Rx
                 </Button>
-                <div className="w-px h-5 bg-border mx-1" />
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => end()}
-                  disabled={isEnding}
-                >
-                  {isEnding ? (
-                    <Loader2 className="w-4 h-4 animate-spin mr-1" />
-                  ) : (
-                    <PhoneOff className="w-4 h-4 mr-1.5" />
-                  )}
-                  End
-                </Button>
               </>
             )}
           </div>
         </div>
 
-        {/* ZegoCloud video container */}
         <div ref={videoContainerRef} className="flex-1 w-full" />
       </div>
 
@@ -203,14 +369,12 @@ export function ConsultationRoom() {
           doctorName={doctorName}
           open={showReviewDialog}
           onOpenChange={setShowReviewDialog}
-          onComplete={() => navigate(-1)}
+          onComplete={() => navigate(appointmentsPath)}
         />
       )}
 
-      {/* Doctor side panel */}
       {isDoctor && isPanelOpen && (
         <div className="w-80 shrink-0 flex flex-col bg-background border-l border-border">
-          {/* Panel tabs */}
           <div className="flex border-b border-border">
             <button
               type="button"
@@ -236,7 +400,6 @@ export function ConsultationRoom() {
             </button>
           </div>
 
-          {/* Panel content */}
           <div className="flex-1 overflow-hidden">
             {activeTab === "notes" && (
               <NotesPanel appointmentId={appointmentId} />

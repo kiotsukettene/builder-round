@@ -123,3 +123,48 @@ export function isSessionWindowPassed(
   const windowEnd = new Date(scheduled.getTime() + durationMin * 60 * 1000)
   return Date.now() > windowEnd.getTime()
 }
+
+/** Whole minutes until scheduled start (ceiled, min 0). */
+export function getMinutesUntilStart(scheduledAt: string, now = new Date()): number {
+  const scheduled = new Date(scheduledAt)
+  const diffMs = scheduled.getTime() - now.getTime()
+  if (diffMs <= 0) return 0
+  return Math.ceil(diffMs / (60 * 1000))
+}
+
+/** Whether the scheduled session start time has been reached. */
+export function hasSessionStarted(scheduledAt: string, now = new Date()): boolean {
+  return now.getTime() >= new Date(scheduledAt).getTime()
+}
+
+/** End of the consultation window (scheduledAt + duration). */
+export function getSessionEndTime(
+  scheduledAt: string,
+  durationMin = 30,
+): Date {
+  const scheduled = new Date(scheduledAt)
+  return new Date(scheduled.getTime() + durationMin * 60 * 1000)
+}
+
+/** Seconds remaining in the session window (0 when past end). */
+export function getSecondsRemainingInSession(
+  scheduledAt: string,
+  durationMin = 30,
+  now = new Date(),
+): number {
+  const end = getSessionEndTime(scheduledAt, durationMin)
+  const diffMs = end.getTime() - now.getTime()
+  return Math.max(0, Math.floor(diffMs / 1000))
+}
+
+/** Format seconds as mm:ss for session timer display. */
+export function formatSessionTimeRemaining(totalSeconds: number): string {
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+}
+
+export function getConsultationTickIntervalMs(scheduledAt: string): number {
+  const minutesUntilStart = getMinutesUntilStart(scheduledAt)
+  return minutesUntilStart <= 2 ? 1_000 : 10_000
+}
