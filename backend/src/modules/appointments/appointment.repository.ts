@@ -161,7 +161,7 @@ export async function createAppointmentSafe(data: {
   doctorId: string;
   scheduledAt: Date;
   durationMinutes: number;
-  notes?: string;
+  initialMessage?: { authorUserId: string; body: string };
 }) {
   return prisma.$transaction(
     async (tx) => {
@@ -187,12 +187,24 @@ export async function createAppointmentSafe(data: {
           doctorId: data.doctorId,
           scheduledAt: data.scheduledAt,
           status: "PENDING",
-          ...(data.notes && { notes: data.notes }),
         },
         include: appointmentWithRelations,
       });
 
-      return { conflict: false as const, appointment };
+      let initialMessage = null;
+
+      if (data.initialMessage) {
+        initialMessage = await tx.appointmentMessage.create({
+          data: {
+            appointmentId: appointment.id,
+            authorRole: "PATIENT",
+            authorUserId: data.initialMessage.authorUserId,
+            body: data.initialMessage.body,
+          },
+        });
+      }
+
+      return { conflict: false as const, appointment, initialMessage };
     },
     { isolationLevel: "Serializable" },
   );
@@ -230,6 +242,7 @@ export async function updateAppointmentScheduleSafe(
           status: "PENDING",
           reminderOneHourSentAt: null,
           reminderTenMinSentAt: null,
+          sessionWindowPassedNotifiedAt: null,
         },
         include: appointmentWithRelations,
       });

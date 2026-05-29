@@ -58,6 +58,7 @@ export const ModelName = {
   DoctorAvailability: 'DoctorAvailability',
   BlockedDate: 'BlockedDate',
   Appointment: 'Appointment',
+  AppointmentMessage: 'AppointmentMessage',
   ConsultationNote: 'ConsultationNote',
   Prescription: 'Prescription',
   Recommendation: 'Recommendation',
@@ -172,11 +173,24 @@ export const AppointmentScalarFieldEnum = {
   cancellationReason: 'cancellationReason',
   reminderOneHourSentAt: 'reminderOneHourSentAt',
   reminderTenMinSentAt: 'reminderTenMinSentAt',
+  sessionWindowPassedNotifiedAt: 'sessionWindowPassedNotifiedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type AppointmentScalarFieldEnum = (typeof AppointmentScalarFieldEnum)[keyof typeof AppointmentScalarFieldEnum]
+
+
+export const AppointmentMessageScalarFieldEnum = {
+  id: 'id',
+  appointmentId: 'appointmentId',
+  authorRole: 'authorRole',
+  authorUserId: 'authorUserId',
+  body: 'body',
+  createdAt: 'createdAt'
+} as const
+
+export type AppointmentMessageScalarFieldEnum = (typeof AppointmentMessageScalarFieldEnum)[keyof typeof AppointmentMessageScalarFieldEnum]
 
 
 export const ConsultationNoteScalarFieldEnum = {

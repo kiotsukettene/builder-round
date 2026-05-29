@@ -45,13 +45,16 @@ import {
   useConfirmAppointment,
 } from "@/hooks/use-appointments"
 import { PatientDetails } from "@/components/common/PatientDetails"
+import { AppointmentMessageThread } from "@/components/common/AppointmentMessageThread"
 import { JoinSessionButton } from "@/components/common/JoinSessionButton"
+import { isSessionWindowPassed } from "@/utils/appointment-datetime"
 import type { Appointment, AppointmentStatus } from "@/types/appointment"
 
-type TabValue = "upcoming" | "completed" | "cancelled" | "all"
+type TabValue = "upcoming" | "missed" | "completed" | "cancelled" | "all"
 
 const TAB_STATUS_MAP: Record<TabValue, AppointmentStatus | undefined> = {
   upcoming: undefined,
+  missed: "MISSED",
   completed: "COMPLETED",
   cancelled: "CANCELLED",
   all: undefined,
@@ -62,9 +65,8 @@ const STATUS_CONFIG = {
   CONFIRMED: { label: "Confirmed", className: "bg-green-100 text-green-700 border-green-200" },
   COMPLETED: { label: "Completed", className: "bg-blue-100 text-blue-700 border-blue-200" },
   CANCELLED: { label: "Cancelled", className: "bg-red-50 text-red-600 border-red-200" },
+  MISSED: { label: "Missed", className: "bg-orange-100 text-orange-700 border-orange-200" },
 }
-
-const CONSULTATION_DURATION_MIN = 30
 
 function DoctorAppointmentCard({ appointment }: { appointment: Appointment }) {
   const navigate = useNavigate()
@@ -74,9 +76,18 @@ function DoctorAppointmentCard({ appointment }: { appointment: Appointment }) {
   const [cancellationReason, setCancellationReason] = useState("")
 
   const statusConfig = STATUS_CONFIG[appointment.status]
+  const durationMin = appointment.doctor.consultationDuration
+  const isMissed = appointment.status === "MISSED"
+  const sessionPassed =
+    isMissed ||
+    (appointment.status === "CONFIRMED" &&
+      isSessionWindowPassed(appointment.scheduledAt, durationMin))
   const isPending = appointment.status === "PENDING"
-  const isConfirmed = appointment.status === "CONFIRMED"
-  const canCancel = appointment.status === "PENDING" || appointment.status === "CONFIRMED"
+  const isConfirmed = appointment.status === "CONFIRMED" && !sessionPassed
+  const canCancel =
+    appointment.status === "PENDING" ||
+    appointment.status === "CONFIRMED" ||
+    appointment.status === "MISSED"
   const isCompleted = appointment.status === "COMPLETED"
   const scheduledDate = new Date(appointment.scheduledAt)
   const dateStr = scheduledDate.toLocaleDateString("en-US", {
@@ -128,9 +139,13 @@ function DoctorAppointmentCard({ appointment }: { appointment: Appointment }) {
                   </p>
                   <p className="text-xs text-muted-foreground">Patient</p>
                 </div>
-                <PatientDetails
-                  patient={appointment.patient}
-                  appointmentNotes={appointment.notes}
+                <PatientDetails patient={appointment.patient} />
+                <AppointmentMessageThread
+                  appointmentId={appointment.id}
+                  status={appointment.status}
+                  role="DOCTOR"
+                  counterpartName={`${appointment.patient.firstName} ${appointment.patient.lastName}`}
+                  counterpartAvatar={appointment.patient.profilePicture}
                 />
               </div>
             </div>
@@ -153,7 +168,13 @@ function DoctorAppointmentCard({ appointment }: { appointment: Appointment }) {
             </div>
           </div>
 
-          {(isPending || isConfirmed || canCancel || isCompleted) && (
+          {sessionPassed && (
+            <div className="border-t bg-orange-50 px-4 py-2.5 text-sm text-orange-800">
+              This session window has passed without a completed consultation.
+            </div>
+          )}
+
+          {(isPending || isConfirmed || canCancel || isCompleted || isMissed) && (
             <div className="flex flex-wrap items-center gap-2 border-t bg-muted/20 px-4 py-2.5">
               {isPending && (
                 <AlertDialog>
@@ -193,7 +214,7 @@ function DoctorAppointmentCard({ appointment }: { appointment: Appointment }) {
                 <JoinSessionButton
                   appointmentId={appointment.id}
                   scheduledAt={appointment.scheduledAt}
-                  durationMin={CONSULTATION_DURATION_MIN}
+                  durationMin={durationMin}
                 />
               )}
 
@@ -277,7 +298,7 @@ export function DoctorAppointmentsPage() {
 
   const status = TAB_STATUS_MAP[activeTab]
 
-  const { data, isLoading } = useMyAppointments({ page, limit: 10, status })
+  const { data, isContentLoading } = useMyAppointments({ page, limit: 10, status })
 
   const appointments = data?.appointments ?? []
   const meta = data?.meta
@@ -304,13 +325,14 @@ export function DoctorAppointmentsPage() {
         <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsList className="w-full sm:w-auto">
             <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+            <TabsTrigger value="missed">Missed</TabsTrigger>
             <TabsTrigger value="completed">Completed</TabsTrigger>
             <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
             <TabsTrigger value="all">All</TabsTrigger>
           </TabsList>
         </Tabs>
 
-        {isLoading ? (
+        {isContentLoading ? (
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, i) => (
               <Skeleton key={i} className="h-36 w-full" />
@@ -324,7 +346,9 @@ export function DoctorAppointmentsPage() {
               <p className="mt-1 text-sm text-muted-foreground">
                 {activeTab === "upcoming"
                   ? "No upcoming appointments. Set your schedule so patients can book."
-                  : "No appointments in this category."}
+                  : activeTab === "missed"
+                    ? "No missed appointments. Sessions that end without completion will appear here."
+                    : "No appointments in this category."}
               </p>
             </div>
           </div>
@@ -342,7 +366,7 @@ export function DoctorAppointmentsPage() {
               variant="outline"
               size="sm"
               onClick={() => setPage((p) => p - 1)}
-              disabled={page === 1}
+              disabled={page === 1 || isContentLoading}
             >
               <ChevronLeft className="size-4" />
               Previous
@@ -354,7 +378,7 @@ export function DoctorAppointmentsPage() {
               variant="outline"
               size="sm"
               onClick={() => setPage((p) => p + 1)}
-              disabled={page === meta.totalPages}
+              disabled={page === meta.totalPages || isContentLoading}
             >
               Next
               <ChevronRight className="size-4" />

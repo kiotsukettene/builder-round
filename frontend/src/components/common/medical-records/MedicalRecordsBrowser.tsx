@@ -272,7 +272,7 @@ export function MedicalRecordsBrowser({
                 variant="outline"
                 size="sm"
                 onClick={() => onPageChange(page - 1)}
-                disabled={page === 1}
+                disabled={page === 1 || isLoading}
               >
                 <ChevronLeft className="size-4" />
                 Previous
@@ -284,7 +284,7 @@ export function MedicalRecordsBrowser({
                 variant="outline"
                 size="sm"
                 onClick={() => onPageChange(page + 1)}
-                disabled={page === meta.totalPages}
+                disabled={page === meta.totalPages || isLoading}
               >
                 Next
                 <ChevronRight className="size-4" />

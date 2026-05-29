@@ -236,6 +236,23 @@ export type EnumAppointmentStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumAppointmentStatusFilter<$PrismaModel>
 }
 
+export type EnumMessageAuthorRoleFilter<$PrismaModel = never> = {
+  equals?: $Enums.MessageAuthorRole | Prisma.EnumMessageAuthorRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.MessageAuthorRole[] | Prisma.ListEnumMessageAuthorRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MessageAuthorRole[] | Prisma.ListEnumMessageAuthorRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMessageAuthorRoleFilter<$PrismaModel> | $Enums.MessageAuthorRole
+}
+
+export type EnumMessageAuthorRoleWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MessageAuthorRole | Prisma.EnumMessageAuthorRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.MessageAuthorRole[] | Prisma.ListEnumMessageAuthorRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MessageAuthorRole[] | Prisma.ListEnumMessageAuthorRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMessageAuthorRoleWithAggregatesFilter<$PrismaModel> | $Enums.MessageAuthorRole
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMessageAuthorRoleFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMessageAuthorRoleFilter<$PrismaModel>
+}
+
 export type EnumRecommendationSourceFilter<$PrismaModel = never> = {
   equals?: $Enums.RecommendationSource | Prisma.EnumRecommendationSourceFieldRefInput<$PrismaModel>
   in?: $Enums.RecommendationSource[] | Prisma.ListEnumRecommendationSourceFieldRefInput<$PrismaModel>
@@ -503,6 +520,23 @@ export type NestedEnumAppointmentStatusWithAggregatesFilter<$PrismaModel = never
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumAppointmentStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumAppointmentStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumMessageAuthorRoleFilter<$PrismaModel = never> = {
+  equals?: $Enums.MessageAuthorRole | Prisma.EnumMessageAuthorRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.MessageAuthorRole[] | Prisma.ListEnumMessageAuthorRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MessageAuthorRole[] | Prisma.ListEnumMessageAuthorRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMessageAuthorRoleFilter<$PrismaModel> | $Enums.MessageAuthorRole
+}
+
+export type NestedEnumMessageAuthorRoleWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MessageAuthorRole | Prisma.EnumMessageAuthorRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.MessageAuthorRole[] | Prisma.ListEnumMessageAuthorRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MessageAuthorRole[] | Prisma.ListEnumMessageAuthorRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMessageAuthorRoleWithAggregatesFilter<$PrismaModel> | $Enums.MessageAuthorRole
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMessageAuthorRoleFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMessageAuthorRoleFilter<$PrismaModel>
 }
 
 export type NestedEnumRecommendationSourceFilter<$PrismaModel = never> = {

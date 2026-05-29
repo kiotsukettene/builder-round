@@ -1,14 +1,20 @@
 import { useQuery } from "@tanstack/react-query"
+import { isQueryContentLoading } from "@/lib/query-utils"
 import * as discoveryService from "@/services/discovery.service"
 import type { DoctorListFilters } from "@/types/doctor"
 
 export function useDoctorList(filters: DoctorListFilters = {}) {
-  return useQuery({
+  const result = useQuery({
     queryKey: ["doctors", filters],
     queryFn: () => discoveryService.listDoctors(filters),
     staleTime: 1000 * 60,
     placeholderData: (prev) => prev,
   })
+
+  return {
+    ...result,
+    isContentLoading: isQueryContentLoading(result),
+  }
 }
 
 export function useDoctorDetail(id: string | undefined) {

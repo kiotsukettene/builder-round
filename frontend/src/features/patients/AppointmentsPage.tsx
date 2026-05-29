@@ -9,10 +9,11 @@ import { AppointmentCard } from "@/features/patients/components/AppointmentCard"
 import { useMyAppointments } from "@/hooks/use-appointments"
 import type { AppointmentStatus } from "@/types/appointment"
 
-type TabValue = "upcoming" | "completed" | "cancelled" | "all"
+type TabValue = "upcoming" | "missed" | "completed" | "cancelled" | "all"
 
 const TAB_STATUS_MAP: Record<TabValue, AppointmentStatus | undefined> = {
   upcoming: undefined,
+  missed: "MISSED",
   completed: "COMPLETED",
   cancelled: "CANCELLED",
   all: undefined,
@@ -33,6 +34,10 @@ function EmptyState({ tab, onFindDoctor }: { tab: TabValue; onFindDoctor: () => 
     upcoming: {
       title: "No upcoming appointments",
       description: "Find a doctor and book your first consultation.",
+    },
+    missed: {
+      title: "No missed appointments",
+      description: "Appointments that pass without a completed session will appear here.",
     },
     completed: {
       title: "No completed appointments yet",
@@ -73,7 +78,7 @@ export function AppointmentsPage() {
 
   const status = TAB_STATUS_MAP[activeTab]
 
-  const { data, isLoading } = useMyAppointments({
+  const { data, isContentLoading } = useMyAppointments({
     page,
     limit: 10,
     status,
@@ -109,13 +114,14 @@ export function AppointmentsPage() {
         <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsList className="w-full sm:w-auto">
             <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+            <TabsTrigger value="missed">Missed</TabsTrigger>
             <TabsTrigger value="completed">Completed</TabsTrigger>
             <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
             <TabsTrigger value="all">All</TabsTrigger>
           </TabsList>
         </Tabs>
 
-        {isLoading ? (
+        {isContentLoading ? (
           <AppointmentsSkeleton />
         ) : displayed.length === 0 ? (
           <EmptyState tab={activeTab} onFindDoctor={() => navigate("/doctors")} />
@@ -138,7 +144,7 @@ export function AppointmentsPage() {
               variant="outline"
               size="sm"
               onClick={() => setPage((p) => p - 1)}
-              disabled={page === 1}
+              disabled={page === 1 || isContentLoading}
             >
               <ChevronLeft className="size-4" />
               Previous
@@ -150,7 +156,7 @@ export function AppointmentsPage() {
               variant="outline"
               size="sm"
               onClick={() => setPage((p) => p + 1)}
-              disabled={page === meta.totalPages}
+              disabled={page === meta.totalPages || isContentLoading}
             >
               Next
               <ChevronRight className="size-4" />

@@ -23,7 +23,7 @@ import { BookingConfirmDialog } from "@/features/patients/components/BookingConf
 import { useDoctorDetail, useDoctorSlots } from "@/hooks/use-discovery"
 import { useDoctorReviews } from "@/hooks/use-rating"
 import type { DoctorAvailability, PublicDoctorWithAvailability } from "@/types/doctor"
-import { formatDateQueryParam, formatSlotTime } from "@/utils/appointment-datetime"
+import { formatDateQueryParam, formatSlotTime, isSlotInPast } from "@/utils/appointment-datetime"
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 const DAY_NAMES_FULL = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
@@ -100,7 +100,9 @@ function SlotPicker({ doctorId, availabilities, onSlotSelect }: SlotPickerProps)
     (a) => a.dayOfWeek === selectedDate.getDay(),
   )
   const hasBookableSlots =
-    !!slotsData?.slots.some((slot) => slot.available) 
+    !!slotsData?.slots.some(
+      (slot) => slot.available && !isSlotInPast(selectedDate, slot.startTime),
+    )
   const isDateUnavailable =
     !dayHasSchedule ||
     (!isLoading && !!slotsData && !hasBookableSlots)
@@ -163,21 +165,37 @@ function SlotPicker({ doctorId, availabilities, onSlotSelect }: SlotPickerProps)
             <Skeleton key={i} className="h-8 w-20" />
           ))}
         </div>
-      ) : slotsData && slotsData.slots.length > 0 ? (
+      ) : slotsData && slotsData.slots.length > 0 && hasBookableSlots ? (
         <div className="flex flex-wrap gap-2">
-          {slotsData.slots.map((slot) => (
+          {slotsData.slots.map((slot) => {
+            const isPast = isSlotInPast(selectedDate, slot.startTime)
+            const isDisabled = !slot.available || isPast
+            const disabledTitle = !slot.available
+              ? "This slot is already booked"
+              : isPast
+                ? "This time has passed"
+                : undefined
+
+            return (
             <Button
               key={slot.startTime}
               variant={selectedSlot === slot.startTime ? "default" : "outline"}
               size="sm"
-              disabled={!slot.available}
-              className={!slot.available ? "line-through opacity-40" : ""}
-              title={!slot.available ? "This slot is already booked" : undefined}
-              onClick={() => slot.available && handleSlotClick(slot.startTime)}
+              disabled={isDisabled}
+              className={
+                !slot.available
+                  ? "line-through opacity-40"
+                  : isPast
+                    ? "opacity-40"
+                    : ""
+              }
+              title={disabledTitle}
+              onClick={() => slot.available && !isPast && handleSlotClick(slot.startTime)}
             >
               {formatTime(slot.startTime)}
             </Button>
-          ))}
+            )
+          })}
         </div>
       ) : (
         <div

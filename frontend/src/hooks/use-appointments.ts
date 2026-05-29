@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { isQueryContentLoading } from "@/lib/query-utils";
 import * as appointmentService from "@/services/appointment.service";
 import type {
   AppointmentListQuery,
@@ -9,12 +10,17 @@ import type {
 } from "@/types/appointment";
 
 export function useMyAppointments(query: AppointmentListQuery = {}) {
-  return useQuery({
+  const result = useQuery({
     queryKey: ["appointments", query],
     queryFn: () => appointmentService.listMyAppointments(query),
     staleTime: 1000 * 60,
     placeholderData: (prev) => prev,
   });
+
+  return {
+    ...result,
+    isContentLoading: isQueryContentLoading(result),
+  };
 }
 
 export function useAppointmentById(id: string | undefined) {

@@ -10,12 +10,22 @@ export function formatDateQueryParam(date: Date): string {
   return `${year}-${month}-${day}`
 }
 
-/** Build ISO datetime with the user's local timezone offset (e.g. 2026-05-29T09:00:00+08:00). */
-export function buildScheduledAtIso(date: Date, slotTime: string): string {
-  const datePart = formatDateQueryParam(date)
+function buildLocalSlotDateTime(date: Date, slotTime: string): Date {
   const [hours, minutes] = slotTime.split(":").map(Number)
   const local = new Date(date)
   local.setHours(hours, minutes, 0, 0)
+  return local
+}
+
+/** Whether a slot start time is in the past (matches backend requireFutureDate). */
+export function isSlotInPast(date: Date, slotTime: string, now = new Date()): boolean {
+  return buildLocalSlotDateTime(date, slotTime) <= now
+}
+
+/** Build ISO datetime with the user's local timezone offset (e.g. 2026-05-29T09:00:00+08:00). */
+export function buildScheduledAtIso(date: Date, slotTime: string): string {
+  const datePart = formatDateQueryParam(date)
+  const local = buildLocalSlotDateTime(date, slotTime)
 
   const offsetMinutes = -local.getTimezoneOffset()
   const sign = offsetMinutes >= 0 ? "+" : "-"
@@ -102,4 +112,59 @@ export function getRelativeTimeLabel(
   }
 
   return "Session window passed"
+}
+
+/** Whether the session join window has fully ended. */
+export function isSessionWindowPassed(
+  scheduledAt: string,
+  durationMin = 30,
+): boolean {
+  const scheduled = new Date(scheduledAt)
+  const windowEnd = new Date(scheduled.getTime() + durationMin * 60 * 1000)
+  return Date.now() > windowEnd.getTime()
+}
+
+/** Whole minutes until scheduled start (ceiled, min 0). */
+export function getMinutesUntilStart(scheduledAt: string, now = new Date()): number {
+  const scheduled = new Date(scheduledAt)
+  const diffMs = scheduled.getTime() - now.getTime()
+  if (diffMs <= 0) return 0
+  return Math.ceil(diffMs / (60 * 1000))
+}
+
+/** Whether the scheduled session start time has been reached. */
+export function hasSessionStarted(scheduledAt: string, now = new Date()): boolean {
+  return now.getTime() >= new Date(scheduledAt).getTime()
+}
+
+/** End of the consultation window (scheduledAt + duration). */
+export function getSessionEndTime(
+  scheduledAt: string,
+  durationMin = 30,
+): Date {
+  const scheduled = new Date(scheduledAt)
+  return new Date(scheduled.getTime() + durationMin * 60 * 1000)
+}
+
+/** Seconds remaining in the session window (0 when past end). */
+export function getSecondsRemainingInSession(
+  scheduledAt: string,
+  durationMin = 30,
+  now = new Date(),
+): number {
+  const end = getSessionEndTime(scheduledAt, durationMin)
+  const diffMs = end.getTime() - now.getTime()
+  return Math.max(0, Math.floor(diffMs / 1000))
+}
+
+/** Format seconds as mm:ss for session timer display. */
+export function formatSessionTimeRemaining(totalSeconds: number): string {
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+}
+
+export function getConsultationTickIntervalMs(scheduledAt: string): number {
+  const minutesUntilStart = getMinutesUntilStart(scheduledAt)
+  return minutesUntilStart <= 2 ? 1_000 : 10_000
 }

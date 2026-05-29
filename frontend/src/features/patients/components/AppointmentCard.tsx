@@ -16,18 +16,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { JoinSessionButton } from "@/components/common/JoinSessionButton"
+import { AppointmentMessageThread } from "@/components/common/AppointmentMessageThread"
 import { RescheduleDialog } from "@/features/patients/components/RescheduleDialog"
 import { useCancelAppointment } from "@/hooks/use-appointments"
+import { isSessionWindowPassed } from "@/utils/appointment-datetime"
 import type { Appointment } from "@/types/appointment"
 
 const STATUS_CONFIG = {
   PENDING: { label: "Pending", className: "bg-amber-100 text-amber-700 border-amber-200" },
   CONFIRMED: { label: "Confirmed", className: "bg-green-100 text-green-700 border-green-200" },
-  COMPLETED: { label: "Completed", className: "bg-muted text-muted-foreground border-border" },
+  COMPLETED: { label: "Completed", className: "bg-blue-100 text-blue-700 border-blue-200" },
   CANCELLED: { label: "Cancelled", className: "bg-red-50 text-red-600 border-red-200" },
+  MISSED: { label: "Missed", className: "bg-orange-100 text-orange-700 border-orange-200" },
 }
-
-const CONSULTATION_DURATION_MIN = 30
 
 interface AppointmentCardProps {
   appointment: Appointment
@@ -49,9 +50,22 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
   const counterpartSub = isPatient ? appointment.doctor.specialization : "Patient"
 
   const statusConfig = STATUS_CONFIG[appointment.status]
-  const canCancel = appointment.status === "PENDING" || appointment.status === "CONFIRMED"
-  const canReschedule = isPatient && (appointment.status === "PENDING" || appointment.status === "CONFIRMED")
-  const isConfirmed = appointment.status === "CONFIRMED"
+  const durationMin = appointment.doctor.consultationDuration
+  const isMissed = appointment.status === "MISSED"
+  const sessionPassed =
+    isMissed ||
+    (appointment.status === "CONFIRMED" &&
+      isSessionWindowPassed(appointment.scheduledAt, durationMin))
+  const canCancel =
+    appointment.status === "PENDING" ||
+    appointment.status === "CONFIRMED" ||
+    appointment.status === "MISSED"
+  const canReschedule =
+    isPatient &&
+    (appointment.status === "PENDING" ||
+      appointment.status === "CONFIRMED" ||
+      appointment.status === "MISSED")
+  const isConfirmed = appointment.status === "CONFIRMED" && !sessionPassed
   const isCompleted = appointment.status === "COMPLETED"
   const medicalRecordsPath = isPatient
     ? `/medical-records?appointment=${appointment.id}`
@@ -96,7 +110,7 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
                 <button
                   type="button"
                   onClick={() => navigate(`/doctors/${appointment.doctor.id}`)}
-                  className="flex min-w-0 flex-1 items-start gap-3 rounded-md text-left transition-colors hover:bg-muted/40 -m-1 p-1"
+                  className="flex min-w-0 flex-1 cursor-pointer items-start gap-3 rounded-md text-left transition-colors hover:bg-muted/40 -m-1 p-1"
                 >
                   <Avatar className="size-11 shrink-0">
                     <AvatarImage
@@ -152,6 +166,22 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
             </div>
           </div>
 
+          {sessionPassed && (
+            <div className="border-t bg-orange-50 px-4 py-2.5 text-sm text-orange-800">
+              This session window has passed. Reschedule if you still need a consultation.
+            </div>
+          )}
+
+          <div className="border-t px-4 py-3">
+            <AppointmentMessageThread
+              appointmentId={appointment.id}
+              status={appointment.status}
+              role={role}
+              counterpartName={counterpartName}
+              counterpartAvatar={counterpart.profilePicture}
+            />
+          </div>
+
           {/* Actions footer */}
           {(canCancel || canReschedule || isConfirmed || isCompleted) && (
             <div className="flex flex-wrap items-center gap-2 border-t bg-muted/20 px-4 py-2.5">
@@ -159,7 +189,7 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
                 <JoinSessionButton
                   appointmentId={appointment.id}
                   scheduledAt={appointment.scheduledAt}
-                  durationMin={CONSULTATION_DURATION_MIN}
+                  durationMin={durationMin}
                 />
               )}
 
@@ -177,7 +207,7 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
 
               {canReschedule && (
                 <Button
-                  variant="outline"
+                  variant={isMissed ? "default" : "outline"}
                   size="sm"
                   className="gap-1.5"
                   onClick={() => setRescheduleOpen(true)}

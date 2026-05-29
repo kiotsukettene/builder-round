@@ -11,6 +11,22 @@ const appointmentInclude = {
   doctor: { include: { user: { select: { id: true } } } },
 } as const;
 
+const sessionWindowInclude = {
+  patient: {
+    include: {
+      user: { select: { id: true } },
+    },
+  },
+  doctor: {
+    select: {
+      firstName: true,
+      lastName: true,
+      consultationDuration: true,
+      user: { select: { id: true } },
+    },
+  },
+} as const;
+
 async function notifyBothParties(
   appointment: {
     id: string;
@@ -96,10 +112,61 @@ async function processTenMinReminders(now: Date): Promise<void> {
   }
 }
 
+async function processSessionWindowPassed(now: Date): Promise<void> {
+  const appointments = await prisma.appointment.findMany({
+    where: {
+      status: "CONFIRMED",
+      sessionWindowPassedNotifiedAt: null,
+      scheduledAt: { lt: now },
+    },
+    include: sessionWindowInclude,
+  });
+
+  for (const appointment of appointments) {
+    const sessionEndMs =
+      appointment.scheduledAt.getTime() +
+      appointment.doctor.consultationDuration * 60 * 1000;
+
+    if (now.getTime() < sessionEndMs) {
+      continue;
+    }
+
+    const when = formatAppointmentDateTime(appointment.scheduledAt);
+    const doctorName = `Dr. ${appointment.doctor.firstName} ${appointment.doctor.lastName}`;
+    const patientName = `${appointment.patient.firstName} ${appointment.patient.lastName}`;
+
+    await prisma.appointment.update({
+      where: { id: appointment.id },
+      data: {
+        status: "MISSED",
+        sessionWindowPassedNotifiedAt: now,
+      },
+    });
+
+    await Promise.all([
+      sendNotification({
+        userId: appointment.patient.user.id,
+        type: "SESSION_WINDOW_PASSED",
+        title: "Session window passed",
+        message: `Your consultation with ${doctorName} on ${when} has ended without a completed session. Reschedule if you still need to be seen.`,
+        relatedId: appointment.id,
+      }),
+      sendNotification({
+        userId: appointment.doctor.user.id,
+        type: "SESSION_WINDOW_PASSED",
+        title: "Session window passed",
+        message: `Your consultation with ${patientName} on ${when} was not completed. The appointment has been marked as missed.`,
+        relatedId: appointment.id,
+      }),
+    ]);
+  }
+}
+
 export async function runAppointmentReminderJob(): Promise<void> {
   const now = new Date();
   await processOneHourReminders(now);
   await processTenMinReminders(now);
+  await processSessionWindowPassed(now);
 }
 
 export function startAppointmentReminderJob(): void {
