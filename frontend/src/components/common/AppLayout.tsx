@@ -15,6 +15,7 @@ import { useLogout } from "@/hooks/use-auth"
 import { NavigationProgress } from "@/components/common/NavigationProgress"
 import { NotificationBell } from "@/components/common/NotificationBell"
 import { useAppointmentMessagesSocket } from "@/hooks/use-appointment-messages"
+import { usePushNotifications } from "@/hooks/use-push-notifications"
 import { cn } from "@/lib/utils"
 
 interface AppLayoutProps {
@@ -57,6 +58,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const { pathname } = useLocation()
 
   useAppointmentMessagesSocket()
+  usePushNotifications()
 
   const profile = user?.role === "PATIENT" ? user.patient : user?.doctor
   const displayName = profile

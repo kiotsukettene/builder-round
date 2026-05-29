@@ -25,6 +25,10 @@ const envSchema = z.object({
   ZEGOCLOUD_APP_ID: z.coerce.number().int().positive(),
   ZEGOCLOUD_SERVER_SECRET: z.string().min(1),
   APP_TIMEZONE: z.string().default("Asia/Manila"),
+  PUSHER_BEAMS_INSTANCE_ID: z.string().optional(),
+  PUSHER_BEAMS_SECRET_KEY: z.string().optional(),
+  /** Seconds to subtract from iat when signing Beams JWTs (clock skew vs Pusher). */
+  PUSHER_BEAMS_TOKEN_SKEW_SECONDS: z.coerce.number().int().min(0).default(600),
 });
 
 const parsed = envSchema.parse(process.env);

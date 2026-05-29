@@ -1,5 +1,18 @@
 import axios, { type AxiosError } from "axios"
 
+const AUTH_NO_REFRESH_PATHS = [
+  "/api/v1/auth/login",
+  "/api/v1/auth/register",
+  "/api/v1/auth/refresh",
+  "/api/v1/auth/verify-email",
+  "/api/v1/auth/resend-verification",
+] as const
+
+function isAuthNoRefreshRequest(url?: string): boolean {
+  if (!url) return false
+  return AUTH_NO_REFRESH_PATHS.some((path) => url.includes(path))
+}
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? "",
   withCredentials: true,
@@ -36,6 +49,10 @@ api.interceptors.response.use(
     const originalRequest = error.config as typeof error.config & { _retry?: boolean }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isAuthNoRefreshRequest(originalRequest.url)) {
+        return Promise.reject(error)
+      }
+
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject })

@@ -1,16 +1,23 @@
 import { z } from "zod";
+import { passwordSchema } from "../../lib/password.validation.js";
+
+const emailSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .pipe(z.email("Invalid email address"));
 
 const patientRegisterSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  email: emailSchema,
+  password: passwordSchema,
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   role: z.literal("PATIENT"),
 });
 
 const doctorRegisterSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  email: emailSchema,
+  password: passwordSchema,
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   role: z.literal("DOCTOR"),
@@ -23,7 +30,7 @@ export const registerSchema = z.discriminatedUnion("role", [
 ]);
 
 export const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: emailSchema,
   password: z.string().min(1, "Password is required"),
 });
 
@@ -38,7 +45,7 @@ export const verifyEmailSchema = z.object({
 });
 
 export const resendVerificationSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: emailSchema,
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
