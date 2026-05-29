@@ -26,6 +26,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { useAuthStore } from "@/store/auth.store"
 import { useCompletePatientProfile, useUploadPatientPicture } from "@/hooks/use-patient"
+import { requiredPositiveNumber } from "@/lib/number-schema"
 
 const completeProfileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -36,8 +37,8 @@ const completeProfileSchema = z.object({
     .refine((v) => !isNaN(Date.parse(v)) && new Date(v) < new Date(), {
       message: "Please enter a valid date in the past",
     }),
-  weight: z.coerce.number().positive("Weight must be positive"),
-  height: z.coerce.number().positive("Height must be positive"),
+  weight: requiredPositiveNumber("Weight"),
+  height: requiredPositiveNumber("Height"),
   phone: z.string().min(1, "Phone number is required").max(20),
   history: z.string().min(1, "Medical history is required").max(2000),
 })
