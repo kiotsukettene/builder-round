@@ -29,7 +29,12 @@ export function useLogin() {
   const navigate = useNavigate()
 
   return useMutation({
-    mutationFn: (payload: LoginPayload) => authService.login(payload),
+    mutationFn: async (payload: LoginPayload) => {
+      localStorage.removeItem("accessToken")
+      localStorage.removeItem("refreshToken")
+      useAuthStore.getState().logout()
+      return authService.login(payload)
+    },
     onSuccess: (res) => {
       login(res.data.user, res.data.accessToken, res.data.refreshToken)
       const user = res.data.user
@@ -48,9 +53,16 @@ export function useLogin() {
         }
       }
     },
-    onError: (error: { response?: { data?: { message?: string } } }) => {
+    onError: (
+      error: { response?: { status?: number; data?: { message?: string } } },
+      variables
+    ) => {
       const message = error?.response?.data?.message ?? "Login failed. Please try again."
       toast.error(message)
+
+      if (error?.response?.status === 403) {
+        navigate("/verify-email-pending", { state: { email: variables.email } })
+      }
     },
   })
 }
