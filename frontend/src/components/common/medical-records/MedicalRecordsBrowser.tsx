@@ -225,13 +225,16 @@ export function MedicalRecordsBrowser({
             </div>
           ) : (
             <div className="grid gap-6 lg:grid-cols-[minmax(280px,340px)_1fr] lg:items-start">
-              <div className="space-y-4">
-                {groupedRecords.map(([monthLabel, monthRecords]) => (
-                  <div key={monthLabel} className="space-y-1">
-                    <p className="px-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+              <div className="rounded-xl border bg-card">
+                {groupedRecords.map(([monthLabel, monthRecords], groupIndex) => (
+                  <div
+                    key={monthLabel}
+                    className={groupIndex > 0 ? "border-t" : undefined}
+                  >
+                    <p className="px-3 pt-3 pb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
                       {monthLabel}
                     </p>
-                    <div className="space-y-1">
+                    <div className="divide-y divide-border">
                       {monthRecords.map((record) => (
                         <MedicalRecordListRow
                           key={record.id}

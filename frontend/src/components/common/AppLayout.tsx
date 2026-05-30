@@ -94,6 +94,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   usePushNotifications()
 
   const profile = user?.role === "PATIENT" ? user.patient : user?.doctor
+  const firstName = profile?.firstName ?? ""
   const displayName = profile
     ? `${profile.firstName} ${profile.lastName}`
     : user?.email ?? ""
@@ -174,6 +175,11 @@ export function AppLayout({ children }: AppLayoutProps) {
                     <AvatarImage src={profile?.profilePicture ?? undefined} alt={displayName} />
                     <AvatarFallback className="text-xs">{initials}</AvatarFallback>
                   </Avatar>
+                  {firstName && (
+                    <span className="hidden max-w-[120px] truncate text-sm font-medium sm:inline">
+                      {firstName}
+                    </span>
+                  )}
                   <Menu className="size-4 sm:hidden" />
                 </Button>
               </DropdownMenuTrigger>
