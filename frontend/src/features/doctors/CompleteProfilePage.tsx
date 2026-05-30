@@ -34,6 +34,8 @@ import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { useAuthStore } from "@/store/auth.store"
 import { useCompleteDoctorProfile, useUploadDoctorPicture } from "@/hooks/use-doctor"
+import { locationFieldsSchema } from "@/lib/location-schema"
+import { LocationFormFields } from "@/components/common/LocationFormFields"
 
 const DURATION_OPTIONS = [
   { value: "15", label: "15 minutes" },
@@ -45,11 +47,13 @@ const DURATION_OPTIONS = [
   { value: "120", label: "2 hours" },
 ]
 
-const completeProfileSchema = z.object({
-  bio: z.string().min(1, "Bio is required").max(2000),
-  fee: z.coerce.number().positive("Fee must be a positive amount"),
-  consultationDuration: z.coerce.number().int().min(10).max(240).optional(),
-})
+const completeProfileSchema = z
+  .object({
+    bio: z.string().min(1, "Bio is required").max(2000),
+    fee: z.coerce.number().positive("Fee must be a positive amount"),
+    consultationDuration: z.coerce.number().int().min(10).max(240).optional(),
+  })
+  .merge(locationFieldsSchema)
 
 type CompleteProfileFormValues = z.infer<typeof completeProfileSchema>
 
@@ -69,6 +73,9 @@ export function DoctorCompleteProfilePage() {
       bio: doctor?.bio ?? "",
       fee: undefined,
       consultationDuration: 30,
+      address: "",
+      latitude: undefined,
+      longitude: undefined,
     },
   })
 
@@ -245,6 +252,8 @@ export function DoctorCompleteProfilePage() {
                     </FormItem>
                   )}
                 />
+
+                <LocationFormFields control={form.control} addressLabel="Practice Address" />
 
                 {!picUploaded && (
                   <p className="text-sm text-destructive">

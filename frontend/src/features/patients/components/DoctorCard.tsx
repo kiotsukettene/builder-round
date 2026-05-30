@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom"
-import { Sparkles, Clock, DollarSign, User } from "lucide-react"
+import { Sparkles, Clock, DollarSign, User, MapPin, Navigation } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -59,17 +59,31 @@ export function DoctorCard({ doctor, isRecommended = false }: DoctorCardProps) {
         )}
 
         {/* Meta row */}
-        <div className="mt-auto flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-          {doctor.fee !== null && (
-            <span className="flex items-center gap-1">
-              <DollarSign className="size-3.5" />
-              {doctor.fee} / session
-            </span>
+        <div className="mt-auto flex flex-col gap-2">
+          {doctor.address && (
+            <p className="flex items-start gap-1 text-xs text-muted-foreground">
+              <MapPin className="mt-0.5 size-3.5 shrink-0" />
+              <span className="line-clamp-1">{doctor.address}</span>
+            </p>
           )}
-          <span className="flex items-center gap-1">
-            <Clock className="size-3.5" />
-            {doctor.consultationDuration} min
-          </span>
+          <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+            {doctor.distanceKm !== null && (
+              <span className="flex items-center gap-1 font-medium text-foreground">
+                <Navigation className="size-3.5" />
+                {doctor.distanceKm} km away
+              </span>
+            )}
+            {doctor.fee !== null && (
+              <span className="flex items-center gap-1">
+                <DollarSign className="size-3.5" />
+                {doctor.fee} / session
+              </span>
+            )}
+            <span className="flex items-center gap-1">
+              <Clock className="size-3.5" />
+              {doctor.consultationDuration} min
+            </span>
+          </div>
         </div>
 
         <Button

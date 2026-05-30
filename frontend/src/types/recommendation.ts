@@ -9,6 +9,8 @@ export interface PublicDoctor {
   profilePicture: string | null
   averageRating: number | null
   totalReviews: number
+  address: string | null
+  distanceKm: number | null
 }
 
 export interface RecommendationResult {

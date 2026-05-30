@@ -5,10 +5,12 @@ import {
   uploadImage,
 } from "../../lib/cloudinary.js";
 import * as doctorRepository from "./doctor.repository.js";
+import * as patientRepository from "../patients/patient.repository.js";
 import {
   getDayOfWeekFromDateStr,
   getWallClockParts,
 } from "../../utils/schedule-datetime.js";
+import { sortByDistanceFromPatient, haversineKm } from "../../utils/distance.js";
 import {
   isDoctorProfileComplete,
   toDoctorDto,
@@ -112,13 +114,47 @@ export async function uploadProfilePicture(
   return { profilePicture: updatedDoctor.profilePicture };
 }
 
-export async function listDoctors(query: ListDoctorsQueryInput) {
+export async function listDoctors(
+  query: ListDoctorsQueryInput,
+  patientUserId: string,
+) {
   const { page, limit } = query;
   const { doctors, total, ratingStats } = await doctorRepository.findDoctors(query);
+  const patient = await patientRepository.findPatientByUserId(patientUserId);
+
+  const patientHasCoords =
+    patient?.latitude !== null &&
+    patient?.latitude !== undefined &&
+    patient?.longitude !== null &&
+    patient?.longitude !== undefined;
+
+  let sortedDoctors = doctors.map((doctor) => ({
+    doctor,
+    distanceKm: null as number | null,
+  }));
+
+  if (patientHasCoords && patient) {
+    const withDistance = sortByDistanceFromPatient(
+      doctors,
+      patient.latitude!,
+      patient.longitude!,
+      (doctor) => ({
+        latitude: doctor.latitude,
+        longitude: doctor.longitude,
+      }),
+    );
+    sortedDoctors = withDistance.map((doctor) => ({
+      doctor,
+      distanceKm: doctor.distanceKm,
+    }));
+  }
+
+  const skip = (page - 1) * limit;
+  const paginated = sortedDoctors.slice(skip, skip + limit);
 
   return {
-    data: doctors.map((doctor) =>
-      toPublicDoctorDto(doctor, ratingStats.get(doctor.id)),
+    data: paginated.map(({ doctor, distanceKm }) =>
+      toPublicDoctorDto(doctor, ratingStats.get(doctor.id), distanceKm),
     ),
     meta: {
       page,
@@ -129,15 +165,37 @@ export async function listDoctors(query: ListDoctorsQueryInput) {
   };
 }
 
-export async function getDoctorById(id: string) {
+export async function getDoctorById(id: string, patientUserId: string) {
   const result = await doctorRepository.findDoctorById(id);
   if (!result) {
     throw new AppError("Doctor not found", 404);
   }
 
+  const patient = await patientRepository.findPatientByUserId(patientUserId);
+  let distanceKm: number | null = null;
+
+  if (
+    patient?.latitude !== null &&
+    patient?.latitude !== undefined &&
+    patient?.longitude !== null &&
+    patient?.longitude !== undefined &&
+    result.doctor.latitude !== null &&
+    result.doctor.latitude !== undefined &&
+    result.doctor.longitude !== null &&
+    result.doctor.longitude !== undefined
+  ) {
+    distanceKm = haversineKm(
+      patient.latitude,
+      patient.longitude,
+      result.doctor.latitude,
+      result.doctor.longitude,
+    );
+  }
+
   return toPublicDoctorWithAvailabilityDto(
     result.doctor,
     result.ratingStats,
+    distanceKm,
   );
 }
 

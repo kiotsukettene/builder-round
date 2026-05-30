@@ -27,6 +27,14 @@ router.get(
 );
 
 router.get(
+  "/:id/patient-medical-records",
+  authenticate,
+  authorize("DOCTOR"),
+  requireVerifiedEmail,
+  appointmentController.getPatientMedicalRecords,
+);
+
+router.get(
   "/:id/messages",
   authenticate,
   authorize("PATIENT", "DOCTOR"),

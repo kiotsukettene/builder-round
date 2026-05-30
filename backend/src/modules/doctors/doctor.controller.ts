@@ -87,7 +87,7 @@ export const uploadProfilePicture = asyncHandler(
 export const listDoctors = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const query = listDoctorsQuerySchema.parse(req.query);
-    const result = await doctorService.listDoctors(query);
+    const result = await doctorService.listDoctors(query, getUserId(req));
 
     res.status(200).json({
       success: true,
@@ -100,7 +100,7 @@ export const listDoctors = asyncHandler(
 
 export const getDoctorById = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const doctor = await doctorService.getDoctorById(getDoctorId(req));
+    const doctor = await doctorService.getDoctorById(getDoctorId(req), getUserId(req));
 
     res.status(200).json({
       success: true,

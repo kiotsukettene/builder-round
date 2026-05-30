@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { locationFieldsSchema } from "../../lib/location.validation.js";
 
 const birthdaySchema = z
   .string()
@@ -27,9 +28,30 @@ const profileFieldsSchema = z.object({
     .max(2000, "Medical history is too long"),
 });
 
-export const completeProfileSchema = profileFieldsSchema;
+export const completeProfileSchema = profileFieldsSchema.merge(locationFieldsSchema);
 
-export const updateProfileSchema = profileFieldsSchema.partial();
+const locationUpdateFields = z
+  .object({
+    address: z.string().min(1).max(500).optional(),
+    latitude: z.number().min(-90).max(90).optional(),
+    longitude: z.number().min(-180).max(180).optional(),
+  })
+  .superRefine((data, ctx) => {
+    const provided = (["address", "latitude", "longitude"] as const).filter(
+      (key) => data[key] !== undefined,
+    );
+    if (provided.length > 0 && provided.length < 3) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Address, latitude, and longitude must be updated together",
+        path: ["address"],
+      });
+    }
+  });
+
+export const updateProfileSchema = profileFieldsSchema
+  .partial()
+  .merge(locationUpdateFields);
 
 export type CompleteProfileInput = z.infer<typeof completeProfileSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;

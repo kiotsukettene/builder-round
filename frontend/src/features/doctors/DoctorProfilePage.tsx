@@ -28,6 +28,8 @@ import { AppLayout } from "@/components/common/AppLayout"
 import { ProfileSectionCard } from "@/components/common/ProfileSectionCard"
 import { useAuthStore } from "@/store/auth.store"
 import { useUpdateDoctorProfile, useUploadDoctorPicture } from "@/hooks/use-doctor"
+import { locationFieldsSchema } from "@/lib/location-schema"
+import { LocationFormFields } from "@/components/common/LocationFormFields"
 
 const DURATION_OPTIONS = [
   { value: "15", label: "15 minutes" },
@@ -53,6 +55,7 @@ const practiceSchema = z.object({
 
 type ProfessionalFormValues = z.infer<typeof professionalSchema>
 type PracticeFormValues = z.infer<typeof practiceSchema>
+type LocationFormValues = z.infer<typeof locationFieldsSchema>
 
 function ProfileField({ label, value }: { label: string; value: string | null | undefined }) {
   return (
@@ -93,6 +96,15 @@ export function DoctorProfilePage() {
     },
   })
 
+  const locationForm = useForm<LocationFormValues>({
+    resolver: zodResolver(locationFieldsSchema) as Resolver<LocationFormValues>,
+    defaultValues: {
+      address: doctor?.address ?? "",
+      latitude: doctor?.latitude ?? undefined,
+      longitude: doctor?.longitude ?? undefined,
+    },
+  })
+
   useEffect(() => {
     if (!doctor) return
     professionalForm.reset({
@@ -105,8 +117,13 @@ export function DoctorProfilePage() {
       fee: doctor.fee ?? 0,
       consultationDuration: doctor.consultationDuration ?? 30,
     })
+    locationForm.reset({
+      address: doctor.address ?? "",
+      latitude: doctor.latitude ?? undefined,
+      longitude: doctor.longitude ?? undefined,
+    })
     setPreviewUrl(doctor.profilePicture ?? null)
-  }, [doctor, professionalForm, practiceForm])
+  }, [doctor, professionalForm, practiceForm, locationForm])
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -133,6 +150,11 @@ export function DoctorProfilePage() {
       fee: doctor.fee ?? 0,
       consultationDuration: doctor.consultationDuration ?? 30,
     })
+    locationForm.reset({
+      address: doctor.address ?? "",
+      latitude: doctor.latitude ?? undefined,
+      longitude: doctor.longitude ?? undefined,
+    })
     setEditingSection(null)
   }
 
@@ -144,6 +166,12 @@ export function DoctorProfilePage() {
 
   function savePractice() {
     practiceForm.handleSubmit((values) => {
+      updateProfile(values, { onSuccess: () => setEditingSection(null) })
+    })()
+  }
+
+  function saveLocation() {
+    locationForm.handleSubmit((values) => {
       updateProfile(values, { onSuccess: () => setEditingSection(null) })
     })()
   }
@@ -370,6 +398,37 @@ export function DoctorProfilePage() {
                   )}
                 />
               </div>
+            </Form>
+          }
+        />
+
+        <ProfileSectionCard
+          title="Practice Location"
+          description="Where patients can find you"
+          sectionId="location"
+          editingSection={editingSection}
+          onEdit={handleEdit}
+          onCancel={handleCancel}
+          onSave={saveLocation}
+          isSaving={isUpdating}
+          view={
+            <div className="space-y-4">
+              <ProfileField label="Address" value={doctor.address} />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <ProfileField
+                  label="Latitude"
+                  value={doctor.latitude != null ? String(doctor.latitude) : null}
+                />
+                <ProfileField
+                  label="Longitude"
+                  value={doctor.longitude != null ? String(doctor.longitude) : null}
+                />
+              </div>
+            </div>
+          }
+          edit={
+            <Form {...locationForm}>
+              <LocationFormFields control={locationForm.control} addressLabel="Practice Address" />
             </Form>
           }
         />

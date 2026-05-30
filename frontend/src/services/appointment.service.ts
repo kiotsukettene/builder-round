@@ -8,6 +8,11 @@ import type {
   CancelAppointmentPayload,
   RescheduleAppointmentPayload,
 } from "@/types/appointment";
+import type {
+  MedicalRecordListItem,
+  MedicalRecordListMeta,
+  MedicalRecordListQuery,
+} from "@/types/consultation";
 
 export async function listMyAppointments(
   query: AppointmentListQuery = {},
@@ -35,6 +40,26 @@ export async function getAppointmentById(id: string): Promise<Appointment> {
     `/api/v1/appointments/${id}`,
   );
   return data.data;
+}
+
+export async function listPatientMedicalRecords(
+  appointmentId: string,
+  query: MedicalRecordListQuery = {},
+): Promise<{ data: MedicalRecordListItem[]; meta: MedicalRecordListMeta }> {
+  const params = new URLSearchParams();
+  if (query.page) params.set("page", String(query.page));
+  if (query.limit) params.set("limit", String(query.limit));
+
+  const queryString = params.toString();
+  const url = queryString
+    ? `/api/v1/appointments/${appointmentId}/patient-medical-records?${queryString}`
+    : `/api/v1/appointments/${appointmentId}/patient-medical-records`;
+
+  const { data } = await api.get<
+    ApiResponse<MedicalRecordListItem[]> & { meta: MedicalRecordListMeta }
+  >(url);
+
+  return { data: data.data, meta: data.meta };
 }
 
 export async function bookAppointment(

@@ -81,6 +81,9 @@ model Patient {
   history            String?
   profilePicture     String?
   profileCompletedAt DateTime?
+  address            String?
+  latitude           Float?
+  longitude          Float?
 
   user            User             @relation(fields: [userId], references: [id])
   appointments    Appointment[]
@@ -99,6 +102,9 @@ model Doctor {
   consultationDuration Int       @default(30)
   profilePicture       String?
   profileCompletedAt   DateTime?
+  address              String?
+  latitude             Float?
+  longitude            Float?
 
   user           User                @relation(fields: [userId], references: [id])
   appointments   Appointment[]

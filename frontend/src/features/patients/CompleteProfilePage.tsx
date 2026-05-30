@@ -27,21 +27,25 @@ import { Separator } from "@/components/ui/separator"
 import { useAuthStore } from "@/store/auth.store"
 import { useCompletePatientProfile, useUploadPatientPicture } from "@/hooks/use-patient"
 import { requiredPositiveNumber } from "@/lib/number-schema"
+import { locationFieldsSchema } from "@/lib/location-schema"
+import { LocationFormFields } from "@/components/common/LocationFormFields"
 
-const completeProfileSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  birthday: z
-    .string()
-    .min(1, "Birthday is required")
-    .refine((v) => !isNaN(Date.parse(v)) && new Date(v) < new Date(), {
-      message: "Please enter a valid date in the past",
-    }),
-  weight: requiredPositiveNumber("Weight"),
-  height: requiredPositiveNumber("Height"),
-  phone: z.string().min(1, "Phone number is required").max(20),
-  history: z.string().min(1, "Medical history is required").max(2000),
-})
+const completeProfileSchema = z
+  .object({
+    firstName: z.string().min(1, "First name is required"),
+    lastName: z.string().min(1, "Last name is required"),
+    birthday: z
+      .string()
+      .min(1, "Birthday is required")
+      .refine((v) => !isNaN(Date.parse(v)) && new Date(v) < new Date(), {
+        message: "Please enter a valid date in the past",
+      }),
+    weight: requiredPositiveNumber("Weight"),
+    height: requiredPositiveNumber("Height"),
+    phone: z.string().min(1, "Phone number is required").max(20),
+    history: z.string().min(1, "Medical history is required").max(2000),
+  })
+  .merge(locationFieldsSchema)
 
 type CompleteProfileFormValues = z.infer<typeof completeProfileSchema>
 
@@ -65,6 +69,9 @@ export function CompleteProfilePage() {
       height: undefined,
       phone: patient?.phone ?? "",
       history: patient?.history ?? "",
+      address: "",
+      latitude: undefined,
+      longitude: undefined,
     },
   })
 
@@ -267,6 +274,8 @@ export function CompleteProfilePage() {
                     </FormItem>
                   )}
                 />
+
+                <LocationFormFields control={form.control} addressLabel="Home Address" />
 
                 {!picUploaded && (
                   <p className="text-sm text-destructive">

@@ -10,6 +10,8 @@ import {
 } from "./appointment.validation.js";
 import { sendAppointmentMessageSchema } from "./appointment-message.validation.js";
 import * as appointmentMessageService from "./appointment-message.service.js";
+import * as medicalRecordService from "../medical-records/medical-record.service.js";
+import { listMedicalRecordsQuerySchema } from "../medical-records/medical-record.validation.js";
 
 function getAuthUser(req: Request): { userId: string; role: string } {
   const userId = req.user?.userId;
@@ -131,6 +133,25 @@ export const getAppointmentById = asyncHandler(
       success: true,
       message: "Appointment retrieved successfully",
       data: appointment,
+    });
+  },
+);
+
+export const getPatientMedicalRecords = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const { userId } = getAuthUser(req);
+    const query = listMedicalRecordsQuerySchema.parse(req.query);
+    const result = await medicalRecordService.listPatientMedicalRecordsForDoctor(
+      userId,
+      getAppointmentId(req),
+      query,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Patient medical records retrieved successfully",
+      data: result.data,
+      meta: result.meta,
     });
   },
 );
