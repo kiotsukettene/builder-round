@@ -16,6 +16,7 @@ export async function listMyAppointments(
   if (query.page) params.set("page", String(query.page));
   if (query.limit) params.set("limit", String(query.limit));
   if (query.status) params.set("status", query.status);
+  if (query.upcoming) params.set("upcoming", "true");
 
   const queryString = params.toString();
   const url = queryString
