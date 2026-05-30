@@ -19,14 +19,16 @@ function SummaryCard({
   value: string;
 }) {
   return (
-    <Card className="border-muted/60 shadow-none">
+    <Card className="border-border shadow-sm transition-colors hover:border-primary/20">
       <CardContent className="flex items-center gap-3 p-4">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted/60">
-          <Icon className="size-4 text-muted-foreground" />
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+          <Icon className="size-4 text-primary" />
         </div>
         <div className="min-w-0">
           <p className="text-xs text-muted-foreground">{label}</p>
-          <p className="truncate text-lg font-semibold tracking-tight">{value}</p>
+          <p className="truncate text-2xl font-semibold tabular-nums tracking-tight">
+            {value}
+          </p>
         </div>
       </CardContent>
     </Card>
