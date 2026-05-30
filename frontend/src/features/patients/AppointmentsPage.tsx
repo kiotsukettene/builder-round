@@ -78,23 +78,15 @@ export function AppointmentsPage() {
 
   const status = TAB_STATUS_MAP[activeTab]
 
-  const { data, isContentLoading } = useMyAppointments({
-    page,
-    limit: 10,
-    status,
-  })
+  const listQuery =
+    activeTab === "upcoming"
+      ? { page, limit: 10, upcoming: true as const }
+      : { page, limit: 10, status }
+
+  const { data, isContentLoading } = useMyAppointments(listQuery)
 
   const appointments = data?.appointments ?? []
   const meta = data?.meta
-
-  function filterUpcoming() {
-    if (activeTab !== "upcoming") return appointments
-    return appointments.filter(
-      (a) => a.status === "PENDING" || a.status === "CONFIRMED"
-    )
-  }
-
-  const displayed = activeTab === "upcoming" ? filterUpcoming() : appointments
 
   function handleTabChange(value: string) {
     setActiveTab(value as TabValue)
@@ -123,11 +115,11 @@ export function AppointmentsPage() {
 
         {isContentLoading ? (
           <AppointmentsSkeleton />
-        ) : displayed.length === 0 ? (
+        ) : appointments.length === 0 ? (
           <EmptyState tab={activeTab} onFindDoctor={() => navigate("/doctors")} />
         ) : (
           <div className="space-y-3">
-            {displayed.map((appointment) => (
+            {appointments.map((appointment) => (
               <AppointmentCard
                 key={appointment.id}
                 appointment={appointment}
@@ -138,7 +130,9 @@ export function AppointmentsPage() {
         )}
 
         {/* Pagination */}
-        {meta && meta.totalPages > 1 && (
+        {meta &&
+          meta.totalPages > 1 &&
+          (activeTab !== "upcoming" || appointments.length > 0) && (
           <div className="flex items-center justify-center gap-3">
             <Button
               variant="outline"

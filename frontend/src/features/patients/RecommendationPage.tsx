@@ -32,10 +32,10 @@ type RecommendationSource = "history" | "symptoms"
 function RecommendationSkeleton({ message }: { message: string }) {
   return (
     <div className="space-y-6">
-      <Card className="border-primary/20 bg-primary/5">
+      <Card className="border-violet-200/80 bg-linear-to-br from-violet-50 via-violet-50/40 to-background dark:border-violet-500/25 dark:from-violet-950/50 dark:via-violet-950/20 dark:to-background">
         <CardContent className="flex flex-col items-center gap-4 py-10 text-center">
-          <div className="flex size-12 items-center justify-center rounded-full bg-primary/10">
-            <Sparkles className="size-6 animate-pulse text-primary" />
+          <div className="flex size-12 items-center justify-center rounded-full bg-violet-100 dark:bg-violet-500/15">
+            <Sparkles className="size-6 animate-pulse text-violet-600 dark:text-violet-400" />
           </div>
           <div className="space-y-1.5">
             <p className="font-medium">{message}</p>
@@ -47,7 +47,7 @@ function RecommendationSkeleton({ message }: { message: string }) {
             {[0, 1, 2].map((i) => (
               <span
                 key={i}
-                className="size-2 animate-bounce rounded-full bg-primary/50"
+                className="size-2 animate-bounce rounded-full bg-violet-400/70 dark:bg-violet-400/50"
                 style={{ animationDelay: `${i * 150}ms` }}
               />
             ))}
@@ -249,15 +249,21 @@ export function RecommendationPage() {
                 </div>
               )}
 
-              <Card className="border-primary/20 bg-linear-to-br from-primary/5 to-background">
+              <Card className="border-violet-200/80 bg-linear-to-br from-violet-50 via-violet-50/40 to-background shadow-sm dark:border-violet-500/25 dark:from-violet-950/50 dark:via-violet-950/20 dark:to-background">
                 <CardHeader className="pb-3">
-                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                    <Sparkles className="size-4 text-primary" />
+                  <div className="flex items-center gap-2 text-sm font-medium text-violet-700 dark:text-violet-300">
+                    <span className="flex size-6 items-center justify-center rounded-full bg-violet-100 dark:bg-violet-500/15">
+                      <Sparkles className="size-3.5 text-violet-600 dark:text-violet-400" />
+                    </span>
                     AI Recommendation
                   </div>
                   <CardTitle className="flex flex-wrap items-center gap-3 text-xl">
-                    <Stethoscope className="size-5 text-primary" />
-                    {displayData.recommendation.specialization}
+                    <span className="flex size-9 items-center justify-center rounded-lg bg-violet-100 dark:bg-violet-500/15">
+                      <Stethoscope className="size-5 text-violet-600 dark:text-violet-400" />
+                    </span>
+                    <span className="text-violet-950 dark:text-violet-50">
+                      {displayData.recommendation.specialization}
+                    </span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">

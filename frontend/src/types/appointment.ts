@@ -55,6 +55,7 @@ export interface AppointmentListQuery {
   page?: number
   limit?: number
   status?: AppointmentStatus
+  upcoming?: boolean
 }
 
 export interface AppointmentListMeta {

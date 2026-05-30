@@ -81,6 +81,11 @@ const DoctorMedicalRecordsPage = lazy(() =>
     default: m.DoctorMedicalRecordsPage,
   }))
 )
+const NotificationsPage = lazy(() =>
+  import("@/features/notifications/NotificationsPage").then((m) => ({
+    default: m.NotificationsPage,
+  }))
+)
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -171,6 +176,15 @@ function App() {
               <Route path="/doctor/schedule" element={<DoctorSchedulePage />} />
               <Route path="/doctor/appointments" element={<DoctorAppointmentsPage />} />
               <Route path="/doctor/medical-records" element={<DoctorMedicalRecordsPage />} />
+            </Route>
+
+            {/* Shared routes — patient or doctor with complete profile */}
+            <Route
+              element={
+                <ProtectedRoute requireVerified requireCompleteProfile />
+              }
+            >
+              <Route path="/notifications" element={<NotificationsPage />} />
             </Route>
 
             {/* Consultation room — requires auth only */}
