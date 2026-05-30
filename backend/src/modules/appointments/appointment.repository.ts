@@ -56,17 +56,30 @@ export async function findAppointmentById(id: string) {
   });
 }
 
+function buildAppointmentListWhere(
+  filters: ListAppointmentsQueryInput,
+  idFilter: { patientId: string } | { doctorId: string },
+) {
+  const { status, upcoming } = filters;
+
+  return {
+    ...idFilter,
+    ...(upcoming
+      ? { status: { in: ["PENDING", "CONFIRMED"] as AppointmentStatus[] } }
+      : status
+        ? { status }
+        : {}),
+  };
+}
+
 export async function findAppointmentsByPatientId(
   patientId: string,
   filters: ListAppointmentsQueryInput,
 ) {
-  const { page, limit, status } = filters;
+  const { page, limit } = filters;
   const skip = (page - 1) * limit;
 
-  const where = {
-    patientId,
-    ...(status && { status }),
-  };
+  const where = buildAppointmentListWhere(filters, { patientId });
 
   const [appointments, total] = await prisma.$transaction([
     prisma.appointment.findMany({
@@ -86,13 +99,10 @@ export async function findAppointmentsByDoctorId(
   doctorId: string,
   filters: ListAppointmentsQueryInput,
 ) {
-  const { page, limit, status } = filters;
+  const { page, limit } = filters;
   const skip = (page - 1) * limit;
 
-  const where = {
-    doctorId,
-    ...(status && { status }),
-  };
+  const where = buildAppointmentListWhere(filters, { doctorId });
 
   const [appointments, total] = await prisma.$transaction([
     prisma.appointment.findMany({

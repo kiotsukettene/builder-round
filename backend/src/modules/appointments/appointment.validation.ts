@@ -28,13 +28,18 @@ export const rescheduleAppointmentSchema = z.object({
     }),
 });
 
-export const listAppointmentsQuerySchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().min(1).max(50).default(10),
-  status: z
-    .enum(["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED", "MISSED"])
-    .optional(),
-});
+export const listAppointmentsQuerySchema = z
+  .object({
+    page: z.coerce.number().int().positive().default(1),
+    limit: z.coerce.number().int().min(1).max(50).default(10),
+    status: z
+      .enum(["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED", "MISSED"])
+      .optional(),
+    upcoming: z.coerce.boolean().optional(),
+  })
+  .refine((data) => !(data.status && data.upcoming), {
+    message: "Cannot use status and upcoming filters together",
+  });
 
 export type BookAppointmentInput = z.infer<typeof bookAppointmentSchema>;
 export type CancelAppointmentInput = z.infer<typeof cancelAppointmentSchema>;
