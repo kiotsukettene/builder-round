@@ -6,6 +6,7 @@ import { joinConsultation, endConsultation } from "@/services/consultation.servi
 import { useAuthStore } from "@/store/auth.store";
 import { useAppointmentById } from "@/hooks/use-appointments";
 import { useConsultationEnded } from "@/hooks/use-consultation-ended";
+import { PatientPastMedicalRecords } from "@/components/common/PatientPastMedicalRecords";
 import { NotesPanel } from "./components/NotesPanel";
 import { PrescriptionsPanel } from "./components/PrescriptionsPanel";
 import { ConsultationWaitingLobby } from "./components/ConsultationWaitingLobby";
@@ -438,6 +439,9 @@ export function ConsultationRoom() {
 
       {isDoctor && isPanelOpen && (
         <div className="w-80 shrink-0 flex flex-col bg-background border-l border-border">
+          <div className="max-h-56 shrink-0 overflow-y-auto border-b border-border p-3">
+            <PatientPastMedicalRecords appointmentId={appointmentId} />
+          </div>
           <div className="flex border-b border-border">
             <button
               type="button"

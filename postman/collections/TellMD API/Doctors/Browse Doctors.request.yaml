@@ -2,6 +2,9 @@ $kind: http-request
 name: Browse Doctors
 method: GET
 url: "{{baseUrl}}/api/v1/doctors?page=1&limit=10"
+description: |
+  Returns doctors sorted by distance from the authenticated patient's coordinates when available.
+  Each doctor includes `address`, and `distanceKm` (null when patient or doctor has no coordinates).
 queryParams:
   page: "1"
   limit: "10"

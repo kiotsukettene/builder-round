@@ -10,6 +10,8 @@ import {
   ChevronLeft,
   ChevronRight,
   AlertCircle,
+  MapPin,
+  Navigation,
 } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -360,6 +362,12 @@ function DoctorDetailContent({ doctor }: { doctor: PublicDoctorWithAvailability 
                     <span className="font-medium">{doctor.consultationDuration} min</span>
                     <span className="text-muted-foreground">consultation</span>
                   </div>
+                  {doctor.distanceKm !== null && (
+                    <div className="flex items-center gap-1.5 text-sm">
+                      <Navigation className="size-4 text-muted-foreground" />
+                      <span className="font-medium">{doctor.distanceKm} km away</span>
+                    </div>
+                  )}
                   {uniqueDays.length > 0 && (
                     <div className="flex items-center gap-1.5 text-sm">
                       <Calendar className="size-4 text-muted-foreground" />
@@ -370,6 +378,20 @@ function DoctorDetailContent({ doctor }: { doctor: PublicDoctorWithAvailability 
               </div>
             </CardContent>
           </Card>
+
+          {doctor.address && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Practice Location</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="flex items-start gap-2 text-sm leading-relaxed text-muted-foreground">
+                  <MapPin className="mt-0.5 size-4 shrink-0" />
+                  {doctor.address}
+                </p>
+              </CardContent>
+            </Card>
+          )}
 
           {doctor.bio && (
             <Card>

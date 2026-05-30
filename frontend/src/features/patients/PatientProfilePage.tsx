@@ -21,6 +21,8 @@ import { ProfileSectionCard } from "@/components/common/ProfileSectionCard"
 import { useAuthStore } from "@/store/auth.store"
 import { useUpdatePatientProfile, useUploadPatientPicture } from "@/hooks/use-patient"
 import { optionalPositiveNumber } from "@/lib/number-schema"
+import { locationFieldsSchema } from "@/lib/location-schema"
+import { LocationFormFields } from "@/components/common/LocationFormFields"
 
 const personalSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -37,6 +39,7 @@ const healthSchema = z.object({
 
 type PersonalFormValues = z.infer<typeof personalSchema>
 type HealthFormValues = z.infer<typeof healthSchema>
+type LocationFormValues = z.infer<typeof locationFieldsSchema>
 
 function ProfileField({ label, value }: { label: string; value: string | null | undefined }) {
   return (
@@ -76,6 +79,15 @@ export function PatientProfilePage() {
     },
   })
 
+  const locationForm = useForm<LocationFormValues>({
+    resolver: zodResolver(locationFieldsSchema) as Resolver<LocationFormValues>,
+    defaultValues: {
+      address: patient?.address ?? "",
+      latitude: patient?.latitude ?? undefined,
+      longitude: patient?.longitude ?? undefined,
+    },
+  })
+
   useEffect(() => {
     if (!patient) return
     personalForm.reset({
@@ -89,8 +101,13 @@ export function PatientProfilePage() {
       height: patient.height ?? undefined,
       history: patient.history ?? "",
     })
+    locationForm.reset({
+      address: patient.address ?? "",
+      latitude: patient.latitude ?? undefined,
+      longitude: patient.longitude ?? undefined,
+    })
     setPreviewUrl(patient.profilePicture ?? null)
-  }, [patient, personalForm, healthForm])
+  }, [patient, personalForm, healthForm, locationForm])
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -117,6 +134,11 @@ export function PatientProfilePage() {
       weight: patient.weight ?? undefined,
       height: patient.height ?? undefined,
       history: patient.history ?? "",
+    })
+    locationForm.reset({
+      address: patient.address ?? "",
+      latitude: patient.latitude ?? undefined,
+      longitude: patient.longitude ?? undefined,
     })
     setEditingSection(null)
   }
@@ -145,6 +167,12 @@ export function PatientProfilePage() {
         },
         { onSuccess: () => setEditingSection(null) }
       )
+    })()
+  }
+
+  function saveLocation() {
+    locationForm.handleSubmit((values) => {
+      updateProfile(values, { onSuccess: () => setEditingSection(null) })
     })()
   }
 
@@ -375,6 +403,37 @@ export function PatientProfilePage() {
                   )}
                 />
               </div>
+            </Form>
+          }
+        />
+
+        <ProfileSectionCard
+          title="Location"
+          description="Used to find doctors nearest to you"
+          sectionId="location"
+          editingSection={editingSection}
+          onEdit={handleEdit}
+          onCancel={handleCancel}
+          onSave={saveLocation}
+          isSaving={isUpdating}
+          view={
+            <div className="space-y-4">
+              <ProfileField label="Address" value={patient.address} />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <ProfileField
+                  label="Latitude"
+                  value={patient.latitude != null ? String(patient.latitude) : null}
+                />
+                <ProfileField
+                  label="Longitude"
+                  value={patient.longitude != null ? String(patient.longitude) : null}
+                />
+              </div>
+            </div>
+          }
+          edit={
+            <Form {...locationForm}>
+              <LocationFormFields control={locationForm.control} addressLabel="Home Address" />
             </Form>
           }
         />

@@ -33,6 +33,9 @@ export async function updatePatientByUserId(
     height?: number;
     phone?: string;
     history?: string;
+    address?: string;
+    latitude?: number;
+    longitude?: number;
   } = {};
 
   if (data.firstName !== undefined) {
@@ -55,6 +58,15 @@ export async function updatePatientByUserId(
   }
   if (data.history !== undefined) {
     updateData.history = data.history;
+  }
+  if (data.address !== undefined) {
+    updateData.address = data.address;
+  }
+  if (data.latitude !== undefined) {
+    updateData.latitude = data.latitude;
+  }
+  if (data.longitude !== undefined) {
+    updateData.longitude = data.longitude;
   }
 
   return prisma.patient.update({

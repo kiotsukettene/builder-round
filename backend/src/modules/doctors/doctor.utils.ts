@@ -10,6 +10,7 @@ type PublicDoctorFields = Pick<
   | "fee"
   | "consultationDuration"
   | "profilePicture"
+  | "address"
 >;
 
 type DoctorWithAvailabilities = PublicDoctorFields & {
@@ -50,6 +51,7 @@ export function formatUserWithDoctorDto<T extends { doctor?: Doctor | null }>(
 export function toPublicDoctorDto(
   doctor: PublicDoctorFields,
   ratingStats?: DoctorRatingStats,
+  distanceKm: number | null = null,
 ) {
   return {
     id: doctor.id,
@@ -60,17 +62,20 @@ export function toPublicDoctorDto(
     fee: doctor.fee,
     consultationDuration: doctor.consultationDuration,
     profilePicture: doctor.profilePicture,
+    address: doctor.address,
     averageRating: ratingStats?.averageRating ?? null,
     totalReviews: ratingStats?.totalReviews ?? 0,
+    distanceKm,
   };
 }
 
 export function toPublicDoctorWithAvailabilityDto(
   doctor: DoctorWithAvailabilities,
   ratingStats?: DoctorRatingStats,
+  distanceKm: number | null = null,
 ) {
   return {
-    ...toPublicDoctorDto(doctor, ratingStats),
+    ...toPublicDoctorDto(doctor, ratingStats, distanceKm),
     availabilities: doctor.availabilities.map(
       ({ id, dayOfWeek, startTime, endTime }) => ({
         id,

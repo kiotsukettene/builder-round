@@ -45,6 +45,7 @@ import {
   useConfirmAppointment,
 } from "@/hooks/use-appointments"
 import { PatientDetails } from "@/components/common/PatientDetails"
+import { PatientPastMedicalRecords } from "@/components/common/PatientPastMedicalRecords"
 import { AppointmentMessageThread } from "@/components/common/AppointmentMessageThread"
 import { JoinSessionButton } from "@/components/common/JoinSessionButton"
 import { isSessionWindowPassed } from "@/utils/appointment-datetime"
@@ -140,6 +141,7 @@ function DoctorAppointmentCard({ appointment }: { appointment: Appointment }) {
                   <p className="text-xs text-muted-foreground">Patient</p>
                 </div>
                 <PatientDetails patient={appointment.patient} />
+                <PatientPastMedicalRecords appointmentId={appointment.id} />
                 <AppointmentMessageThread
                   appointmentId={appointment.id}
                   status={appointment.status}

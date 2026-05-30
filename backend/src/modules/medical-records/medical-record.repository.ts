@@ -42,6 +42,43 @@ export async function findCompletedAppointmentsByPatientId(
   return { appointments, total };
 }
 
+export async function findCompletedAppointmentsByPatientIdExcluding(
+  patientId: string,
+  excludeAppointmentId: string,
+  { page, limit }: ListMedicalRecordsQueryInput,
+) {
+  const skip = (page - 1) * limit;
+  const where = {
+    patientId,
+    status: "COMPLETED" as const,
+    id: { not: excludeAppointmentId },
+  };
+
+  const [appointments, total] = await prisma.$transaction([
+    prisma.appointment.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: { scheduledAt: "desc" },
+      include: {
+        ...medicalRecordInclude,
+        doctor: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            specialization: true,
+            profilePicture: true,
+          },
+        },
+      },
+    }),
+    prisma.appointment.count({ where }),
+  ]);
+
+  return { appointments, total };
+}
+
 // ── Doctor queries ──
 
 export async function findCompletedAppointmentsByDoctorId(

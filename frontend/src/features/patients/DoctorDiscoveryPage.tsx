@@ -19,6 +19,8 @@ import { SymptomSearchDialog } from "@/features/patients/components/SymptomSearc
 import { useDoctorList } from "@/hooks/use-discovery"
 import { useCustomRecommendation } from "@/hooks/use-recommendation"
 import { useRecommendationLimit } from "@/hooks/use-recommendation-limit"
+import { useAuthStore } from "@/store/auth.store"
+import { Link } from "react-router-dom"
 
 const ITEMS_PER_PAGE = 9
 
@@ -47,6 +49,10 @@ function DoctorGridSkeleton() {
 export function DoctorDiscoveryPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
+  const patient = useAuthStore((s) => s.user?.patient)
+
+  const patientHasLocation =
+    patient?.latitude != null && patient?.longitude != null
 
   const { mutateAsync: getCustomRecommendation, isPending: isCustomPending } =
     useCustomRecommendation()
@@ -136,7 +142,9 @@ export function DoctorDiscoveryPage() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Find a Doctor</h1>
             <p className="text-sm text-muted-foreground">
-              Browse available specialists and book a consultation.
+              {patientHasLocation
+                ? "Doctors are sorted by distance from your location."
+                : "Browse available specialists and book a consultation."}
             </p>
           </div>
           <SymptomSearchDialog
@@ -154,6 +162,16 @@ export function DoctorDiscoveryPage() {
             }
           />
         </div>
+
+        {!patientHasLocation && (
+          <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">
+            Add your location in{" "}
+            <Link to="/profile" className="font-medium underline underline-offset-2">
+              Profile
+            </Link>{" "}
+            to see doctors sorted by nearest distance.
+          </div>
+        )}
 
         {/* Filters */}
         <div className="mb-6 flex flex-wrap gap-3">
