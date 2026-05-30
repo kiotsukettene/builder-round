@@ -103,65 +103,71 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
     <>
       <Card className="overflow-hidden">
         <CardContent className="p-0">
-          <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:gap-5">
-            {/* Doctor/Patient info */}
-            <div className="flex flex-1 items-start gap-3">
-              {isPatient ? (
-                <button
-                  type="button"
-                  onClick={() => navigate(`/doctors/${appointment.doctor.id}`)}
-                  className="flex min-w-0 flex-1 cursor-pointer items-start gap-3 rounded-md text-left transition-colors hover:bg-muted/40 -m-1 p-1"
-                >
-                  <Avatar className="size-11 shrink-0">
-                    <AvatarImage
-                      src={counterpart.profilePicture ?? undefined}
-                      alt={counterpartName}
-                    />
-                    <AvatarFallback>
-                      <User className="size-5" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold hover:underline">
-                      {counterpartName}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{counterpartSub}</p>
-                  </div>
-                </button>
-              ) : (
-                <>
-                  <Avatar className="size-11 shrink-0">
-                    <AvatarImage
-                      src={counterpart.profilePicture ?? undefined}
-                      alt={counterpartName}
-                    />
-                    <AvatarFallback>
-                      <User className="size-5" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold">{counterpartName}</p>
-                    <p className="text-xs text-muted-foreground">{counterpartSub}</p>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Date + status */}
-            <div className="flex flex-wrap items-center gap-3 sm:flex-col sm:items-end sm:gap-1.5">
+          <div className="space-y-4 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex min-w-0 flex-1 items-start gap-3">
+                {isPatient ? (
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/doctors/${appointment.doctor.id}`)}
+                    className="flex min-w-0 flex-1 cursor-pointer items-start gap-3 rounded-md text-left transition-colors hover:bg-muted/40 -m-1 p-1"
+                  >
+                    <Avatar className="size-11 shrink-0">
+                      <AvatarImage
+                        src={counterpart.profilePicture ?? undefined}
+                        alt={counterpartName}
+                      />
+                      <AvatarFallback>
+                        <User className="size-5" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-semibold hover:underline">
+                        {counterpartName}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{counterpartSub}</p>
+                    </div>
+                  </button>
+                ) : (
+                  <>
+                    <Avatar className="size-11 shrink-0">
+                      <AvatarImage
+                        src={counterpart.profilePicture ?? undefined}
+                        alt={counterpartName}
+                      />
+                      <AvatarFallback>
+                        <User className="size-5" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-semibold">{counterpartName}</p>
+                      <p className="text-xs text-muted-foreground">{counterpartSub}</p>
+                    </div>
+                  </>
+                )}
+              </div>
               <Badge
                 variant="outline"
                 className={`shrink-0 text-xs font-medium ${statusConfig.className}`}
               >
                 {statusConfig.label}
               </Badge>
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <CalendarDays className="size-3.5" />
-                {dateStr}
-              </div>
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Clock className="size-3.5" />
-                {timeStr}
+            </div>
+
+            <div className="rounded-md border bg-muted/30 px-3 py-2">
+              <p className="text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+                Scheduled
+              </p>
+              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-foreground">
+                <span className="inline-flex items-center gap-1.5">
+                  <CalendarDays className="size-3.5 text-muted-foreground" />
+                  {dateStr}
+                </span>
+                <span className="text-muted-foreground">·</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Clock className="size-3.5 text-muted-foreground" />
+                  {timeStr}
+                </span>
               </div>
             </div>
           </div>
@@ -184,51 +190,54 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
 
           {/* Actions footer */}
           {(canCancel || canReschedule || isConfirmed || isCompleted) && (
-            <div className="flex flex-wrap items-center gap-2 border-t bg-muted/20 px-4 py-2.5">
-              {isConfirmed && (
-                <JoinSessionButton
-                  appointmentId={appointment.id}
-                  scheduledAt={appointment.scheduledAt}
-                  durationMin={durationMin}
-                />
-              )}
+            <div className="flex flex-col gap-2 border-t bg-muted/20 px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-wrap items-center gap-2">
+                {isConfirmed && (
+                  <JoinSessionButton
+                    appointmentId={appointment.id}
+                    scheduledAt={appointment.scheduledAt}
+                    durationMin={durationMin}
+                  />
+                )}
 
-              {isCompleted && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5"
-                  onClick={() => navigate(medicalRecordsPath)}
-                >
-                  <FileText className="size-3.5" />
-                  View Records
-                </Button>
-              )}
-
-              {canReschedule && (
-                <Button
-                  variant={isMissed ? "default" : "outline"}
-                  size="sm"
-                  className="gap-1.5"
-                  onClick={() => setRescheduleOpen(true)}
-                >
-                  <RotateCcw className="size-3.5" />
-                  Reschedule
-                </Button>
-              )}
-
-              {canCancel && (
-                <>
+                {isCompleted && (
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    className="gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                    disabled={isCancelling}
-                    onClick={() => setCancelOpen(true)}
+                    className="gap-1.5"
+                    onClick={() => navigate(medicalRecordsPath)}
                   >
-                    <X className="size-3.5" />
-                    Cancel
+                    <FileText className="size-3.5" />
+                    View Records
                   </Button>
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {canReschedule && (
+                  <Button
+                    variant={isMissed ? "default" : "outline"}
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={() => setRescheduleOpen(true)}
+                  >
+                    <RotateCcw className="size-3.5" />
+                    Reschedule
+                  </Button>
+                )}
+
+                {canCancel && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      disabled={isCancelling}
+                      onClick={() => setCancelOpen(true)}
+                    >
+                      <X className="size-3.5" />
+                      Cancel
+                    </Button>
 
                   <Dialog open={cancelOpen} onOpenChange={(open) => !open && handleCancelClose()}>
                     <DialogContent className="sm:max-w-md">
@@ -266,8 +275,9 @@ export function AppointmentCard({ appointment, role }: AppointmentCardProps) {
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
-                </>
-              )}
+                  </>
+                )}
+              </div>
             </div>
           )}
         </CardContent>

@@ -44,10 +44,10 @@ export function MedicalRecordListRow({
       type="button"
       onClick={onSelect}
       className={cn(
-        "flex w-full cursor-pointer items-start gap-3 rounded-lg border px-3 py-3 text-left transition-colors",
+        "flex w-full cursor-pointer items-start gap-3 px-3 py-3 text-left transition-colors",
         isSelected
-          ? "border-primary/30 bg-primary/5 shadow-sm"
-          : "border-transparent bg-background hover:border-border hover:bg-muted/40",
+          ? "bg-primary/5 shadow-sm ring-1 ring-inset ring-primary/30"
+          : "bg-background hover:bg-muted/40",
       )}
     >
       <Avatar className="size-9 shrink-0">

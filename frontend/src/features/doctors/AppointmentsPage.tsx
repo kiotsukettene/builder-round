@@ -122,51 +122,53 @@ function DoctorAppointmentCard({ appointment }: { appointment: Appointment }) {
     <>
       <Card className="overflow-hidden">
         <CardContent className="p-0">
-          <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:gap-5">
-            <div className="flex min-w-0 flex-1 items-start gap-3">
-              <Avatar className="size-11 shrink-0">
-                <AvatarImage
-                  src={appointment.patient.profilePicture ?? undefined}
-                  alt={`${appointment.patient.firstName} ${appointment.patient.lastName}`}
-                />
-                <AvatarFallback>
-                  <User className="size-5" />
-                </AvatarFallback>
-              </Avatar>
-              <div className="min-w-0 flex-1 space-y-3">
-                <div>
+          <div className="space-y-4 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex min-w-0 flex-1 items-start gap-3">
+                <Avatar className="size-11 shrink-0">
+                  <AvatarImage
+                    src={appointment.patient.profilePicture ?? undefined}
+                    alt={`${appointment.patient.firstName} ${appointment.patient.lastName}`}
+                  />
+                  <AvatarFallback>
+                    <User className="size-5" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">
                     {appointment.patient.firstName} {appointment.patient.lastName}
                   </p>
                   <p className="text-xs text-muted-foreground">Patient</p>
                 </div>
-                <PatientDetails patient={appointment.patient} />
-                <PatientPastMedicalRecords appointmentId={appointment.id} />
-                <AppointmentMessageThread
-                  appointmentId={appointment.id}
-                  status={appointment.status}
-                  role="DOCTOR"
-                  counterpartName={`${appointment.patient.firstName} ${appointment.patient.lastName}`}
-                  counterpartAvatar={appointment.patient.profilePicture}
-                />
               </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3 sm:flex-col sm:items-end sm:gap-1.5">
               <Badge
                 variant="outline"
                 className={`shrink-0 text-xs font-medium ${statusConfig.className}`}
               >
                 {statusConfig.label}
               </Badge>
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <CalendarDays className="size-3.5" />
-                {dateStr}
+            </div>
+
+            <div className="rounded-md border bg-muted/30 px-3 py-2">
+              <p className="text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+                Scheduled
+              </p>
+              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-foreground">
+                <span className="inline-flex items-center gap-1.5">
+                  <CalendarDays className="size-3.5 text-muted-foreground" />
+                  {dateStr}
+                </span>
+                <span className="text-muted-foreground">·</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Clock className="size-3.5 text-muted-foreground" />
+                  {timeStr}
+                </span>
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Clock className="size-3.5" />
-                {timeStr}
-              </div>
+            </div>
+
+            <div className="space-y-3 border-t pt-4">
+              <PatientDetails patient={appointment.patient} />
+              <PatientPastMedicalRecords appointmentId={appointment.id} />
             </div>
           </div>
 
@@ -176,66 +178,78 @@ function DoctorAppointmentCard({ appointment }: { appointment: Appointment }) {
             </div>
           )}
 
+          <div className="border-t px-4 py-3">
+            <AppointmentMessageThread
+              appointmentId={appointment.id}
+              status={appointment.status}
+              role="DOCTOR"
+              counterpartName={`${appointment.patient.firstName} ${appointment.patient.lastName}`}
+              counterpartAvatar={appointment.patient.profilePicture}
+            />
+          </div>
+
           {(isPending || isConfirmed || canCancel || isCompleted || isMissed) && (
-            <div className="flex flex-wrap items-center gap-2 border-t bg-muted/20 px-4 py-2.5">
-              {isPending && (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      size="sm"
-                      className="gap-1.5"
-                      disabled={isConfirming}
-                    >
-                      <Check className="size-3.5" />
-                      Confirm
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Confirm appointment?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Confirm the appointment with {appointment.patient.firstName}{" "}
-                        {appointment.patient.lastName} on {dateStr} at {timeStr}. The
-                        patient will be notified and you can join the session once
-                        confirmed.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Not yet</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => confirmAppointment(appointment.id)}
+            <div className="flex flex-col gap-2 border-t bg-muted/20 px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-wrap items-center gap-2">
+                {isPending && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        size="sm"
+                        className="gap-1.5"
+                        disabled={isConfirming}
                       >
-                        Confirm Appointment
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              )}
+                        <Check className="size-3.5" />
+                        Confirm
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Confirm appointment?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Confirm the appointment with {appointment.patient.firstName}{" "}
+                          {appointment.patient.lastName} on {dateStr} at {timeStr}. The
+                          patient will be notified and you can join the session once
+                          confirmed.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Not yet</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => confirmAppointment(appointment.id)}
+                        >
+                          Confirm Appointment
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
 
-              {isConfirmed && (
-                <JoinSessionButton
-                  appointmentId={appointment.id}
-                  scheduledAt={appointment.scheduledAt}
-                  durationMin={durationMin}
-                />
-              )}
+                {isConfirmed && (
+                  <JoinSessionButton
+                    appointmentId={appointment.id}
+                    scheduledAt={appointment.scheduledAt}
+                    durationMin={durationMin}
+                  />
+                )}
 
-              {isCompleted && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5"
-                  onClick={() =>
-                    navigate(`/doctor/medical-records?appointment=${appointment.id}`)
-                  }
-                >
-                  <FileText className="size-3.5" />
-                  View Records
-                </Button>
-              )}
+                {isCompleted && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={() =>
+                      navigate(`/doctor/medical-records?appointment=${appointment.id}`)
+                    }
+                  >
+                    <FileText className="size-3.5" />
+                    View Records
+                  </Button>
+                )}
+              </div>
 
               {canCancel && (
-                <>
+                <div className="flex flex-wrap items-center gap-2">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -284,7 +298,7 @@ function DoctorAppointmentCard({ appointment }: { appointment: Appointment }) {
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
-                </>
+                </div>
               )}
             </div>
           )}

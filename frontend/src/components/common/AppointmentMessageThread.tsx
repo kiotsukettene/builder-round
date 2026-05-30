@@ -121,20 +121,40 @@ export function AppointmentMessageThread({
       ? "No messages yet. Share symptoms or questions for your doctor."
       : "No messages from the patient yet."
 
+  const collapsedHint =
+    role === "PATIENT"
+      ? "Message your doctor before the visit"
+      : "View patient messages"
+
+  const highlightMessages =
+    messages.length > 0 || isUpcomingStatus(status)
+
   return (
-    <div className={cn("rounded-lg border bg-muted/20", className)}>
+    <div className={cn("rounded-lg border border-border bg-background", className)}>
       <button
         type="button"
         onClick={() => setExpanded((prev) => !prev)}
-        className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left transition-colors hover:bg-muted/40"
+        className="flex w-full items-center justify-between gap-2 px-3 py-3 text-left transition-colors hover:bg-muted/40"
       >
-        <div className="flex items-center gap-2">
-          <MessageSquare className="size-4 text-muted-foreground" />
-          <span className="text-sm font-medium">Messages</span>
-          {messages.length > 0 && (
-            <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
-              {messages.length}
-            </Badge>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <MessageSquare
+              className={cn(
+                "size-4 shrink-0",
+                highlightMessages ? "text-primary" : "text-muted-foreground",
+              )}
+            />
+            <span className="text-sm font-medium">Messages</span>
+            {messages.length > 0 && (
+              <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
+                {messages.length}
+              </Badge>
+            )}
+          </div>
+          {!expanded && (
+            <p className="mt-0.5 truncate pl-6 text-xs text-muted-foreground">
+              {collapsedHint}
+            </p>
           )}
         </div>
         {expanded ? (
