@@ -13,6 +13,9 @@ export interface PatientProfile {
   profilePicture: string | null
   profileCompletedAt: string | null
   isProfileComplete: boolean
+  address: string | null
+  latitude: number | null
+  longitude: number | null
 }
 
 export interface DoctorProfile {
@@ -27,6 +30,9 @@ export interface DoctorProfile {
   profilePicture: string | null
   profileCompletedAt: string | null
   isProfileComplete: boolean
+  address: string | null
+  latitude: number | null
+  longitude: number | null
 }
 
 export interface AuthUser {
@@ -67,6 +73,9 @@ export interface CompletePatientProfilePayload {
   height: number
   phone: string
   history: string
+  address: string
+  latitude: number
+  longitude: number
 }
 
 export interface UpdatePatientProfilePayload {
@@ -77,12 +86,18 @@ export interface UpdatePatientProfilePayload {
   height?: number
   phone?: string
   history?: string
+  address?: string
+  latitude?: number
+  longitude?: number
 }
 
 export interface CompleteDoctorProfilePayload {
   bio: string
   fee: number
   consultationDuration?: number
+  address: string
+  latitude: number
+  longitude: number
 }
 
 export interface UpdateDoctorProfilePayload {
@@ -92,6 +107,9 @@ export interface UpdateDoctorProfilePayload {
   bio?: string
   fee?: number
   consultationDuration?: number
+  address?: string
+  latitude?: number
+  longitude?: number
 }
 
 export interface ApiResponse<T = unknown> {

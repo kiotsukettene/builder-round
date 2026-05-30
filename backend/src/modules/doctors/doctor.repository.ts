@@ -26,10 +26,16 @@ export async function completeDoctorProfile(
     fee: number;
     consultationDuration?: number;
     profileCompletedAt: Date;
+    address: string;
+    latitude: number;
+    longitude: number;
   } = {
     bio: data.bio,
     fee: data.fee,
     profileCompletedAt: new Date(),
+    address: data.address,
+    latitude: data.latitude,
+    longitude: data.longitude,
   };
 
   if (data.consultationDuration !== undefined) {
@@ -53,6 +59,9 @@ export async function updateDoctorByUserId(
     bio?: string;
     fee?: number;
     consultationDuration?: number;
+    address?: string;
+    latitude?: number;
+    longitude?: number;
   } = {};
 
   if (data.firstName !== undefined) updateData.firstName = data.firstName;
@@ -61,6 +70,9 @@ export async function updateDoctorByUserId(
   if (data.bio !== undefined) updateData.bio = data.bio;
   if (data.fee !== undefined) updateData.fee = data.fee;
   if (data.consultationDuration !== undefined) updateData.consultationDuration = data.consultationDuration;
+  if (data.address !== undefined) updateData.address = data.address;
+  if (data.latitude !== undefined) updateData.latitude = data.latitude;
+  if (data.longitude !== undefined) updateData.longitude = data.longitude;
 
   return prisma.doctor.update({
     where: { userId },
@@ -112,8 +124,7 @@ export async function getDoctorRatingStats(
 }
 
 export async function findDoctors(filters: ListDoctorsQueryInput) {
-  const { page, limit, search, specialization } = filters;
-  const skip = (page - 1) * limit;
+  const { search, specialization } = filters;
 
   const where = {
     profileCompletedAt: { not: null },
@@ -128,19 +139,14 @@ export async function findDoctors(filters: ListDoctorsQueryInput) {
     }),
   };
 
-  const [doctors, total] = await prisma.$transaction([
-    prisma.doctor.findMany({
-      where,
-      skip,
-      take: limit,
-      orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
-    }),
-    prisma.doctor.count({ where }),
-  ]);
+  const doctors = await prisma.doctor.findMany({
+    where,
+    orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+  });
 
   const ratingStats = await getDoctorRatingStats(doctors.map((d) => d.id));
 
-  return { doctors, total, ratingStats };
+  return { doctors, total: doctors.length, ratingStats };
 }
 
 export async function findDoctorById(id: string) {

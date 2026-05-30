@@ -2,6 +2,7 @@ import { AppError } from "../../errors/app-error.js";
 import { generateContent } from "../../lib/gemini.js";
 import * as doctorRepository from "../doctors/doctor.repository.js";
 import * as patientRepository from "../patients/patient.repository.js";
+import { sortByDistanceFromPatient } from "../../utils/distance.js";
 import {
   toPublicDoctorDto,
 } from "../doctors/doctor.utils.js";
@@ -13,7 +14,7 @@ interface RecommendationResult {
 }
 
 function buildPrompt(input: string, specializations: string[]): string {
-  return `You are a medical triage assistant helping patients find the right doctor.
+  return `You are a professional medical assistant helping patients find the right doctor.
 
 Available doctor specializations on this platform:
 ${specializations.map((s) => `- ${s}`).join("\n")}
@@ -63,12 +64,37 @@ function parseGeminiResponse(raw: string): RecommendationResult {
   return result;
 }
 
-async function getMatchedDoctors(specialization: string) {
+async function getMatchedDoctors(
+  specialization: string,
+  patient?: { latitude: number | null; longitude: number | null },
+) {
   const matchedDoctors =
     await doctorRepository.findDoctorsBySpecialization(specialization);
   const ratingStats = await doctorRepository.getDoctorRatingStats(
     matchedDoctors.map((d) => d.id),
   );
+
+  const patientHasCoords =
+    patient?.latitude !== null &&
+    patient?.latitude !== undefined &&
+    patient?.longitude !== null &&
+    patient?.longitude !== undefined;
+
+  if (patientHasCoords && patient) {
+    const sorted = sortByDistanceFromPatient(
+      matchedDoctors,
+      patient.latitude!,
+      patient.longitude!,
+      (doctor) => ({
+        latitude: doctor.latitude,
+        longitude: doctor.longitude,
+      }),
+    );
+
+    return sorted.map((doctor) =>
+      toPublicDoctorDto(doctor, ratingStats.get(doctor.id), doctor.distanceKm),
+    );
+  }
 
   return matchedDoctors.map((doctor) =>
     toPublicDoctorDto(doctor, ratingStats.get(doctor.id)),
@@ -79,6 +105,7 @@ async function generateAndPersistRecommendation(
   patientId: string,
   source: "HISTORY" | "SYMPTOMS",
   input: string,
+  patient: { latitude: number | null; longitude: number | null },
 ) {
   const specializations = await doctorRepository.getAllSpecializations();
 
@@ -93,7 +120,10 @@ async function generateAndPersistRecommendation(
   const raw = await generateContent(prompt);
   const recommendation = parseGeminiResponse(raw);
 
-  const matchedDoctors = await getMatchedDoctors(recommendation.specialization);
+  const matchedDoctors = await getMatchedDoctors(
+    recommendation.specialization,
+    patient,
+  );
 
   await recommendationRepository.createRecommendation({
     patientId,
@@ -140,7 +170,7 @@ export async function getDefaultRecommendation(userId: string) {
   );
 
   if (cached && cached.input === patient.history) {
-    const doctors = await getMatchedDoctors(cached.specialization);
+    const doctors = await getMatchedDoctors(cached.specialization, patient);
 
     return {
       recommendation: {
@@ -156,6 +186,7 @@ export async function getDefaultRecommendation(userId: string) {
     patient.id,
     "HISTORY",
     patient.history,
+    patient,
   );
 
   return {
@@ -175,6 +206,7 @@ export async function getCustomRecommendation(userId: string, symptoms: string) 
     patient.id,
     "SYMPTOMS",
     symptoms,
+    patient,
   );
 
   return {
