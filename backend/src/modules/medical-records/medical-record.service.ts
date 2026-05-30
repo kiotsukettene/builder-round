@@ -1,4 +1,5 @@
 import { AppError } from "../../errors/app-error.js";
+import * as appointmentRepository from "../appointments/appointment.repository.js";
 import * as patientRepository from "../patients/patient.repository.js";
 import * as doctorRepository from "../doctors/doctor.repository.js";
 import * as medicalRecordRepository from "./medical-record.repository.js";
@@ -105,5 +106,41 @@ export async function getMedicalRecordDetail(
     },
     consultationNote: appointment.consultationNote,
     prescriptions: appointment.prescriptions,
+  };
+}
+
+export async function listPatientMedicalRecordsForDoctor(
+  userId: string,
+  appointmentId: string,
+  query: ListMedicalRecordsQueryInput,
+) {
+  const { page, limit } = query;
+
+  const appointment =
+    await appointmentRepository.findAppointmentById(appointmentId);
+
+  if (!appointment) {
+    throw new AppError("Appointment not found", 404);
+  }
+
+  if (appointment.doctor.userId !== userId) {
+    throw new AppError("You do not have access to this appointment", 403);
+  }
+
+  const { appointments, total } =
+    await medicalRecordRepository.findCompletedAppointmentsByPatientIdExcluding(
+      appointment.patientId,
+      appointmentId,
+      query,
+    );
+
+  return {
+    data: appointments,
+    meta: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
   };
 }

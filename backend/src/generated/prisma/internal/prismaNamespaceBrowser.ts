@@ -118,7 +118,10 @@ export const PatientScalarFieldEnum = {
   phone: 'phone',
   history: 'history',
   profilePicture: 'profilePicture',
-  profileCompletedAt: 'profileCompletedAt'
+  profileCompletedAt: 'profileCompletedAt',
+  address: 'address',
+  latitude: 'latitude',
+  longitude: 'longitude'
 } as const
 
 export type PatientScalarFieldEnum = (typeof PatientScalarFieldEnum)[keyof typeof PatientScalarFieldEnum]
@@ -134,7 +137,10 @@ export const DoctorScalarFieldEnum = {
   fee: 'fee',
   consultationDuration: 'consultationDuration',
   profilePicture: 'profilePicture',
-  profileCompletedAt: 'profileCompletedAt'
+  profileCompletedAt: 'profileCompletedAt',
+  address: 'address',
+  latitude: 'latitude',
+  longitude: 'longitude'
 } as const
 
 export type DoctorScalarFieldEnum = (typeof DoctorScalarFieldEnum)[keyof typeof DoctorScalarFieldEnum]

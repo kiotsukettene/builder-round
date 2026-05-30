@@ -29,11 +29,15 @@ export type AggregateDoctor = {
 export type DoctorAvgAggregateOutputType = {
   fee: number | null
   consultationDuration: number | null
+  latitude: number | null
+  longitude: number | null
 }
 
 export type DoctorSumAggregateOutputType = {
   fee: number | null
   consultationDuration: number | null
+  latitude: number | null
+  longitude: number | null
 }
 
 export type DoctorMinAggregateOutputType = {
@@ -47,6 +51,9 @@ export type DoctorMinAggregateOutputType = {
   consultationDuration: number | null
   profilePicture: string | null
   profileCompletedAt: Date | null
+  address: string | null
+  latitude: number | null
+  longitude: number | null
 }
 
 export type DoctorMaxAggregateOutputType = {
@@ -60,6 +67,9 @@ export type DoctorMaxAggregateOutputType = {
   consultationDuration: number | null
   profilePicture: string | null
   profileCompletedAt: Date | null
+  address: string | null
+  latitude: number | null
+  longitude: number | null
 }
 
 export type DoctorCountAggregateOutputType = {
@@ -73,6 +83,9 @@ export type DoctorCountAggregateOutputType = {
   consultationDuration: number
   profilePicture: number
   profileCompletedAt: number
+  address: number
+  latitude: number
+  longitude: number
   _all: number
 }
 
@@ -80,11 +93,15 @@ export type DoctorCountAggregateOutputType = {
 export type DoctorAvgAggregateInputType = {
   fee?: true
   consultationDuration?: true
+  latitude?: true
+  longitude?: true
 }
 
 export type DoctorSumAggregateInputType = {
   fee?: true
   consultationDuration?: true
+  latitude?: true
+  longitude?: true
 }
 
 export type DoctorMinAggregateInputType = {
@@ -98,6 +115,9 @@ export type DoctorMinAggregateInputType = {
   consultationDuration?: true
   profilePicture?: true
   profileCompletedAt?: true
+  address?: true
+  latitude?: true
+  longitude?: true
 }
 
 export type DoctorMaxAggregateInputType = {
@@ -111,6 +131,9 @@ export type DoctorMaxAggregateInputType = {
   consultationDuration?: true
   profilePicture?: true
   profileCompletedAt?: true
+  address?: true
+  latitude?: true
+  longitude?: true
 }
 
 export type DoctorCountAggregateInputType = {
@@ -124,6 +147,9 @@ export type DoctorCountAggregateInputType = {
   consultationDuration?: true
   profilePicture?: true
   profileCompletedAt?: true
+  address?: true
+  latitude?: true
+  longitude?: true
   _all?: true
 }
 
@@ -224,6 +250,9 @@ export type DoctorGroupByOutputType = {
   consultationDuration: number
   profilePicture: string | null
   profileCompletedAt: Date | null
+  address: string | null
+  latitude: number | null
+  longitude: number | null
   _count: DoctorCountAggregateOutputType | null
   _avg: DoctorAvgAggregateOutputType | null
   _sum: DoctorSumAggregateOutputType | null
@@ -260,6 +289,9 @@ export type DoctorWhereInput = {
   consultationDuration?: Prisma.IntFilter<"Doctor"> | number
   profilePicture?: Prisma.StringNullableFilter<"Doctor"> | string | null
   profileCompletedAt?: Prisma.DateTimeNullableFilter<"Doctor"> | Date | string | null
+  address?: Prisma.StringNullableFilter<"Doctor"> | string | null
+  latitude?: Prisma.FloatNullableFilter<"Doctor"> | number | null
+  longitude?: Prisma.FloatNullableFilter<"Doctor"> | number | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   appointments?: Prisma.AppointmentListRelationFilter
   availabilities?: Prisma.DoctorAvailabilityListRelationFilter
@@ -278,6 +310,9 @@ export type DoctorOrderByWithRelationInput = {
   consultationDuration?: Prisma.SortOrder
   profilePicture?: Prisma.SortOrderInput | Prisma.SortOrder
   profileCompletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  address?: Prisma.SortOrderInput | Prisma.SortOrder
+  latitude?: Prisma.SortOrderInput | Prisma.SortOrder
+  longitude?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   appointments?: Prisma.AppointmentOrderByRelationAggregateInput
   availabilities?: Prisma.DoctorAvailabilityOrderByRelationAggregateInput
@@ -299,6 +334,9 @@ export type DoctorWhereUniqueInput = Prisma.AtLeast<{
   consultationDuration?: Prisma.IntFilter<"Doctor"> | number
   profilePicture?: Prisma.StringNullableFilter<"Doctor"> | string | null
   profileCompletedAt?: Prisma.DateTimeNullableFilter<"Doctor"> | Date | string | null
+  address?: Prisma.StringNullableFilter<"Doctor"> | string | null
+  latitude?: Prisma.FloatNullableFilter<"Doctor"> | number | null
+  longitude?: Prisma.FloatNullableFilter<"Doctor"> | number | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   appointments?: Prisma.AppointmentListRelationFilter
   availabilities?: Prisma.DoctorAvailabilityListRelationFilter
@@ -317,6 +355,9 @@ export type DoctorOrderByWithAggregationInput = {
   consultationDuration?: Prisma.SortOrder
   profilePicture?: Prisma.SortOrderInput | Prisma.SortOrder
   profileCompletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  address?: Prisma.SortOrderInput | Prisma.SortOrder
+  latitude?: Prisma.SortOrderInput | Prisma.SortOrder
+  longitude?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.DoctorCountOrderByAggregateInput
   _avg?: Prisma.DoctorAvgOrderByAggregateInput
   _max?: Prisma.DoctorMaxOrderByAggregateInput
@@ -338,6 +379,9 @@ export type DoctorScalarWhereWithAggregatesInput = {
   consultationDuration?: Prisma.IntWithAggregatesFilter<"Doctor"> | number
   profilePicture?: Prisma.StringNullableWithAggregatesFilter<"Doctor"> | string | null
   profileCompletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Doctor"> | Date | string | null
+  address?: Prisma.StringNullableWithAggregatesFilter<"Doctor"> | string | null
+  latitude?: Prisma.FloatNullableWithAggregatesFilter<"Doctor"> | number | null
+  longitude?: Prisma.FloatNullableWithAggregatesFilter<"Doctor"> | number | null
 }
 
 export type DoctorCreateInput = {
@@ -350,6 +394,9 @@ export type DoctorCreateInput = {
   consultationDuration?: number
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
   user: Prisma.UserCreateNestedOneWithoutDoctorInput
   appointments?: Prisma.AppointmentCreateNestedManyWithoutDoctorInput
   availabilities?: Prisma.DoctorAvailabilityCreateNestedManyWithoutDoctorInput
@@ -368,6 +415,9 @@ export type DoctorUncheckedCreateInput = {
   consultationDuration?: number
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
   appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutDoctorInput
   availabilities?: Prisma.DoctorAvailabilityUncheckedCreateNestedManyWithoutDoctorInput
   blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutDoctorInput
@@ -384,6 +434,9 @@ export type DoctorUpdateInput = {
   consultationDuration?: Prisma.IntFieldUpdateOperationsInput | number
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   user?: Prisma.UserUpdateOneRequiredWithoutDoctorNestedInput
   appointments?: Prisma.AppointmentUpdateManyWithoutDoctorNestedInput
   availabilities?: Prisma.DoctorAvailabilityUpdateManyWithoutDoctorNestedInput
@@ -402,6 +455,9 @@ export type DoctorUncheckedUpdateInput = {
   consultationDuration?: Prisma.IntFieldUpdateOperationsInput | number
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutDoctorNestedInput
   availabilities?: Prisma.DoctorAvailabilityUncheckedUpdateManyWithoutDoctorNestedInput
   blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutDoctorNestedInput
@@ -419,6 +475,9 @@ export type DoctorCreateManyInput = {
   consultationDuration?: number
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
 }
 
 export type DoctorUpdateManyMutationInput = {
@@ -431,6 +490,9 @@ export type DoctorUpdateManyMutationInput = {
   consultationDuration?: Prisma.IntFieldUpdateOperationsInput | number
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
 }
 
 export type DoctorUncheckedUpdateManyInput = {
@@ -444,6 +506,9 @@ export type DoctorUncheckedUpdateManyInput = {
   consultationDuration?: Prisma.IntFieldUpdateOperationsInput | number
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
 }
 
 export type DoctorNullableScalarRelationFilter = {
@@ -462,11 +527,16 @@ export type DoctorCountOrderByAggregateInput = {
   consultationDuration?: Prisma.SortOrder
   profilePicture?: Prisma.SortOrder
   profileCompletedAt?: Prisma.SortOrder
+  address?: Prisma.SortOrder
+  latitude?: Prisma.SortOrder
+  longitude?: Prisma.SortOrder
 }
 
 export type DoctorAvgOrderByAggregateInput = {
   fee?: Prisma.SortOrder
   consultationDuration?: Prisma.SortOrder
+  latitude?: Prisma.SortOrder
+  longitude?: Prisma.SortOrder
 }
 
 export type DoctorMaxOrderByAggregateInput = {
@@ -480,6 +550,9 @@ export type DoctorMaxOrderByAggregateInput = {
   consultationDuration?: Prisma.SortOrder
   profilePicture?: Prisma.SortOrder
   profileCompletedAt?: Prisma.SortOrder
+  address?: Prisma.SortOrder
+  latitude?: Prisma.SortOrder
+  longitude?: Prisma.SortOrder
 }
 
 export type DoctorMinOrderByAggregateInput = {
@@ -493,11 +566,16 @@ export type DoctorMinOrderByAggregateInput = {
   consultationDuration?: Prisma.SortOrder
   profilePicture?: Prisma.SortOrder
   profileCompletedAt?: Prisma.SortOrder
+  address?: Prisma.SortOrder
+  latitude?: Prisma.SortOrder
+  longitude?: Prisma.SortOrder
 }
 
 export type DoctorSumOrderByAggregateInput = {
   fee?: Prisma.SortOrder
   consultationDuration?: Prisma.SortOrder
+  latitude?: Prisma.SortOrder
+  longitude?: Prisma.SortOrder
 }
 
 export type DoctorScalarRelationFilter = {
@@ -611,6 +689,9 @@ export type DoctorCreateWithoutUserInput = {
   consultationDuration?: number
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
   appointments?: Prisma.AppointmentCreateNestedManyWithoutDoctorInput
   availabilities?: Prisma.DoctorAvailabilityCreateNestedManyWithoutDoctorInput
   blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutDoctorInput
@@ -627,6 +708,9 @@ export type DoctorUncheckedCreateWithoutUserInput = {
   consultationDuration?: number
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
   appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutDoctorInput
   availabilities?: Prisma.DoctorAvailabilityUncheckedCreateNestedManyWithoutDoctorInput
   blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutDoctorInput
@@ -659,6 +743,9 @@ export type DoctorUpdateWithoutUserInput = {
   consultationDuration?: Prisma.IntFieldUpdateOperationsInput | number
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   appointments?: Prisma.AppointmentUpdateManyWithoutDoctorNestedInput
   availabilities?: Prisma.DoctorAvailabilityUpdateManyWithoutDoctorNestedInput
   blockedDates?: Prisma.BlockedDateUpdateManyWithoutDoctorNestedInput
@@ -675,6 +762,9 @@ export type DoctorUncheckedUpdateWithoutUserInput = {
   consultationDuration?: Prisma.IntFieldUpdateOperationsInput | number
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutDoctorNestedInput
   availabilities?: Prisma.DoctorAvailabilityUncheckedUpdateManyWithoutDoctorNestedInput
   blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutDoctorNestedInput
@@ -691,6 +781,9 @@ export type DoctorCreateWithoutAvailabilitiesInput = {
   consultationDuration?: number
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
   user: Prisma.UserCreateNestedOneWithoutDoctorInput
   appointments?: Prisma.AppointmentCreateNestedManyWithoutDoctorInput
   blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutDoctorInput
@@ -708,6 +801,9 @@ export type DoctorUncheckedCreateWithoutAvailabilitiesInput = {
   consultationDuration?: number
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
   appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutDoctorInput
   blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutDoctorInput
   reviews?: Prisma.DoctorReviewUncheckedCreateNestedManyWithoutDoctorInput
@@ -739,6 +835,9 @@ export type DoctorUpdateWithoutAvailabilitiesInput = {
   consultationDuration?: Prisma.IntFieldUpdateOperationsInput | number
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   user?: Prisma.UserUpdateOneRequiredWithoutDoctorNestedInput
   appointments?: Prisma.AppointmentUpdateManyWithoutDoctorNestedInput
   blockedDates?: Prisma.BlockedDateUpdateManyWithoutDoctorNestedInput
@@ -756,6 +855,9 @@ export type DoctorUncheckedUpdateWithoutAvailabilitiesInput = {
   consultationDuration?: Prisma.IntFieldUpdateOperationsInput | number
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutDoctorNestedInput
   blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutDoctorNestedInput
   reviews?: Prisma.DoctorReviewUncheckedUpdateManyWithoutDoctorNestedInput
@@ -771,6 +873,9 @@ export type DoctorCreateWithoutBlockedDatesInput = {
   consultationDuration?: number
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
   user: Prisma.UserCreateNestedOneWithoutDoctorInput
   appointments?: Prisma.AppointmentCreateNestedManyWithoutDoctorInput
   availabilities?: Prisma.DoctorAvailabilityCreateNestedManyWithoutDoctorInput
@@ -788,6 +893,9 @@ export type DoctorUncheckedCreateWithoutBlockedDatesInput = {
   consultationDuration?: number
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
   appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutDoctorInput
   availabilities?: Prisma.DoctorAvailabilityUncheckedCreateNestedManyWithoutDoctorInput
   reviews?: Prisma.DoctorReviewUncheckedCreateNestedManyWithoutDoctorInput
@@ -819,6 +927,9 @@ export type DoctorUpdateWithoutBlockedDatesInput = {
   consultationDuration?: Prisma.IntFieldUpdateOperationsInput | number
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   user?: Prisma.UserUpdateOneRequiredWithoutDoctorNestedInput
   appointments?: Prisma.AppointmentUpdateManyWithoutDoctorNestedInput
   availabilities?: Prisma.DoctorAvailabilityUpdateManyWithoutDoctorNestedInput
@@ -836,6 +947,9 @@ export type DoctorUncheckedUpdateWithoutBlockedDatesInput = {
   consultationDuration?: Prisma.IntFieldUpdateOperationsInput | number
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutDoctorNestedInput
   availabilities?: Prisma.DoctorAvailabilityUncheckedUpdateManyWithoutDoctorNestedInput
   reviews?: Prisma.DoctorReviewUncheckedUpdateManyWithoutDoctorNestedInput
@@ -851,6 +965,9 @@ export type DoctorCreateWithoutAppointmentsInput = {
   consultationDuration?: number
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
   user: Prisma.UserCreateNestedOneWithoutDoctorInput
   availabilities?: Prisma.DoctorAvailabilityCreateNestedManyWithoutDoctorInput
   blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutDoctorInput
@@ -868,6 +985,9 @@ export type DoctorUncheckedCreateWithoutAppointmentsInput = {
   consultationDuration?: number
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
   availabilities?: Prisma.DoctorAvailabilityUncheckedCreateNestedManyWithoutDoctorInput
   blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutDoctorInput
   reviews?: Prisma.DoctorReviewUncheckedCreateNestedManyWithoutDoctorInput
@@ -899,6 +1019,9 @@ export type DoctorUpdateWithoutAppointmentsInput = {
   consultationDuration?: Prisma.IntFieldUpdateOperationsInput | number
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   user?: Prisma.UserUpdateOneRequiredWithoutDoctorNestedInput
   availabilities?: Prisma.DoctorAvailabilityUpdateManyWithoutDoctorNestedInput
   blockedDates?: Prisma.BlockedDateUpdateManyWithoutDoctorNestedInput
@@ -916,6 +1039,9 @@ export type DoctorUncheckedUpdateWithoutAppointmentsInput = {
   consultationDuration?: Prisma.IntFieldUpdateOperationsInput | number
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   availabilities?: Prisma.DoctorAvailabilityUncheckedUpdateManyWithoutDoctorNestedInput
   blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutDoctorNestedInput
   reviews?: Prisma.DoctorReviewUncheckedUpdateManyWithoutDoctorNestedInput
@@ -931,6 +1057,9 @@ export type DoctorCreateWithoutReviewsInput = {
   consultationDuration?: number
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
   user: Prisma.UserCreateNestedOneWithoutDoctorInput
   appointments?: Prisma.AppointmentCreateNestedManyWithoutDoctorInput
   availabilities?: Prisma.DoctorAvailabilityCreateNestedManyWithoutDoctorInput
@@ -948,6 +1077,9 @@ export type DoctorUncheckedCreateWithoutReviewsInput = {
   consultationDuration?: number
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
   appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutDoctorInput
   availabilities?: Prisma.DoctorAvailabilityUncheckedCreateNestedManyWithoutDoctorInput
   blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutDoctorInput
@@ -979,6 +1111,9 @@ export type DoctorUpdateWithoutReviewsInput = {
   consultationDuration?: Prisma.IntFieldUpdateOperationsInput | number
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   user?: Prisma.UserUpdateOneRequiredWithoutDoctorNestedInput
   appointments?: Prisma.AppointmentUpdateManyWithoutDoctorNestedInput
   availabilities?: Prisma.DoctorAvailabilityUpdateManyWithoutDoctorNestedInput
@@ -996,6 +1131,9 @@ export type DoctorUncheckedUpdateWithoutReviewsInput = {
   consultationDuration?: Prisma.IntFieldUpdateOperationsInput | number
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutDoctorNestedInput
   availabilities?: Prisma.DoctorAvailabilityUncheckedUpdateManyWithoutDoctorNestedInput
   blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutDoctorNestedInput
@@ -1070,6 +1208,9 @@ export type DoctorSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   consultationDuration?: boolean
   profilePicture?: boolean
   profileCompletedAt?: boolean
+  address?: boolean
+  latitude?: boolean
+  longitude?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   appointments?: boolean | Prisma.Doctor$appointmentsArgs<ExtArgs>
   availabilities?: boolean | Prisma.Doctor$availabilitiesArgs<ExtArgs>
@@ -1089,6 +1230,9 @@ export type DoctorSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   consultationDuration?: boolean
   profilePicture?: boolean
   profileCompletedAt?: boolean
+  address?: boolean
+  latitude?: boolean
+  longitude?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["doctor"]>
 
@@ -1103,6 +1247,9 @@ export type DoctorSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   consultationDuration?: boolean
   profilePicture?: boolean
   profileCompletedAt?: boolean
+  address?: boolean
+  latitude?: boolean
+  longitude?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["doctor"]>
 
@@ -1117,9 +1264,12 @@ export type DoctorSelectScalar = {
   consultationDuration?: boolean
   profilePicture?: boolean
   profileCompletedAt?: boolean
+  address?: boolean
+  latitude?: boolean
+  longitude?: boolean
 }
 
-export type DoctorOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "firstName" | "lastName" | "specialization" | "bio" | "fee" | "consultationDuration" | "profilePicture" | "profileCompletedAt", ExtArgs["result"]["doctor"]>
+export type DoctorOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "firstName" | "lastName" | "specialization" | "bio" | "fee" | "consultationDuration" | "profilePicture" | "profileCompletedAt" | "address" | "latitude" | "longitude", ExtArgs["result"]["doctor"]>
 export type DoctorInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   appointments?: boolean | Prisma.Doctor$appointmentsArgs<ExtArgs>
@@ -1155,6 +1305,9 @@ export type $DoctorPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     consultationDuration: number
     profilePicture: string | null
     profileCompletedAt: Date | null
+    address: string | null
+    latitude: number | null
+    longitude: number | null
   }, ExtArgs["result"]["doctor"]>
   composites: {}
 }
@@ -1593,6 +1746,9 @@ export interface DoctorFieldRefs {
   readonly consultationDuration: Prisma.FieldRef<"Doctor", 'Int'>
   readonly profilePicture: Prisma.FieldRef<"Doctor", 'String'>
   readonly profileCompletedAt: Prisma.FieldRef<"Doctor", 'DateTime'>
+  readonly address: Prisma.FieldRef<"Doctor", 'String'>
+  readonly latitude: Prisma.FieldRef<"Doctor", 'Float'>
+  readonly longitude: Prisma.FieldRef<"Doctor", 'Float'>
 }
     
 

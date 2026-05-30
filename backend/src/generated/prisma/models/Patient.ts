@@ -29,11 +29,15 @@ export type AggregatePatient = {
 export type PatientAvgAggregateOutputType = {
   weight: number | null
   height: number | null
+  latitude: number | null
+  longitude: number | null
 }
 
 export type PatientSumAggregateOutputType = {
   weight: number | null
   height: number | null
+  latitude: number | null
+  longitude: number | null
 }
 
 export type PatientMinAggregateOutputType = {
@@ -48,6 +52,9 @@ export type PatientMinAggregateOutputType = {
   history: string | null
   profilePicture: string | null
   profileCompletedAt: Date | null
+  address: string | null
+  latitude: number | null
+  longitude: number | null
 }
 
 export type PatientMaxAggregateOutputType = {
@@ -62,6 +69,9 @@ export type PatientMaxAggregateOutputType = {
   history: string | null
   profilePicture: string | null
   profileCompletedAt: Date | null
+  address: string | null
+  latitude: number | null
+  longitude: number | null
 }
 
 export type PatientCountAggregateOutputType = {
@@ -76,6 +86,9 @@ export type PatientCountAggregateOutputType = {
   history: number
   profilePicture: number
   profileCompletedAt: number
+  address: number
+  latitude: number
+  longitude: number
   _all: number
 }
 
@@ -83,11 +96,15 @@ export type PatientCountAggregateOutputType = {
 export type PatientAvgAggregateInputType = {
   weight?: true
   height?: true
+  latitude?: true
+  longitude?: true
 }
 
 export type PatientSumAggregateInputType = {
   weight?: true
   height?: true
+  latitude?: true
+  longitude?: true
 }
 
 export type PatientMinAggregateInputType = {
@@ -102,6 +119,9 @@ export type PatientMinAggregateInputType = {
   history?: true
   profilePicture?: true
   profileCompletedAt?: true
+  address?: true
+  latitude?: true
+  longitude?: true
 }
 
 export type PatientMaxAggregateInputType = {
@@ -116,6 +136,9 @@ export type PatientMaxAggregateInputType = {
   history?: true
   profilePicture?: true
   profileCompletedAt?: true
+  address?: true
+  latitude?: true
+  longitude?: true
 }
 
 export type PatientCountAggregateInputType = {
@@ -130,6 +153,9 @@ export type PatientCountAggregateInputType = {
   history?: true
   profilePicture?: true
   profileCompletedAt?: true
+  address?: true
+  latitude?: true
+  longitude?: true
   _all?: true
 }
 
@@ -231,6 +257,9 @@ export type PatientGroupByOutputType = {
   history: string | null
   profilePicture: string | null
   profileCompletedAt: Date | null
+  address: string | null
+  latitude: number | null
+  longitude: number | null
   _count: PatientCountAggregateOutputType | null
   _avg: PatientAvgAggregateOutputType | null
   _sum: PatientSumAggregateOutputType | null
@@ -268,6 +297,9 @@ export type PatientWhereInput = {
   history?: Prisma.StringNullableFilter<"Patient"> | string | null
   profilePicture?: Prisma.StringNullableFilter<"Patient"> | string | null
   profileCompletedAt?: Prisma.DateTimeNullableFilter<"Patient"> | Date | string | null
+  address?: Prisma.StringNullableFilter<"Patient"> | string | null
+  latitude?: Prisma.FloatNullableFilter<"Patient"> | number | null
+  longitude?: Prisma.FloatNullableFilter<"Patient"> | number | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   appointments?: Prisma.AppointmentListRelationFilter
   recommendations?: Prisma.RecommendationListRelationFilter
@@ -286,6 +318,9 @@ export type PatientOrderByWithRelationInput = {
   history?: Prisma.SortOrderInput | Prisma.SortOrder
   profilePicture?: Prisma.SortOrderInput | Prisma.SortOrder
   profileCompletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  address?: Prisma.SortOrderInput | Prisma.SortOrder
+  latitude?: Prisma.SortOrderInput | Prisma.SortOrder
+  longitude?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   appointments?: Prisma.AppointmentOrderByRelationAggregateInput
   recommendations?: Prisma.RecommendationOrderByRelationAggregateInput
@@ -307,6 +342,9 @@ export type PatientWhereUniqueInput = Prisma.AtLeast<{
   history?: Prisma.StringNullableFilter<"Patient"> | string | null
   profilePicture?: Prisma.StringNullableFilter<"Patient"> | string | null
   profileCompletedAt?: Prisma.DateTimeNullableFilter<"Patient"> | Date | string | null
+  address?: Prisma.StringNullableFilter<"Patient"> | string | null
+  latitude?: Prisma.FloatNullableFilter<"Patient"> | number | null
+  longitude?: Prisma.FloatNullableFilter<"Patient"> | number | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   appointments?: Prisma.AppointmentListRelationFilter
   recommendations?: Prisma.RecommendationListRelationFilter
@@ -325,6 +363,9 @@ export type PatientOrderByWithAggregationInput = {
   history?: Prisma.SortOrderInput | Prisma.SortOrder
   profilePicture?: Prisma.SortOrderInput | Prisma.SortOrder
   profileCompletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  address?: Prisma.SortOrderInput | Prisma.SortOrder
+  latitude?: Prisma.SortOrderInput | Prisma.SortOrder
+  longitude?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.PatientCountOrderByAggregateInput
   _avg?: Prisma.PatientAvgOrderByAggregateInput
   _max?: Prisma.PatientMaxOrderByAggregateInput
@@ -347,6 +388,9 @@ export type PatientScalarWhereWithAggregatesInput = {
   history?: Prisma.StringNullableWithAggregatesFilter<"Patient"> | string | null
   profilePicture?: Prisma.StringNullableWithAggregatesFilter<"Patient"> | string | null
   profileCompletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Patient"> | Date | string | null
+  address?: Prisma.StringNullableWithAggregatesFilter<"Patient"> | string | null
+  latitude?: Prisma.FloatNullableWithAggregatesFilter<"Patient"> | number | null
+  longitude?: Prisma.FloatNullableWithAggregatesFilter<"Patient"> | number | null
 }
 
 export type PatientCreateInput = {
@@ -360,6 +404,9 @@ export type PatientCreateInput = {
   history?: string | null
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
   user: Prisma.UserCreateNestedOneWithoutPatientInput
   appointments?: Prisma.AppointmentCreateNestedManyWithoutPatientInput
   recommendations?: Prisma.RecommendationCreateNestedManyWithoutPatientInput
@@ -378,6 +425,9 @@ export type PatientUncheckedCreateInput = {
   history?: string | null
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
   appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutPatientInput
   recommendations?: Prisma.RecommendationUncheckedCreateNestedManyWithoutPatientInput
   reviews?: Prisma.DoctorReviewUncheckedCreateNestedManyWithoutPatientInput
@@ -394,6 +444,9 @@ export type PatientUpdateInput = {
   history?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   user?: Prisma.UserUpdateOneRequiredWithoutPatientNestedInput
   appointments?: Prisma.AppointmentUpdateManyWithoutPatientNestedInput
   recommendations?: Prisma.RecommendationUpdateManyWithoutPatientNestedInput
@@ -412,6 +465,9 @@ export type PatientUncheckedUpdateInput = {
   history?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutPatientNestedInput
   recommendations?: Prisma.RecommendationUncheckedUpdateManyWithoutPatientNestedInput
   reviews?: Prisma.DoctorReviewUncheckedUpdateManyWithoutPatientNestedInput
@@ -429,6 +485,9 @@ export type PatientCreateManyInput = {
   history?: string | null
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
 }
 
 export type PatientUpdateManyMutationInput = {
@@ -442,6 +501,9 @@ export type PatientUpdateManyMutationInput = {
   history?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
 }
 
 export type PatientUncheckedUpdateManyInput = {
@@ -456,6 +518,9 @@ export type PatientUncheckedUpdateManyInput = {
   history?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
 }
 
 export type PatientNullableScalarRelationFilter = {
@@ -475,11 +540,16 @@ export type PatientCountOrderByAggregateInput = {
   history?: Prisma.SortOrder
   profilePicture?: Prisma.SortOrder
   profileCompletedAt?: Prisma.SortOrder
+  address?: Prisma.SortOrder
+  latitude?: Prisma.SortOrder
+  longitude?: Prisma.SortOrder
 }
 
 export type PatientAvgOrderByAggregateInput = {
   weight?: Prisma.SortOrder
   height?: Prisma.SortOrder
+  latitude?: Prisma.SortOrder
+  longitude?: Prisma.SortOrder
 }
 
 export type PatientMaxOrderByAggregateInput = {
@@ -494,6 +564,9 @@ export type PatientMaxOrderByAggregateInput = {
   history?: Prisma.SortOrder
   profilePicture?: Prisma.SortOrder
   profileCompletedAt?: Prisma.SortOrder
+  address?: Prisma.SortOrder
+  latitude?: Prisma.SortOrder
+  longitude?: Prisma.SortOrder
 }
 
 export type PatientMinOrderByAggregateInput = {
@@ -508,11 +581,16 @@ export type PatientMinOrderByAggregateInput = {
   history?: Prisma.SortOrder
   profilePicture?: Prisma.SortOrder
   profileCompletedAt?: Prisma.SortOrder
+  address?: Prisma.SortOrder
+  latitude?: Prisma.SortOrder
+  longitude?: Prisma.SortOrder
 }
 
 export type PatientSumOrderByAggregateInput = {
   weight?: Prisma.SortOrder
   height?: Prisma.SortOrder
+  latitude?: Prisma.SortOrder
+  longitude?: Prisma.SortOrder
 }
 
 export type PatientScalarRelationFilter = {
@@ -613,6 +691,9 @@ export type PatientCreateWithoutUserInput = {
   history?: string | null
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
   appointments?: Prisma.AppointmentCreateNestedManyWithoutPatientInput
   recommendations?: Prisma.RecommendationCreateNestedManyWithoutPatientInput
   reviews?: Prisma.DoctorReviewCreateNestedManyWithoutPatientInput
@@ -629,6 +710,9 @@ export type PatientUncheckedCreateWithoutUserInput = {
   history?: string | null
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
   appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutPatientInput
   recommendations?: Prisma.RecommendationUncheckedCreateNestedManyWithoutPatientInput
   reviews?: Prisma.DoctorReviewUncheckedCreateNestedManyWithoutPatientInput
@@ -661,6 +745,9 @@ export type PatientUpdateWithoutUserInput = {
   history?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   appointments?: Prisma.AppointmentUpdateManyWithoutPatientNestedInput
   recommendations?: Prisma.RecommendationUpdateManyWithoutPatientNestedInput
   reviews?: Prisma.DoctorReviewUpdateManyWithoutPatientNestedInput
@@ -677,6 +764,9 @@ export type PatientUncheckedUpdateWithoutUserInput = {
   history?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutPatientNestedInput
   recommendations?: Prisma.RecommendationUncheckedUpdateManyWithoutPatientNestedInput
   reviews?: Prisma.DoctorReviewUncheckedUpdateManyWithoutPatientNestedInput
@@ -693,6 +783,9 @@ export type PatientCreateWithoutAppointmentsInput = {
   history?: string | null
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
   user: Prisma.UserCreateNestedOneWithoutPatientInput
   recommendations?: Prisma.RecommendationCreateNestedManyWithoutPatientInput
   reviews?: Prisma.DoctorReviewCreateNestedManyWithoutPatientInput
@@ -710,6 +803,9 @@ export type PatientUncheckedCreateWithoutAppointmentsInput = {
   history?: string | null
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
   recommendations?: Prisma.RecommendationUncheckedCreateNestedManyWithoutPatientInput
   reviews?: Prisma.DoctorReviewUncheckedCreateNestedManyWithoutPatientInput
 }
@@ -741,6 +837,9 @@ export type PatientUpdateWithoutAppointmentsInput = {
   history?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   user?: Prisma.UserUpdateOneRequiredWithoutPatientNestedInput
   recommendations?: Prisma.RecommendationUpdateManyWithoutPatientNestedInput
   reviews?: Prisma.DoctorReviewUpdateManyWithoutPatientNestedInput
@@ -758,6 +857,9 @@ export type PatientUncheckedUpdateWithoutAppointmentsInput = {
   history?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendations?: Prisma.RecommendationUncheckedUpdateManyWithoutPatientNestedInput
   reviews?: Prisma.DoctorReviewUncheckedUpdateManyWithoutPatientNestedInput
 }
@@ -773,6 +875,9 @@ export type PatientCreateWithoutRecommendationsInput = {
   history?: string | null
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
   user: Prisma.UserCreateNestedOneWithoutPatientInput
   appointments?: Prisma.AppointmentCreateNestedManyWithoutPatientInput
   reviews?: Prisma.DoctorReviewCreateNestedManyWithoutPatientInput
@@ -790,6 +895,9 @@ export type PatientUncheckedCreateWithoutRecommendationsInput = {
   history?: string | null
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
   appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutPatientInput
   reviews?: Prisma.DoctorReviewUncheckedCreateNestedManyWithoutPatientInput
 }
@@ -821,6 +929,9 @@ export type PatientUpdateWithoutRecommendationsInput = {
   history?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   user?: Prisma.UserUpdateOneRequiredWithoutPatientNestedInput
   appointments?: Prisma.AppointmentUpdateManyWithoutPatientNestedInput
   reviews?: Prisma.DoctorReviewUpdateManyWithoutPatientNestedInput
@@ -838,6 +949,9 @@ export type PatientUncheckedUpdateWithoutRecommendationsInput = {
   history?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutPatientNestedInput
   reviews?: Prisma.DoctorReviewUncheckedUpdateManyWithoutPatientNestedInput
 }
@@ -853,6 +967,9 @@ export type PatientCreateWithoutReviewsInput = {
   history?: string | null
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
   user: Prisma.UserCreateNestedOneWithoutPatientInput
   appointments?: Prisma.AppointmentCreateNestedManyWithoutPatientInput
   recommendations?: Prisma.RecommendationCreateNestedManyWithoutPatientInput
@@ -870,6 +987,9 @@ export type PatientUncheckedCreateWithoutReviewsInput = {
   history?: string | null
   profilePicture?: string | null
   profileCompletedAt?: Date | string | null
+  address?: string | null
+  latitude?: number | null
+  longitude?: number | null
   appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutPatientInput
   recommendations?: Prisma.RecommendationUncheckedCreateNestedManyWithoutPatientInput
 }
@@ -901,6 +1021,9 @@ export type PatientUpdateWithoutReviewsInput = {
   history?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   user?: Prisma.UserUpdateOneRequiredWithoutPatientNestedInput
   appointments?: Prisma.AppointmentUpdateManyWithoutPatientNestedInput
   recommendations?: Prisma.RecommendationUpdateManyWithoutPatientNestedInput
@@ -918,6 +1041,9 @@ export type PatientUncheckedUpdateWithoutReviewsInput = {
   history?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   profileCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutPatientNestedInput
   recommendations?: Prisma.RecommendationUncheckedUpdateManyWithoutPatientNestedInput
 }
@@ -983,6 +1109,9 @@ export type PatientSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   history?: boolean
   profilePicture?: boolean
   profileCompletedAt?: boolean
+  address?: boolean
+  latitude?: boolean
+  longitude?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   appointments?: boolean | Prisma.Patient$appointmentsArgs<ExtArgs>
   recommendations?: boolean | Prisma.Patient$recommendationsArgs<ExtArgs>
@@ -1002,6 +1131,9 @@ export type PatientSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   history?: boolean
   profilePicture?: boolean
   profileCompletedAt?: boolean
+  address?: boolean
+  latitude?: boolean
+  longitude?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["patient"]>
 
@@ -1017,6 +1149,9 @@ export type PatientSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   history?: boolean
   profilePicture?: boolean
   profileCompletedAt?: boolean
+  address?: boolean
+  latitude?: boolean
+  longitude?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["patient"]>
 
@@ -1032,9 +1167,12 @@ export type PatientSelectScalar = {
   history?: boolean
   profilePicture?: boolean
   profileCompletedAt?: boolean
+  address?: boolean
+  latitude?: boolean
+  longitude?: boolean
 }
 
-export type PatientOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "firstName" | "lastName" | "birthday" | "weight" | "height" | "phone" | "history" | "profilePicture" | "profileCompletedAt", ExtArgs["result"]["patient"]>
+export type PatientOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "firstName" | "lastName" | "birthday" | "weight" | "height" | "phone" | "history" | "profilePicture" | "profileCompletedAt" | "address" | "latitude" | "longitude", ExtArgs["result"]["patient"]>
 export type PatientInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   appointments?: boolean | Prisma.Patient$appointmentsArgs<ExtArgs>
@@ -1069,6 +1207,9 @@ export type $PatientPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     history: string | null
     profilePicture: string | null
     profileCompletedAt: Date | null
+    address: string | null
+    latitude: number | null
+    longitude: number | null
   }, ExtArgs["result"]["patient"]>
   composites: {}
 }
@@ -1507,6 +1648,9 @@ export interface PatientFieldRefs {
   readonly history: Prisma.FieldRef<"Patient", 'String'>
   readonly profilePicture: Prisma.FieldRef<"Patient", 'String'>
   readonly profileCompletedAt: Prisma.FieldRef<"Patient", 'DateTime'>
+  readonly address: Prisma.FieldRef<"Patient", 'String'>
+  readonly latitude: Prisma.FieldRef<"Patient", 'Float'>
+  readonly longitude: Prisma.FieldRef<"Patient", 'Float'>
 }
     
 

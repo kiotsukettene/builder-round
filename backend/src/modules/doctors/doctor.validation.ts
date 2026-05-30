@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { locationFieldsSchema } from "../../lib/location.validation.js";
 
 const profileFieldsSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -16,13 +17,37 @@ const profileFieldsSchema = z.object({
     .max(240, "Consultation duration cannot exceed 240 minutes"),
 });
 
-export const completeProfileSchema = profileFieldsSchema.pick({
-  bio: true,
-  fee: true,
-  consultationDuration: true,
-}).partial({ consultationDuration: true });
+export const completeProfileSchema = profileFieldsSchema
+  .pick({
+    bio: true,
+    fee: true,
+    consultationDuration: true,
+  })
+  .partial({ consultationDuration: true })
+  .merge(locationFieldsSchema);
 
-export const updateProfileSchema = profileFieldsSchema.partial();
+const locationUpdateFields = z
+  .object({
+    address: z.string().min(1).max(500).optional(),
+    latitude: z.number().min(-90).max(90).optional(),
+    longitude: z.number().min(-180).max(180).optional(),
+  })
+  .superRefine((data, ctx) => {
+    const provided = (["address", "latitude", "longitude"] as const).filter(
+      (key) => data[key] !== undefined,
+    );
+    if (provided.length > 0 && provided.length < 3) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Address, latitude, and longitude must be updated together",
+        path: ["address"],
+      });
+    }
+  });
+
+export const updateProfileSchema = profileFieldsSchema
+  .partial()
+  .merge(locationUpdateFields);
 
 export const listDoctorsQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
