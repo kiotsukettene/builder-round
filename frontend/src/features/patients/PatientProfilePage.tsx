@@ -2,11 +2,10 @@ import { useEffect, useRef, useState } from "react"
 import { useForm, type Resolver } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Pencil, Camera, Upload, X, Check, User } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Camera, Upload, User } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Form,
   FormControl,
@@ -16,23 +15,28 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AppLayout } from "@/components/common/AppLayout"
+import { ProfileSectionCard } from "@/components/common/ProfileSectionCard"
 import { useAuthStore } from "@/store/auth.store"
 import { useUpdatePatientProfile, useUploadPatientPicture } from "@/hooks/use-patient"
+import { optionalPositiveNumber } from "@/lib/number-schema"
 
-const updateProfileSchema = z.object({
+const personalSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   birthday: z.string().optional(),
-  weight: z.coerce.number().positive().optional().or(z.literal("")),
-  height: z.coerce.number().positive().optional().or(z.literal("")),
   phone: z.string().max(20).optional(),
+})
+
+const healthSchema = z.object({
+  weight: optionalPositiveNumber("Weight"),
+  height: optionalPositiveNumber("Height"),
   history: z.string().max(2000).optional(),
 })
 
-type UpdateProfileFormValues = z.infer<typeof updateProfileSchema>
+type PersonalFormValues = z.infer<typeof personalSchema>
+type HealthFormValues = z.infer<typeof healthSchema>
 
 function ProfileField({ label, value }: { label: string; value: string | null | undefined }) {
   return (
@@ -46,39 +50,47 @@ function ProfileField({ label, value }: { label: string; value: string | null | 
 export function PatientProfilePage() {
   const { user } = useAuthStore()
   const patient = user?.patient
-  const [isEditing, setIsEditing] = useState(false)
+  const [editingSection, setEditingSection] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(patient?.profilePicture ?? null)
 
   const { mutate: uploadPicture, isPending: isUploadingPicture } = useUploadPatientPicture()
   const { mutate: updateProfile, isPending: isUpdating } = useUpdatePatientProfile()
 
-  const form = useForm<UpdateProfileFormValues>({
-    resolver: zodResolver(updateProfileSchema) as Resolver<UpdateProfileFormValues>,
+  const personalForm = useForm<PersonalFormValues>({
+    resolver: zodResolver(personalSchema) as Resolver<PersonalFormValues>,
     defaultValues: {
       firstName: patient?.firstName ?? "",
       lastName: patient?.lastName ?? "",
       birthday: patient?.birthday ? patient.birthday.split("T")[0] : "",
+      phone: patient?.phone ?? "",
+    },
+  })
+
+  const healthForm = useForm<HealthFormValues>({
+    resolver: zodResolver(healthSchema) as Resolver<HealthFormValues>,
+    defaultValues: {
       weight: patient?.weight ?? undefined,
       height: patient?.height ?? undefined,
-      phone: patient?.phone ?? "",
       history: patient?.history ?? "",
     },
   })
 
   useEffect(() => {
     if (!patient) return
-    form.reset({
+    personalForm.reset({
       firstName: patient.firstName,
       lastName: patient.lastName,
       birthday: patient.birthday ? patient.birthday.split("T")[0] : "",
+      phone: patient.phone ?? "",
+    })
+    healthForm.reset({
       weight: patient.weight ?? undefined,
       height: patient.height ?? undefined,
-      phone: patient.phone ?? "",
       history: patient.history ?? "",
     })
     setPreviewUrl(patient.profilePicture ?? null)
-  }, [patient, form])
+  }, [patient, personalForm, healthForm])
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -89,19 +101,51 @@ export function PatientProfilePage() {
     })
   }
 
-  function onSubmit(values: UpdateProfileFormValues) {
-    const payload = {
-      firstName: values.firstName,
-      lastName: values.lastName,
-      birthday: values.birthday || undefined,
-      weight: values.weight !== "" && values.weight ? Number(values.weight) : undefined,
-      height: values.height !== "" && values.height ? Number(values.height) : undefined,
-      phone: values.phone || undefined,
-      history: values.history || undefined,
-    }
-    updateProfile(payload, {
-      onSuccess: () => setIsEditing(false),
+  function handleEdit(sectionId: string) {
+    setEditingSection(sectionId)
+  }
+
+  function handleCancel() {
+    if (!patient) return
+    personalForm.reset({
+      firstName: patient.firstName,
+      lastName: patient.lastName,
+      birthday: patient.birthday ? patient.birthday.split("T")[0] : "",
+      phone: patient.phone ?? "",
     })
+    healthForm.reset({
+      weight: patient.weight ?? undefined,
+      height: patient.height ?? undefined,
+      history: patient.history ?? "",
+    })
+    setEditingSection(null)
+  }
+
+  function savePersonal() {
+    personalForm.handleSubmit((values) => {
+      updateProfile(
+        {
+          firstName: values.firstName,
+          lastName: values.lastName,
+          birthday: values.birthday || undefined,
+          phone: values.phone || undefined,
+        },
+        { onSuccess: () => setEditingSection(null) }
+      )
+    })()
+  }
+
+  function saveHealth() {
+    healthForm.handleSubmit((values) => {
+      updateProfile(
+        {
+          weight: values.weight,
+          height: values.height,
+          history: values.history || undefined,
+        },
+        { onSuccess: () => setEditingSection(null) }
+      )
+    })()
   }
 
   if (!patient) {
@@ -123,24 +167,20 @@ export function PatientProfilePage() {
       })
     : null
 
+  const bmi =
+    patient.weight && patient.height
+      ? (patient.weight / (patient.height / 100) ** 2).toFixed(1)
+      : null
+
   return (
     <AppLayout>
-      <div className="mx-auto max-w-2xl">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">My Profile</h1>
-            <p className="text-sm text-muted-foreground">Manage your personal health information</p>
-          </div>
-          {!isEditing && (
-            <Button variant="outline" onClick={() => setIsEditing(true)}>
-              <Pencil className="size-4" />
-              Edit Profile
-            </Button>
-          )}
+      <div className="mx-auto max-w-2xl space-y-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">My Profile</h1>
+          <p className="text-sm text-muted-foreground">Manage your personal health information</p>
         </div>
 
         <Card>
-          {/* Profile Header */}
           <CardHeader className="pb-4">
             <div className="flex items-center gap-4">
               <div className="relative">
@@ -179,14 +219,99 @@ export function PatientProfilePage() {
               </div>
             </div>
           </CardHeader>
+        </Card>
 
-          <CardContent>
-            <Separator className="mb-6" />
+        <ProfileSectionCard
+          title="Personal Information"
+          description="Your basic contact details"
+          sectionId="personal"
+          editingSection={editingSection}
+          onEdit={handleEdit}
+          onCancel={handleCancel}
+          onSave={savePersonal}
+          isSaving={isUpdating}
+          view={
+            <div className="grid gap-4 sm:grid-cols-2">
+              <ProfileField label="First Name" value={patient.firstName} />
+              <ProfileField label="Last Name" value={patient.lastName} />
+              <ProfileField label="Date of Birth" value={birthday} />
+              <ProfileField label="Phone" value={patient.phone} />
+            </div>
+          }
+          edit={
+            <Form {...personalForm}>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <FormField
+                    control={personalForm.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>First Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={personalForm.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <FormField
+                  control={personalForm.control}
+                  name="birthday"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Date of Birth</FormLabel>
+                      <FormControl>
+                        <Input type="date" max={new Date().toISOString().split("T")[0]} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={personalForm.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input type="tel" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </Form>
+          }
+        />
 
-            {!isEditing ? (
-              <div className="grid gap-6 sm:grid-cols-2">
-                <ProfileField label="Date of Birth" value={birthday} />
-                <ProfileField label="Phone" value={patient.phone} />
+        <ProfileSectionCard
+          title="Health Details"
+          description="Physical metrics and medical history"
+          sectionId="health"
+          editingSection={editingSection}
+          onEdit={handleEdit}
+          onCancel={handleCancel}
+          onSave={saveHealth}
+          isSaving={isUpdating}
+          view={
+            <div className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-3">
                 <ProfileField
                   label="Weight"
                   value={patient.weight ? `${patient.weight} kg` : null}
@@ -195,139 +320,84 @@ export function PatientProfilePage() {
                   label="Height"
                   value={patient.height ? `${patient.height} cm` : null}
                 />
-                <div className="sm:col-span-2">
-                  <p className="text-xs font-medium text-muted-foreground">Medical History</p>
-                  <p className="mt-0.5 text-sm leading-relaxed">
-                    {patient.history ?? <span className="text-muted-foreground/60">—</span>}
-                  </p>
-                </div>
+                <ProfileField label="BMI" value={bmi} />
               </div>
-            ) : (
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <FormField
-                      control={form.control}
-                      name="firstName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>First Name</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="lastName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Last Name</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
+              <div className="rounded-lg border bg-muted/40 p-4">
+                <p className="text-xs font-medium text-muted-foreground">Medical History</p>
+                <p className="mt-1 text-sm leading-relaxed">
+                  {patient.history ?? <span className="text-muted-foreground/60">—</span>}
+                </p>
+              </div>
+            </div>
+          }
+          edit={
+            <Form {...healthForm}>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
                   <FormField
-                    control={form.control}
-                    name="birthday"
+                    control={healthForm.control}
+                    name="weight"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Date of Birth</FormLabel>
+                        <FormLabel>Weight (kg)</FormLabel>
                         <FormControl>
-                          <Input type="date" max={new Date().toISOString().split("T")[0]} {...field} />
+                          <Input type="number" step="0.1" {...field} value={field.value ?? ""} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <FormField
-                      control={form.control}
-                      name="weight"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Weight (kg)</FormLabel>
-                          <FormControl>
-                            <Input type="number" step="0.1" {...field} value={field.value ?? ""} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="height"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Height (cm)</FormLabel>
-                          <FormControl>
-                            <Input type="number" {...field} value={field.value ?? ""} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
                   <FormField
-                    control={form.control}
-                    name="phone"
+                    control={healthForm.control}
+                    name="height"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Phone Number</FormLabel>
+                        <FormLabel>Height (cm)</FormLabel>
                         <FormControl>
-                          <Input type="tel" {...field} />
+                          <Input type="number" {...field} value={field.value ?? ""} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+                </div>
+                <FormField
+                  control={healthForm.control}
+                  name="history"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Medical History</FormLabel>
+                      <FormControl>
+                        <Textarea className="min-h-24 resize-none" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </Form>
+          }
+        />
 
-                  <FormField
-                    control={form.control}
-                    name="history"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Medical History</FormLabel>
-                        <FormControl>
-                          <Textarea className="min-h-24 resize-none" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="flex gap-2">
-                    <Button type="submit" disabled={isUpdating}>
-                      <Check className="size-4" />
-                      {isUpdating ? "Saving..." : "Save Changes"}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        form.reset()
-                        setIsEditing(false)
-                      }}
-                      disabled={isUpdating}
-                    >
-                      <X className="size-4" />
-                      Cancel
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            )}
-          </CardContent>
-        </Card>
+        <ProfileSectionCard
+          title="Account"
+          description="Login and account settings"
+          sectionId="account"
+          editingSection={editingSection}
+          onEdit={handleEdit}
+          onCancel={handleCancel}
+          onSave={() => {}}
+          editable={false}
+          view={
+            <div className="space-y-3">
+              <ProfileField label="Email" value={user?.email} />
+              <p className="text-xs text-muted-foreground">
+                Contact support to change your email address.
+              </p>
+            </div>
+          }
+          edit={<></>}
+        />
       </div>
     </AppLayout>
   )

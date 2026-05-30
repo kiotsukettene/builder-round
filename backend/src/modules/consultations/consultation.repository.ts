@@ -1,5 +1,19 @@
 import prisma from "../../lib/prisma.js";
 import type { AppointmentStatus } from "../../generated/prisma/client.js";
+import type {
+  ConsultationNoteInput,
+  PrescriptionInput,
+  UpdatePrescriptionInput,
+} from "./consultation.validation.js";
+
+/** Drops keys whose value is `undefined` (required for exactOptionalPropertyTypes + Prisma). */
+function omitUndefined<T extends Record<string, unknown>>(obj: T) {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, value]) => value !== undefined),
+  ) as {
+    [K in keyof T as T[K] extends undefined ? never : K]: Exclude<T[K], undefined>;
+  };
+}
 
 // ── Appointment ──
 
@@ -38,16 +52,13 @@ export async function updateAppointmentStatus(
 
 export async function upsertNote(
   appointmentId: string,
-  data: {
-    diagnosis?: string;
-    notes?: string;
-    recommendations?: string;
-  },
+  data: ConsultationNoteInput,
 ) {
+  const fields = omitUndefined(data);
   return prisma.consultationNote.upsert({
     where: { appointmentId },
-    create: { appointmentId, ...data },
-    update: data,
+    create: { appointmentId, ...fields },
+    update: fields,
   });
 }
 
@@ -61,16 +72,10 @@ export async function findNoteByAppointmentId(appointmentId: string) {
 
 export async function createPrescription(
   appointmentId: string,
-  data: {
-    medication: string;
-    dosage?: string;
-    frequency?: string;
-    duration?: string;
-    instructions?: string;
-  },
+  data: PrescriptionInput,
 ) {
   return prisma.prescription.create({
-    data: { appointmentId, ...data },
+    data: { appointmentId, ...omitUndefined(data) },
   });
 }
 
@@ -89,17 +94,11 @@ export async function findPrescriptionById(id: string) {
 
 export async function updatePrescription(
   id: string,
-  data: {
-    medication?: string;
-    dosage?: string;
-    frequency?: string;
-    duration?: string;
-    instructions?: string;
-  },
+  data: UpdatePrescriptionInput,
 ) {
   return prisma.prescription.update({
     where: { id },
-    data,
+    data: omitUndefined(data),
   });
 }
 

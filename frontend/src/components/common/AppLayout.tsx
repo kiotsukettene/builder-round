@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom"
-import { User, LogOut, Menu, Stethoscope, Sparkles, CalendarDays, CalendarClock, FileText } from "lucide-react"
+import { User, LogOut, Menu, Stethoscope, Sparkles, CalendarDays, CalendarClock, FileText, Bell } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -15,6 +15,7 @@ import { useLogout } from "@/hooks/use-auth"
 import { NavigationProgress } from "@/components/common/NavigationProgress"
 import { NotificationBell } from "@/components/common/NotificationBell"
 import { useAppointmentMessagesSocket } from "@/hooks/use-appointment-messages"
+import { usePushNotifications } from "@/hooks/use-push-notifications"
 import { cn } from "@/lib/utils"
 
 interface AppLayoutProps {
@@ -50,6 +51,39 @@ function NavLinkItem({ to, pathname, icon, label }: NavLinkItemProps) {
   )
 }
 
+function AIMatchNavLink({ pathname }: { pathname: string }) {
+  const active = isNavActive(pathname, "/recommendations")
+
+  return (
+    <Link
+      to="/recommendations"
+      className={cn(
+        "group/ai-match hidden items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-all sm:flex",
+        active
+          ? "border-primary bg-primary text-primary-foreground shadow-sm"
+          : "border-primary/25 bg-primary/5 text-primary hover:border-primary/40 hover:bg-primary/10 hover:shadow-sm"
+      )}
+    >
+      <span
+        className={cn(
+          "flex size-5 items-center justify-center rounded-full transition-colors",
+          active
+            ? "bg-primary-foreground/15"
+            : "bg-primary/10 group-hover/ai-match:bg-primary/15"
+        )}
+      >
+        <Sparkles
+          className={cn(
+            "size-3 transition-transform group-hover/ai-match:scale-110",
+            active ? "text-primary-foreground" : "text-primary"
+          )}
+        />
+      </span>
+      AI Match
+    </Link>
+  )
+}
+
 export function AppLayout({ children }: AppLayoutProps) {
   const { user } = useAuthStore()
   const { mutate: logout, isPending } = useLogout()
@@ -57,6 +91,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const { pathname } = useLocation()
 
   useAppointmentMessagesSocket()
+  usePushNotifications()
 
   const profile = user?.role === "PATIENT" ? user.patient : user?.doctor
   const displayName = profile
@@ -73,18 +108,21 @@ export function AppLayout({ children }: AppLayoutProps) {
       <NavigationProgress />
       <header className="border-b">
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
-          <Link to={profilePath} className="flex items-center gap-2">
-            <span className="text-lg font-bold tracking-tight">TellMD</span>
+          <Link to={profilePath} className="flex shrink-0 items-center">
+            <img
+              src="/tellMd-logo.svg"
+              alt="TellMD"
+              className="h-15 w-auto sm:h-24"
+            />
           </Link>
 
           <nav className="flex items-center gap-1">
             {user?.role === "PATIENT" && (
               <>
-                <NavLinkItem
-                  to="/recommendations"
-                  pathname={pathname}
-                  icon={<Sparkles className="size-3.5" />}
-                  label="AI Match"
+                <AIMatchNavLink pathname={pathname} />
+                <div
+                  aria-hidden
+                  className="mx-0.5 hidden h-5 w-px shrink-0 bg-border sm:block"
                 />
                 <NavLinkItem
                   to="/doctors"
@@ -149,15 +187,27 @@ export function AppLayout({ children }: AppLayoutProps) {
                   <User className="size-4" />
                   Profile
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/notifications")}>
+                  <Bell className="size-4" />
+                  Notifications
+                </DropdownMenuItem>
                 {user?.role === "PATIENT" && (
                   <>
                     <DropdownMenuItem
-                      className="sm:hidden"
+                      className="sm:hidden gap-2.5 rounded-md border border-primary/20 bg-primary/5 py-2.5 font-semibold text-primary focus:bg-primary/10 focus:text-primary"
                       onClick={() => navigate("/recommendations")}
                     >
-                      <Sparkles className="size-4" />
-                      AI Match
+                      <span className="flex size-7 items-center justify-center rounded-full bg-primary/10">
+                        <Sparkles className="size-3.5" />
+                      </span>
+                      <div className="flex flex-col gap-0.5">
+                        <span>AI Match</span>
+                        <span className="text-xs font-normal text-muted-foreground">
+                          Find your ideal doctor
+                        </span>
+                      </div>
                     </DropdownMenuItem>
+                    <DropdownMenuSeparator className="sm:hidden" />
                     <DropdownMenuItem
                       className="sm:hidden"
                       onClick={() => navigate("/doctors")}
