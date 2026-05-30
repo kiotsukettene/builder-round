@@ -112,7 +112,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             <img
               src="/tellMd-logo.svg"
               alt="TellMD"
-              className="h-7 w-auto sm:h-24"
+              className="h-15 w-auto sm:h-24"
             />
           </Link>
 
